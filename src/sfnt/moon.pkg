@@ -1,0 +1,6 @@
+// The SFNT container only: signatures, the table directory, and TrueType
+// collections. It knows where tables are, never what is inside them.
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/wire",
+}

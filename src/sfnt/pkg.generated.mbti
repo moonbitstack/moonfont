@@ -1,0 +1,57 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonfont/sfnt"
+
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/wire",
+}
+
+// Values
+pub fn read(BytesView, @model.Limits) -> Array[Directory] raise @model.Refused
+
+pub fn tag_cmap() -> Int32
+
+pub fn tag_glyf() -> Int32
+
+pub fn tag_head() -> Int32
+
+pub fn tag_hhea() -> Int32
+
+pub fn tag_hmtx() -> Int32
+
+pub fn tag_kern() -> Int32
+
+pub fn tag_loca() -> Int32
+
+pub fn tag_maxp() -> Int32
+
+pub fn tag_name() -> Int32
+
+pub fn tag_os2() -> Int32
+
+pub fn tag_post() -> Int32
+
+pub fn tag_string(Int32) -> String
+
+// Errors
+
+// Types and methods
+pub(all) struct Directory {
+  scaler : Int32
+  records : Array[TableRecord]
+}
+pub fn Directory::find(Self, Int32) -> TableRecord?
+pub fn Directory::has(Self, Int32) -> Bool
+pub fn Directory::require(Self, Int32) -> TableRecord raise @model.Refused
+pub fn Directory::table(Self, BytesView, Int32, @model.Limits) -> @wire.Cursor raise @model.Refused
+
+pub(all) struct TableRecord {
+  tag : Int32
+  checksum : Int32
+  offset : Int32
+  length : Int32
+}
+
+// Type aliases
+
+// Traits

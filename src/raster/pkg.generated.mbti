@@ -1,0 +1,17 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonfont/raster"
+
+import {
+  "moonbitstack/moonfont/model",
+}
+
+// Values
+pub fn rasterise(@model.Outline, @model.Scale, @model.Limits) -> @model.CoverageMask raise @model.Refused
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

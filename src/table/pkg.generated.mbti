@@ -1,0 +1,114 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonfont/table"
+
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/wire",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct Cmap {
+  data : BytesView
+  chosen : Int32
+  format : Int32
+}
+pub fn Cmap::format(Self) -> Int32
+pub fn Cmap::glyph_index(Self, Int32) -> @model.GlyphId?
+pub fn Cmap::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
+
+pub(all) struct Component {
+  glyph_index : Int32
+  dx : Int32
+  dy : Int32
+  a : Int32
+  b : Int32
+  c : Int32
+  d : Int32
+}
+
+pub(all) struct CompositeGlyph {
+  components : Array[Component]
+  bounds : @model.Bounds
+}
+
+pub(all) enum GlyphData {
+  Empty
+  Simple(SimpleGlyph)
+  Composite(CompositeGlyph)
+}
+pub fn GlyphData::parse(BytesView, @model.Limits) -> Self raise @model.Refused
+
+pub(all) struct Head {
+  units_per_em : Int32
+  index_to_loc_format : Int32
+  mac_style : Int32
+  lowest_rec_ppem : Int32
+  bounding_box : @model.Bounds
+}
+pub fn Head::parse(@wire.Cursor) -> Self raise @model.Refused
+
+pub(all) struct Hhea {
+  ascender : Int32
+  descender : Int32
+  line_gap : Int32
+  number_of_h_metrics : Int32
+}
+pub fn Hhea::parse(@wire.Cursor) -> Self raise @model.Refused
+
+pub(all) struct Hmtx {
+  advances : Array[Int32]
+  bearings : Array[Int32]
+}
+pub fn Hmtx::metrics(Self, Int32) -> (Int32, Int32)
+pub fn Hmtx::parse(@wire.Cursor, Int32, Int32, @model.Limits) -> Self raise @model.Refused
+
+pub(all) struct Kern {
+  pairs : Array[(Int32, Int32, Int32)]
+}
+pub fn Kern::between(Self, Int32, Int32) -> Int32
+pub fn Kern::count(Self) -> Int32
+pub fn Kern::empty() -> Self
+pub fn Kern::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
+
+pub(all) struct Loca {
+  offsets : Array[Int32]
+}
+pub fn Loca::count(Self) -> Int32
+pub fn Loca::parse(@wire.Cursor, Int32, Int32, @model.Limits) -> Self raise @model.Refused
+pub fn Loca::range(Self, Int32) -> (Int32, Int32)?
+
+pub(all) struct Maxp {
+  num_glyphs : Int32
+  max_points : Int32
+  max_contours : Int32
+  max_composite_points : Int32
+  max_composite_contours : Int32
+}
+pub fn Maxp::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
+
+pub(all) struct Os2 {
+  weight_class : Int32
+  width_class : Int32
+  x_height : Int32
+  cap_height : Int32
+  typo_ascender : Int32
+  typo_descender : Int32
+  typo_line_gap : Int32
+}
+pub fn Os2::empty() -> Self
+pub fn Os2::parse(@wire.Cursor) -> Self raise @model.Refused
+
+pub(all) struct SimpleGlyph {
+  end_points : Array[Int32]
+  points : Array[@model.Point]
+  on_curve : Array[Bool]
+  bounds : @model.Bounds
+}
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,7 @@
+// Geometry, not pixels. A TrueType glyph is a set of points and an on-curve
+// bit; this layer turns those into a path command stream and resolves
+// composite glyphs. Nothing here decides how a curve is flattened.
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/table",
+}

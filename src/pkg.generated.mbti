@@ -1,0 +1,68 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonfont"
+
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/outline",
+  "moonbitstack/moonfont/table",
+}
+
+// Values
+pub fn decode(BytesView, limits? : @model.Limits) -> Face raise @model.Refused
+
+pub fn decode_all(BytesView, limits? : @model.Limits) -> Array[Face] raise @model.Refused
+
+pub fn version() -> String
+
+// Errors
+
+// Types and methods
+pub struct Face {
+  head : @table.Head
+  hhea : @table.Hhea
+  maxp : @table.Maxp
+  hmtx : @table.Hmtx
+  cmap : @table.Cmap
+  kern : @table.Kern
+  os2 : @table.Os2
+  source : @outline.GlyphSource
+  limits : @model.Limits
+}
+pub fn Face::font_metrics(Self) -> @model.FontMetrics
+pub fn Face::glyph_for(Self, Char) -> @model.GlyphId?
+pub fn Face::glyph_index(Self, Int32) -> @model.GlyphId?
+pub fn Face::kern_between(Self, @model.GlyphId, @model.GlyphId) -> Int32
+pub fn Face::measure(Self, String, Int32, letter_spacing? : Int32) -> @model.TextMetrics
+pub fn Face::metrics(Self, @model.GlyphId) -> @model.GlyphMetrics raise @model.Refused
+pub fn Face::num_glyphs(Self) -> Int32
+pub fn Face::outline(Self, @model.GlyphId) -> @model.Outline raise @model.Refused
+pub fn Face::rasterise(Self, @model.GlyphId, Int32) -> @model.CoverageMask raise @model.Refused
+pub fn Face::scale(Self, Int32) -> @model.Scale
+pub fn Face::units_per_em(Self) -> Int32
+
+// Type aliases
+pub using @model {type Bounds}
+
+pub using @model {type CoverageMask}
+
+pub using @model {type FontMetrics}
+
+pub using @model {type GlyphId}
+
+pub using @model {type GlyphMetrics}
+
+pub using @model {type Limits}
+
+pub using @model {type Outline}
+
+pub using @model {type PathCommand}
+
+pub using @model {type Point}
+
+pub using @model {type Refused}
+
+pub using @model {type Scale}
+
+pub using @model {type TextMetrics}
+
+// Traits

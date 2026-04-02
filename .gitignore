@@ -1,0 +1,14 @@
+# MoonBit build artefacts
+_build/
+.repos/
+.moon/
+
+# Local scratch
+.probe/
+*.log
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

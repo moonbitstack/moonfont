@@ -1,0 +1,16 @@
+// The façade. One import gives a caller the types, the entry points and the
+// whole vertical slice from bytes to a coverage mask. Every package below is
+// also public, so a caller that only needs charmap lookup or only needs a
+// rasteriser does not have to load the rest.
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/sfnt",
+  "moonbitstack/moonfont/table",
+  "moonbitstack/moonfont/outline",
+  "moonbitstack/moonfont/raster",
+  "moonbitstack/moonfont/layout",
+}
+
+import {
+  "moonbitstack/moonfont/wire",
+} for "test"

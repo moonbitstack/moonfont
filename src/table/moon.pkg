@@ -1,0 +1,6 @@
+// Table decoders. Each one turns a bounded cursor into domain values and stops
+// there: no outline commands are built here, and no pixel is touched here.
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/wire",
+}

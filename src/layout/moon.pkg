@@ -1,0 +1,7 @@
+// Text measurement, not shaping. It sums advances and applies legacy kerning
+// as data. Bidi, line breaking, GSUB/GPOS and syllable clustering are out of
+// scope by design: those are a different library's problem.
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/table",
+}

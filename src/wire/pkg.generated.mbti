@@ -1,0 +1,42 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonfont/wire"
+
+import {
+  "moonbitstack/moonfont/model",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub struct Cursor {
+  data : BytesView
+  mut pos : Int32
+}
+pub fn Cursor::all(Self) -> BytesView
+pub fn Cursor::at(BytesView, Int32) -> Self raise @model.Refused
+pub fn Cursor::bytes(Self, Int32) -> BytesView raise @model.Refused
+pub fn Cursor::i16(Self) -> Int32 raise @model.Refused
+pub fn Cursor::i16_at(Self, Int32) -> Int32 raise @model.Refused
+pub fn Cursor::i8(Self) -> Int32 raise @model.Refused
+pub fn Cursor::left(Self) -> Int32
+pub fn Cursor::length(Self) -> Int32
+pub fn Cursor::new(BytesView) -> Self
+pub fn Cursor::position(Self) -> Int32
+pub fn Cursor::rest(Self) -> BytesView
+pub fn Cursor::seek(Self, Int32) -> Unit raise @model.Refused
+pub fn Cursor::skip(Self, Int32) -> Unit raise @model.Refused
+pub fn Cursor::tag(Self) -> Int32 raise @model.Refused
+pub fn Cursor::tag_at(Self, Int32) -> Int32 raise @model.Refused
+pub fn Cursor::u16(Self) -> Int32 raise @model.Refused
+pub fn Cursor::u16_at(Self, Int32) -> Int32 raise @model.Refused
+pub fn Cursor::u24(Self) -> Int32 raise @model.Refused
+pub fn Cursor::u32(Self) -> Int32 raise @model.Refused
+pub fn Cursor::u32_at(Self, Int32) -> Int32 raise @model.Refused
+pub fn Cursor::u8(Self) -> Int32 raise @model.Refused
+pub fn Cursor::window(Self, Int32, Int32) -> Self raise @model.Refused
+
+// Type aliases
+
+// Traits

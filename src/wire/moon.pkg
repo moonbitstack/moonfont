@@ -1,0 +1,6 @@
+// Bounds-checked big-endian reads over bytes that already exist in memory.
+// This layer knows nothing about fonts; it only knows that a short file is the
+// same failure wherever it happens.
+import {
+  "moonbitstack/moonfont/model",
+}

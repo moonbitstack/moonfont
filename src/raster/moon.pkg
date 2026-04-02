@@ -1,0 +1,5 @@
+// The one place that decides how geometry becomes coverage. It consumes path
+// commands and knows nothing about SFNT, tables, charmaps or files.
+import {
+  "moonbitstack/moonfont/model",
+}
