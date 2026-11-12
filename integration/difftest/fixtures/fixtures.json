@@ -1,0 +1,457 @@
+{
+  "categories": [
+    "font",
+    "tables",
+    "cmap",
+    "metrics",
+    "outlines",
+    "coverage"
+  ],
+  "cmap": {
+    "0020": 1,
+    "0041": 2,
+    "0042": 3,
+    "0061": 4,
+    "00C1": 5
+  },
+  "coverage": [
+    {
+      "glyph_id": 0,
+      "ink_bbox": null,
+      "ink_coverage": 0.0
+    },
+    {
+      "glyph_id": 1,
+      "ink_bbox": null,
+      "ink_coverage": 0.0
+    },
+    {
+      "glyph_id": 2,
+      "ink_bbox": [
+        4,
+        0,
+        35,
+        44
+      ],
+      "ink_coverage": 27.825928
+    },
+    {
+      "glyph_id": 3,
+      "ink_bbox": [
+        3,
+        0,
+        28,
+        44
+      ],
+      "ink_coverage": 27.859497
+    },
+    {
+      "glyph_id": 4,
+      "ink_bbox": [
+        3,
+        0,
+        21,
+        31
+      ],
+      "ink_coverage": 12.459946
+    },
+    {
+      "glyph_id": 5,
+      "ink_bbox": [
+        3,
+        0,
+        37,
+        46
+      ],
+      "ink_coverage": 34.243774
+    }
+  ],
+  "font": {
+    "file": "synthetic.ttf",
+    "index_to_loc_format": 1,
+    "num_glyphs": 6,
+    "num_tables": 9,
+    "sfnt_version": "0x00010000",
+    "sha256": "f2e72b1c3adcf15f61e20a333d8c05eab337cae30bdd6d3932eb510faad4c0b1",
+    "table_tags": [
+      "cmap",
+      "glyf",
+      "head",
+      "hhea",
+      "hmtx",
+      "loca",
+      "maxp",
+      "name",
+      "post"
+    ],
+    "units_per_em": 1000
+  },
+  "metrics": [
+    {
+      "advance": 500,
+      "bounds": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "glyph_id": 0,
+      "lsb": 0,
+      "scaled_bounds": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "advance": 250,
+      "bounds": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "glyph_id": 1,
+      "lsb": 0,
+      "scaled_bounds": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "advance": 600,
+      "bounds": [
+        0,
+        0,
+        600,
+        700
+      ],
+      "glyph_id": 2,
+      "lsb": 0,
+      "scaled_bounds": [
+        0,
+        0,
+        38,
+        45
+      ]
+    },
+    {
+      "advance": 500,
+      "bounds": [
+        50,
+        0,
+        450,
+        700
+      ],
+      "glyph_id": 3,
+      "lsb": 50,
+      "scaled_bounds": [
+        3,
+        0,
+        29,
+        45
+      ]
+    },
+    {
+      "advance": 450,
+      "bounds": [
+        50,
+        0,
+        400,
+        500
+      ],
+      "glyph_id": 4,
+      "lsb": 50,
+      "scaled_bounds": [
+        3,
+        0,
+        26,
+        32
+      ]
+    },
+    {
+      "advance": 700,
+      "bounds": [
+        40,
+        10,
+        640,
+        720
+      ],
+      "glyph_id": 5,
+      "lsb": 40,
+      "scaled_bounds": [
+        3,
+        1,
+        41,
+        46
+      ]
+    }
+  ],
+  "oracle": {
+    "library_versions": {},
+    "moonbit_raster_algorithm": "eight-times vertical subsampling with exact horizontal area in 26.6 fixed point",
+    "name": "reference",
+    "providers": {
+      "cmap": "moonfont.stdlib.reference",
+      "coverage": "moonfont.stdlib.reference",
+      "font": "moonfont.stdlib.reference",
+      "metrics": "moonfont.stdlib.reference",
+      "outlines": "moonfont.stdlib.reference",
+      "tables": "moonfont.stdlib.reference"
+    },
+    "raster_algorithm": "8x8 uniform-grid supersampling with non-zero winding on flattened quadratic outlines",
+    "raster_grid": 64,
+    "raster_samples_per_axis": 8,
+    "raster_y_axis": "up",
+    "version": "1.0.0"
+  },
+  "outlines": [
+    {
+      "commands": [],
+      "glyph_id": 0
+    },
+    {
+      "commands": [],
+      "glyph_id": 1
+    },
+    {
+      "commands": [
+        [
+          "move",
+          100,
+          0
+        ],
+        [
+          "line",
+          500,
+          0
+        ],
+        [
+          "quad",
+          600,
+          300,
+          500,
+          500
+        ],
+        [
+          "quad",
+          400,
+          700,
+          200,
+          700
+        ],
+        [
+          "quad",
+          0,
+          300,
+          100,
+          0
+        ],
+        [
+          "close"
+        ]
+      ],
+      "glyph_id": 2
+    },
+    {
+      "commands": [
+        [
+          "move",
+          50,
+          0
+        ],
+        [
+          "line",
+          450,
+          0
+        ],
+        [
+          "line",
+          450,
+          700
+        ],
+        [
+          "line",
+          50,
+          700
+        ],
+        [
+          "line",
+          50,
+          0
+        ],
+        [
+          "close"
+        ]
+      ],
+      "glyph_id": 3
+    },
+    {
+      "commands": [
+        [
+          "move",
+          50,
+          0
+        ],
+        [
+          "line",
+          300,
+          0
+        ],
+        [
+          "quad",
+          400,
+          250,
+          200,
+          500
+        ],
+        [
+          "line",
+          50,
+          500
+        ],
+        [
+          "line",
+          50,
+          0
+        ],
+        [
+          "close"
+        ]
+      ],
+      "glyph_id": 4
+    },
+    {
+      "commands": [
+        [
+          "move",
+          140,
+          20
+        ],
+        [
+          "line",
+          540,
+          20
+        ],
+        [
+          "quad",
+          640,
+          320,
+          540,
+          520
+        ],
+        [
+          "quad",
+          440,
+          720,
+          240,
+          720
+        ],
+        [
+          "quad",
+          40,
+          320,
+          140,
+          20
+        ],
+        [
+          "close"
+        ],
+        [
+          "move",
+          60,
+          10
+        ],
+        [
+          "line",
+          460,
+          10
+        ],
+        [
+          "line",
+          460,
+          710
+        ],
+        [
+          "line",
+          60,
+          710
+        ],
+        [
+          "line",
+          60,
+          10
+        ],
+        [
+          "close"
+        ]
+      ],
+      "glyph_id": 5
+    }
+  ],
+  "schema": "moonfont.difftest/1",
+  "tables": {
+    "head": {
+      "check_sum_adjustment": 3713498531,
+      "created": 0,
+      "flags": 11,
+      "font_direction_hint": 2,
+      "font_revision": "0x00010000",
+      "glyph_data_format": 0,
+      "index_to_loc_format": 1,
+      "lowest_rec_ppem": 8,
+      "mac_style": 0,
+      "magic_number": "0x5F0F3CF5",
+      "modified": 0,
+      "units_per_em": 1000,
+      "version": "0x00010000",
+      "x_max": 640,
+      "x_min": 0,
+      "y_max": 720,
+      "y_min": 0
+    },
+    "hhea": {
+      "advance_width_max": 700,
+      "ascender": 800,
+      "caret_offset": 0,
+      "caret_slope_rise": 1,
+      "caret_slope_run": 0,
+      "descender": -200,
+      "line_gap": 0,
+      "metric_data_format": 0,
+      "min_left_side_bearing": 0,
+      "min_right_side_bearing": 0,
+      "number_of_h_metrics": 6,
+      "version": "0x00010000",
+      "x_max_extent": 640
+    },
+    "maxp": {
+      "max_component_depth": 1,
+      "max_component_elements": 2,
+      "max_composite_contours": 2,
+      "max_composite_points": 10,
+      "max_contours": 1,
+      "max_function_defs": 0,
+      "max_instruction_defs": 0,
+      "max_points": 6,
+      "max_size_of_instructions": 0,
+      "max_stack_elements": 0,
+      "max_storage": 0,
+      "max_twilight_points": 0,
+      "max_zones": 2,
+      "num_glyphs": 6,
+      "version": "0x00010000"
+    }
+  },
+  "tolerances": {
+    "cmap": "exact",
+    "coverage": "ink_coverage within 5 per cent; ink_bbox within 1 pixel",
+    "font": "exact",
+    "metrics": "advance, lsb and bounds exact; scaled_bounds within 1 pixel",
+    "outlines": "exact after canonicalisation",
+    "tables": "exact"
+  }
+}

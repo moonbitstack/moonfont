@@ -1,0 +1,105 @@
+{
+  "categories": [
+    {
+      "file": "font.json",
+      "name": "font",
+      "sha256": "0eea193fd36cdd3f7b15d34653ff2af92e5f4c5f61e0d03c5f182750c8120d86",
+      "tolerance": "exact"
+    },
+    {
+      "file": "tables.json",
+      "name": "tables",
+      "sha256": "0f2270a126df3a345eb230d2c0b3944d42e240807ff1c108000e067fcf8d0dbd",
+      "tolerance": "exact"
+    },
+    {
+      "file": "cmap.json",
+      "name": "cmap",
+      "sha256": "c8c13d6842d6f662460f425da634eb5209f036458c2d97d766f0f6c43986c7d4",
+      "tolerance": "exact"
+    },
+    {
+      "file": "metrics.json",
+      "name": "metrics",
+      "sha256": "fc107ddae4b78a93aeeb570ef58a066d2a9ca3970a1a072c3fdf1d421228731c",
+      "tolerance": "advance, lsb and bounds exact; scaled_bounds within 1 pixel"
+    },
+    {
+      "file": "outlines.json",
+      "name": "outlines",
+      "sha256": "0b451c7f474e481c07c443d80d578f9f24bb4dc1e1579aebad2dac60f32b1811",
+      "tolerance": "exact after canonicalisation"
+    },
+    {
+      "file": "coverage.json",
+      "name": "coverage",
+      "sha256": "5cdd2dc09fd96fb2473e0194daf1fa40dbca92b762f4d628425b3de5e287fd30",
+      "tolerance": "ink_coverage within 5 per cent; ink_bbox within 1 pixel"
+    }
+  ],
+  "fixtures": {
+    "file": "fixtures.json",
+    "font": {
+      "file": "synthetic.ttf",
+      "num_glyphs": 6,
+      "num_tables": 9,
+      "sha256": "f2e72b1c3adcf15f61e20a333d8c05eab337cae30bdd6d3932eb510faad4c0b1",
+      "table_tags": [
+        "cmap",
+        "glyf",
+        "head",
+        "hhea",
+        "hmtx",
+        "loca",
+        "maxp",
+        "name",
+        "post"
+      ],
+      "units_per_em": 1000
+    },
+    "oracle": {
+      "moonbit_raster_algorithm": "eight-times vertical subsampling with exact horizontal area in 26.6 fixed point",
+      "name": "reference",
+      "providers": {
+        "cmap": "moonfont.stdlib.reference",
+        "coverage": "moonfont.stdlib.reference",
+        "font": "moonfont.stdlib.reference",
+        "metrics": "moonfont.stdlib.reference",
+        "outlines": "moonfont.stdlib.reference",
+        "tables": "moonfont.stdlib.reference"
+      },
+      "raster_algorithm": "8x8 uniform-grid supersampling with non-zero winding on flattened quadratic outlines",
+      "raster_grid": 64,
+      "raster_samples_per_axis": 8,
+      "raster_y_axis": "up",
+      "version": "1.0.0"
+    },
+    "schema": "moonfont.difftest/1",
+    "sha256": "81c3b55444a65cd7cb4b044b4c8353784331f38df0aae9ea54dd9f62a698872b"
+  },
+  "oracle_versions": {
+    "pins": {
+      "fonttools": "4.47.2",
+      "freetype": "2.15.0",
+      "pillow": "10.1.0",
+      "python": "3.11+"
+    },
+    "recorded": {},
+    "toolchain": "1.0.0"
+  },
+  "regeneration": [
+    "python scripts/difftest/make_font.py",
+    "python scripts/difftest/make_fixtures.py --oracle reference",
+    "python scripts/difftest/verify_fixtures.py --check",
+    "python scripts/difftest/index_fixtures.py"
+  ],
+  "schema": "moonfont.difftest.index/1",
+  "tolerances": {
+    "cmap": "exact",
+    "coverage": "ink_coverage within 5 per cent; ink_bbox within 1 pixel",
+    "font": "exact",
+    "metrics": "advance, lsb and bounds exact; scaled_bounds within 1 pixel",
+    "outlines": "exact after canonicalisation",
+    "tables": "exact"
+  }
+}

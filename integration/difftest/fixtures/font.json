@@ -1,0 +1,20 @@
+{
+  "file": "synthetic.ttf",
+  "index_to_loc_format": 1,
+  "num_glyphs": 6,
+  "num_tables": 9,
+  "sfnt_version": "0x00010000",
+  "sha256": "f2e72b1c3adcf15f61e20a333d8c05eab337cae30bdd6d3932eb510faad4c0b1",
+  "table_tags": [
+    "cmap",
+    "glyf",
+    "head",
+    "hhea",
+    "hmtx",
+    "loca",
+    "maxp",
+    "name",
+    "post"
+  ],
+  "units_per_em": 1000
+}

@@ -1,0 +1,283 @@
+{
+  "bad_index_to_loc_format.ttf": {
+    "legal_but_unusual": false,
+    "offset": 306,
+    "reason": "indexToLocFormat must be 0 or 1; any other value makes loca widths unknowable.",
+    "sha256": "adc9bdfcd71aeec3ea0b3efa1cbb405bbdabb53ec9ba500932c52e542b2f9d8c",
+    "variant": "Malformed"
+  },
+  "bad_sfnt_scaler.ttf": {
+    "legal_but_unusual": false,
+    "offset": 0,
+    "reason": "An unrecognised sfnt scaler type (0x00020000) must be refused before any table is read.",
+    "sha256": "17f10313994f8ca8cd1343bd270b0a80bcba9f822eb05bec33a71b60685f9988",
+    "variant": "Unknown"
+  },
+  "bad_signature.bin": {
+    "legal_but_unusual": false,
+    "offset": 0,
+    "reason": "A PNG magic number is not an sfnt scaler type; the file is not a font this library reads.",
+    "sha256": "d690dd787d2bdc8aac1d67e4c1526bc36b1fc2b8d0506cf73fc48d7deb8459d5",
+    "variant": "Unknown"
+  },
+  "cmap_format4_start_above_end.ttf": {
+    "legal_but_unusual": false,
+    "offset": 190,
+    "reason": "cmap format 4 startCode[0] (0x30) is above endCode[0] (0x20); the segment is impossible.",
+    "sha256": "9f8b828f2cc9d452f52039389799fff00cc2d04bcec2ff714f31d31da7867f40",
+    "variant": "Malformed"
+  },
+  "cmap_subtable_offset_outside_table.ttf": {
+    "legal_but_unusual": false,
+    "offset": 164,
+    "reason": "The encoding record points 64 bytes past the end of cmap; the subtable window must be refused.",
+    "sha256": "7e8524c986324b7b010bb280536f958c48255fbf84840fbfc71d0451c3a0fd44",
+    "variant": "Truncated"
+  },
+  "composite_bad_component_glyph_id.ttf": {
+    "legal_but_unusual": false,
+    "offset": 244,
+    "reason": "A composite component names glyph 99 while maxp declares three glyphs.",
+    "sha256": "765acbf06f5e9be1a7308a2be1c72eaa8bbffa7da55617886d6e63a515cedafe",
+    "variant": "MissingGlyph"
+  },
+  "composite_nesting_beyond_recursion.ttf": {
+    "ceiling": "recursion",
+    "legal_but_unusual": false,
+    "offset": 244,
+    "reason": "A chain of 17 nested composites exceeds Limits.default().recursion (16) and Limits.strict().recursion (8).",
+    "sha256": "2aa76ac1da6ec3be34367185bb77dd3ff342928757eb22ddb1165b00cba2537c",
+    "variant": "Recursion"
+  },
+  "composite_self_reference.ttf": {
+    "ceiling": "recursion",
+    "legal_but_unusual": false,
+    "offset": 244,
+    "reason": "A composite glyph whose component is itself must be refused at the recursion ceiling, not followed forever.",
+    "sha256": "2fa5d002272d0b1d96a3b2ac8ef566022ee9b57440bfc8a820f11ef7f107a42a",
+    "variant": "Recursion"
+  },
+  "composites_over_limit.ttf": {
+    "ceiling": "composites",
+    "legal_but_unusual": false,
+    "offset": 244,
+    "reason": "1025 components exceeds Limits.default().composites (1024); the count must be checked before the glyph is walked.",
+    "sha256": "729c4b96a2fcc033d0ebb3399cdf430194b67c3cdeb04d09916adb610ce7bda6",
+    "variant": "OverLimit"
+  },
+  "contours_over_limit.ttf": {
+    "ceiling": "contours",
+    "legal_but_unusual": false,
+    "offset": 232,
+    "reason": "32767 contours exceeds Limits.default().contours (8192); the count must be checked before the endpoint array is read.",
+    "sha256": "57e5940d14c9d9804aff37fa7fb62b9f7d6bbf3a1763a3967fba8a1d90fdfa0c",
+    "variant": "OverLimit"
+  },
+  "extra_unknown_table.ttf": {
+    "legal_but_unusual": true,
+    "offset": null,
+    "reason": "An unrecognised table tag is legal; the directory reader must ignore it, not refuse.",
+    "sha256": "d146c1b910b8dbcfc7bc99772aae03e3c68bc8ff5a23d288acfa8b54205243fe",
+    "variant": null
+  },
+  "glyf_contours_exceed_points.ttf": {
+    "legal_but_unusual": false,
+    "offset": 232,
+    "reason": "Five contours are declared over only three points; each contour needs at least one endpoint.",
+    "sha256": "e4a1d2c3ccdb10aa4106aa72bcb987180888b7a4002e1a3d87f9d3ed49ba623d",
+    "variant": "Malformed"
+  },
+  "glyf_repeat_flag_overflow.ttf": {
+    "legal_but_unusual": false,
+    "offset": 247,
+    "reason": "A REPEAT flag declares 256 flags for a three-point glyph; expansion must be capped at numPoints.",
+    "sha256": "f44d3b45d2985a57c6d4f8b0f9336ec8c9e88a9d8baf43e04cb6c0d3d7104146",
+    "variant": "Malformed"
+  },
+  "glyf_truncated_coordinates.ttf": {
+    "legal_but_unusual": false,
+    "offset": 258,
+    "reason": "Six points are declared but the y-coordinate run is cut short; the read must stop at the range end.",
+    "sha256": "63828469f430983c8e2d6ed75e3690246538951d3664db46f48fe600def88e5b",
+    "variant": "Truncated"
+  },
+  "hhea_number_of_h_metrics_above_num_glyphs.ttf": {
+    "legal_but_unusual": true,
+    "offset": 346,
+    "reason": "Out of spec, but Hmtx::parse clamps numberOfHMetrics to numGlyphs; the reader must accept it without over-allocating.",
+    "sha256": "7074e58845926f7542b9ecd8c3a73b45e9aa1c9efb78d6307674985f7f94bf08",
+    "variant": null
+  },
+  "loca_offset_past_glyf.ttf": {
+    "legal_but_unusual": false,
+    "offset": 366,
+    "reason": "The final loca offset points far beyond the glyf table; reading that glyph range must be refused.",
+    "sha256": "a44b4290b567fb8b5e70416136f7e29efe60b9a48dbd7416d39ce33164998956",
+    "variant": "Truncated"
+  },
+  "loca_offsets_going_backwards.ttf": {
+    "legal_but_unusual": false,
+    "offset": 364,
+    "reason": "The third loca offset is below the second; glyph ranges must be monotonically non-decreasing.",
+    "sha256": "fb13e0221bde206e3e1ea03d35d4dc0c58368b68ebfb2ad004b6109aea218edc",
+    "variant": "Malformed"
+  },
+  "long_loca_format.ttf": {
+    "legal_but_unusual": true,
+    "offset": 306,
+    "reason": "indexToLocFormat 1 (long offsets) is valid; the control uses short offsets.",
+    "sha256": "313662ddc3dc93e3ea734ead7b552a57619fb1b17550fe1e9a7e2f3056ea7a7b",
+    "variant": null
+  },
+  "missing_cmap.ttf": {
+    "legal_but_unusual": false,
+    "offset": null,
+    "reason": "The cmap table is required and absent from the directory.",
+    "sha256": "cff12b41f6f62ff95dcd7360e3e1902cf611b4fb46e9e4a5e01b2a7713013345",
+    "variant": "MissingTable"
+  },
+  "missing_glyf.ttf": {
+    "legal_but_unusual": false,
+    "offset": null,
+    "reason": "The glyf table is required and absent from the directory.",
+    "sha256": "378c9b0a80d7f9a2d8eba8be8632bfa570ce1a7bd4ca534426aa885d734b56e2",
+    "variant": "MissingTable"
+  },
+  "missing_head.ttf": {
+    "legal_but_unusual": false,
+    "offset": null,
+    "reason": "The head table is required and absent from the directory.",
+    "sha256": "022985bc2ddcbd9138c888b9d58a5129b1c1c67b78ac421aa60bb0264d87d66c",
+    "variant": "MissingTable"
+  },
+  "missing_hhea.ttf": {
+    "legal_but_unusual": false,
+    "offset": null,
+    "reason": "The hhea table is required and absent from the directory.",
+    "sha256": "599b7bb66de48f1d3a4b5ec30200aa524bba767c6b0cbe8665eadd25877f194c",
+    "variant": "MissingTable"
+  },
+  "missing_hmtx.ttf": {
+    "legal_but_unusual": false,
+    "offset": null,
+    "reason": "The hmtx table is required and absent from the directory.",
+    "sha256": "69f33439b9aaa70557ece9ef9f3c575ba8bb6ea848945a38523204d1905bdb78",
+    "variant": "MissingTable"
+  },
+  "missing_loca.ttf": {
+    "legal_but_unusual": false,
+    "offset": null,
+    "reason": "The loca table is required and absent from the directory.",
+    "sha256": "7375a0fe3752a3938bc8d7d5986b821860d555da42b0e57f34271b3368252c00",
+    "variant": "MissingTable"
+  },
+  "missing_maxp.ttf": {
+    "legal_but_unusual": false,
+    "offset": null,
+    "reason": "The maxp table is required and absent from the directory.",
+    "sha256": "776c37f5ff968ef3a8aab8021278ebf07fab988ed3573b0cbb68f4e1ecda804c",
+    "variant": "MissingTable"
+  },
+  "points_over_strict_limit.ttf": {
+    "ceiling": "points",
+    "legal_but_unusual": false,
+    "limits_profile": "strict",
+    "offset": 232,
+    "reason": "A glyph declaring 8193 points exceeds Limits.strict().points (8192); under default limits it must be accepted.",
+    "sha256": "f5ce4f22a6d5b5319dcfdb745f040b34c2d9b1b1cfefa4a9ec1eb7c8b2037538",
+    "variant": "OverLimit"
+  },
+  "table_length_over_limit.ttf": {
+    "ceiling": "table_bytes",
+    "legal_but_unusual": false,
+    "offset": 56,
+    "reason": "A table length one byte above Limits.default().table_bytes must be refused before allocation.",
+    "sha256": "d36d4e19547e0eb2cef5023bc684597a62ab9b910c282a2cedeb50cf360a22fc",
+    "variant": "OverLimit"
+  },
+  "table_length_past_eof.ttf": {
+    "legal_but_unusual": false,
+    "offset": 56,
+    "reason": "The head record declares 1048576 bytes, well past EOF; the range must be refused.",
+    "sha256": "e2107c34f1147e1156df6d386427e8dc96528e7b808d8ad286a5a01c4d4c05d7",
+    "variant": "Truncated"
+  },
+  "table_offset_past_eof.ttf": {
+    "legal_but_unusual": false,
+    "offset": 36,
+    "reason": "The glyf record points 4096 bytes past EOF; the directory must refuse the range before slicing.",
+    "sha256": "ba5346bbec16c07012a63e4cb35a1f2c6ef38ae009ab26116a700ab06a02ed77",
+    "variant": "Truncated"
+  },
+  "truncated_file.bin": {
+    "legal_but_unusual": false,
+    "offset": 12,
+    "reason": "The file is cut at byte 40, so the 144-byte directory read starting at 12 runs off the end.",
+    "sha256": "7d0a394ee809bf83377a058cea6b36074d6d15a8a4907452168db2db5f8bec27",
+    "variant": "Truncated"
+  },
+  "ttc_count_over_glyphs_ceiling.bin": {
+    "ceiling": "glyphs",
+    "legal_but_unusual": false,
+    "offset": 8,
+    "reason": "A TTC declaring 65537 faces exceeds Limits.default().glyphs before any face offset is read.",
+    "sha256": "702951623bb1572a1dc365a4132a67d81950cab81aa1ffbfe28939111e25f409",
+    "variant": "OverLimit"
+  },
+  "unexpected_head_magic.ttf": {
+    "legal_but_unusual": false,
+    "offset": 268,
+    "reason": "head.magicNumber is not 0x5F0F3CF5; the reader must name the expected value.",
+    "sha256": "5233b9cd150b1d1c9eb9520affed964a49c269a95927a41ec17c5b6efc150bbe",
+    "variant": "Unexpected"
+  },
+  "units_per_em_above_16384.ttf": {
+    "legal_but_unusual": false,
+    "offset": 274,
+    "reason": "unitsPerEm of 16385 is one above the maximum Head::parse permits.",
+    "sha256": "1135652a9d1257adb6e4a7a0acdeb43760c79e64e29aff5dbcef727696301658",
+    "variant": "Malformed"
+  },
+  "units_per_em_at_16384.ttf": {
+    "legal_but_unusual": true,
+    "offset": 274,
+    "reason": "16384 is the inclusive maximum Head::parse permits; a boundary value must be accepted.",
+    "sha256": "c7a08010d069a47142f02d4ef80d4e9a42997226ea41f97e772bd1851cb697d5",
+    "variant": null
+  },
+  "units_per_em_zero.ttf": {
+    "legal_but_unusual": false,
+    "offset": 274,
+    "reason": "unitsPerEm of 0 makes every later scale divide by zero; it is below the permitted minimum of 16.",
+    "sha256": "cd067172e543e869e6bbb74734b7b3a853f0e14036f151de974ac669a04ab0fc",
+    "variant": "Malformed"
+  },
+  "unsupported_maxp_version.ttf": {
+    "legal_but_unusual": false,
+    "offset": 368,
+    "reason": "A well-formed maxp version this library does not read must be named as unsupported.",
+    "sha256": "423b35dc1b460a997aa327bed169b3f93d123744370d9a6c32d2ae25b4968b86",
+    "variant": "Unsupported"
+  },
+  "unsupported_ttc_version.bin": {
+    "legal_but_unusual": false,
+    "offset": 4,
+    "reason": "A TTC version this library does not read must be named as unsupported, not parsed anyway.",
+    "sha256": "858b9afa0ba2dcae4a85525a2e718b85fd5d4ed9d315a138b91e096e61ae349e",
+    "variant": "Unsupported"
+  },
+  "valid_minimal.ttf": {
+    "legal_but_unusual": false,
+    "offset": null,
+    "reason": "The unmodified control font; the reader must accept it with no refusal.",
+    "sha256": "faf73e94ffa51d48035c841125fbbcdff98e495304092d991acfd8cf9a7862e0",
+    "variant": null
+  },
+  "zero_num_tables.ttf": {
+    "legal_but_unusual": false,
+    "offset": 4,
+    "reason": "A table directory declaring zero tables is structurally impossible.",
+    "sha256": "4c41f53547a60cc955432a2e15e9f51c7435c31e8477b062d8ec16324a385a53",
+    "variant": "Malformed"
+  }
+}

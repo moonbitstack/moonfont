@@ -1,0 +1,104 @@
+[
+  {
+    "advance": 500,
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "glyph_id": 0,
+    "lsb": 0,
+    "scaled_bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "advance": 250,
+    "bounds": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "glyph_id": 1,
+    "lsb": 0,
+    "scaled_bounds": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "advance": 600,
+    "bounds": [
+      0,
+      0,
+      600,
+      700
+    ],
+    "glyph_id": 2,
+    "lsb": 0,
+    "scaled_bounds": [
+      0,
+      0,
+      38,
+      45
+    ]
+  },
+  {
+    "advance": 500,
+    "bounds": [
+      50,
+      0,
+      450,
+      700
+    ],
+    "glyph_id": 3,
+    "lsb": 50,
+    "scaled_bounds": [
+      3,
+      0,
+      29,
+      45
+    ]
+  },
+  {
+    "advance": 450,
+    "bounds": [
+      50,
+      0,
+      400,
+      500
+    ],
+    "glyph_id": 4,
+    "lsb": 50,
+    "scaled_bounds": [
+      3,
+      0,
+      26,
+      32
+    ]
+  },
+  {
+    "advance": 700,
+    "bounds": [
+      40,
+      10,
+      640,
+      720
+    ],
+    "glyph_id": 5,
+    "lsb": 40,
+    "scaled_bounds": [
+      3,
+      1,
+      41,
+      46
+    ]
+  }
+]

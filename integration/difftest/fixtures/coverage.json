@@ -1,0 +1,52 @@
+[
+  {
+    "glyph_id": 0,
+    "ink_bbox": null,
+    "ink_coverage": 0.0
+  },
+  {
+    "glyph_id": 1,
+    "ink_bbox": null,
+    "ink_coverage": 0.0
+  },
+  {
+    "glyph_id": 2,
+    "ink_bbox": [
+      4,
+      0,
+      35,
+      44
+    ],
+    "ink_coverage": 27.825928
+  },
+  {
+    "glyph_id": 3,
+    "ink_bbox": [
+      3,
+      0,
+      28,
+      44
+    ],
+    "ink_coverage": 27.859497
+  },
+  {
+    "glyph_id": 4,
+    "ink_bbox": [
+      3,
+      0,
+      21,
+      31
+    ],
+    "ink_coverage": 12.459946
+  },
+  {
+    "glyph_id": 5,
+    "ink_bbox": [
+      3,
+      0,
+      37,
+      46
+    ],
+    "ink_coverage": 34.243774
+  }
+]
