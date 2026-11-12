@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>moonfont — Comparison</title>
+<meta name="description" content="The cross-language oracle matrix, the pre-registered tolerances and the committed fixture and corpus counts.">
+<script>
+  (() => {
+    let chosen = null;
+    try { chosen = localStorage.getItem("moonfont-theme"); } catch (e) {}
+    const theme = chosen === "light" || chosen === "dark"
+      ? chosen
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.dataset.theme = theme;
+  })();
+</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="top">
+  <nav aria-label="Sections">
+    <a class="brand" href="index.html"><b>moonfont</b><span>font reading for MoonBit</span></a>
+    <a class="link" href="index.html">Specimen</a>
+    <a class="link" href="guide.html">Guide</a>
+    <a class="link" href="api.html">Reference</a>
+    <a class="link" href="difftest.html" aria-current="page">Comparison</a>
+    <a class="link" href="showcase.html">Measure</a>
+    <button class="theme-toggle" type="button" aria-label="Use the dark case" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <g class="face"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.4"/></g>
+        <g class="foot"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18M4 12h16" stroke="currentColor" stroke-width="1.4"/></g>
+      </svg>
+    </button>
+  </nav>
+</header>
+<main id="main">
+  <div class="wrap">
+    <section aria-labelledby="pair">
+      <h1 id="pair">Two readers of the same bytes, set on one baseline.</h1>
+      <p>Correctness is held to the libraries that came before this one. Fixtures are produced offline, committed as plain data and replayed by MoonBit tests; at test time there is no oracle process, no FFI, no network and no third-party MoonBit module.</p>
+      <figure class="rule-figure">
+        <svg viewBox="-20 -860 2020 1120" role="img" aria-label="Two impressions of the sort A drawn from one outline command stream">
+          <g fill="none" stroke="currentColor">
+            <line x1="0" y1="0" x2="2000" y2="0" stroke-width="3"/>
+            <line x1="1000" y1="-800" x2="1000" y2="200" stroke-width="1" stroke-dasharray="12 12"/>
+          </g>
+          <g fill="currentColor"><path d="M100 0 L500 0 Q600 -300 500 -500 Q400 -700 200 -700 Q0 -300 100 0 Z"/></g>
+          <g transform="translate(1000 0)" fill="currentColor"><path d="M100 0 L500 0 Q600 -300 500 -500 Q400 -700 200 -700 Q0 -300 100 0 Z"/></g>
+          <g fill="currentColor" font-size="12">
+            <text x="0" y="250">moonfont</text>
+            <text x="1000" y="250">reference oracle</text>
+          </g>
+        </svg>
+        <figcaption>A kerning pair in the proofreader's sense: the same <code>U+0041</code> outline read twice. A disagreement shows at the edges and is recorded as a word plus a mono delta, never as colour alone.</figcaption>
+      </figure>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <table class="case-table">
+      <caption>Cross-language oracle assignment. Versions are the pins recorded in <code>contracts/DIFFTEST.md</code>, section 5; a version bump is a one-way door that invalidates every committed golden.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Library</th>
+          <th scope="col">Language</th>
+          <th scope="col">Pinned version</th>
+          <th scope="col">Authoritative for</th>
+          <th scope="col">Flags</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">FreeType</th><td>C via Python</td><td>2.13.3</td><td>outline, metrics, coverage</td><td>FT_LOAD_NO_HINTING, FT_LOAD_NO_BITMAP, FT_LOAD_TARGET_NORMAL</td></tr>
+        <tr><th scope="row">freetype-py</th><td>Python</td><td>2.5.1</td><td>binding to the pinned FreeType</td><td>bound to the system 2.13.3 build</td></tr>
+        <tr><th scope="row">fontTools</th><td>Python</td><td>4.55.3</td><td>container, cmap, metrics</td><td>TTFont(lazy=True), getBestCmap()</td></tr>
+        <tr><th scope="row">golang.org/x/image/font/sfnt</th><td>Go</td><td>v0.23.0</td><td>cmap, outline</td><td>none</td></tr>
+        <tr><th scope="row">skrifa / read-fonts</th><td>Rust</td><td>recorded in ORACLES.lock</td><td>outline, metrics</td><td>unhinted, default location</td></tr>
+        <tr><th scope="row">HarfBuzz / uharfbuzz</th><td>C via Python</td><td>10.1.0 / 0.42.0</td><td>cmap, outline</td><td>no shaping, no hinting</td></tr>
+        <tr><th scope="row">opentype.js</th><td>JavaScript</td><td>1.3.4</td><td>cmap, outline</td><td>none</td></tr>
+        <tr><th scope="row">Pillow</th><td>Python</td><td>11.0.0</td><td>coverage, advisory only</td><td>ImageFont.getmask</td></tr>
+        <tr><th scope="row">stb_truetype</th><td>C</td><td>1.26</td><td>coverage, advisory only</td><td>excluded from tolerance assertions</td></tr>
+        <tr><th scope="row">msdfgen</th><td>C++</td><td>deferred</td><td>none in v0.1.0</td><td>not pinned</td></tr>
+        <tr><th scope="row">moonfont.stdlib.reference</th><td>Python stdlib</td><td>1.0.0</td><td>six committed fixture categories</td><td>8x8 uniform-grid supersampling, non-zero winding</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wrap">
+    <section class="measure" aria-labelledby="rules">
+      <div>
+        <h2 id="rules">Pre-registered tolerances</h2>
+        <p>Thresholds are fixed before any parity fixture is generated and may not be relaxed to make a failing test pass. Variant names and field labels are compared exactly before values; a missing field is a failure, never a default.</p>
+        <table class="case-table">
+          <caption>Per-category rules from <code>contracts/DIFFTEST.md</code>, section 6.</caption>
+          <thead>
+            <tr><th scope="col">Category</th><th scope="col">Rule</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">container</th><td>exact</td></tr>
+            <tr><th scope="row">cmap</th><td>exact</td></tr>
+            <tr><th scope="row">metrics, font units</th><td>exact</td></tr>
+            <tr><th scope="row">metrics, 26.6</th><td>fixed_1</td></tr>
+            <tr><th scope="row">outline, font units</th><td>exact</td></tr>
+            <tr><th scope="row">outline, 26.6</th><td>fixed_1</td></tr>
+            <tr><th scope="row">limits</th><td>exact</td></tr>
+            <tr><th scope="row">measurement</th><td>exact</td></tr>
+            <tr><th scope="row">coverage, 8-bit</th><td>coverage_8</td></tr>
+            <tr><th scope="row">coverage, 1-bit</th><td>exact</td></tr>
+            <tr><th scope="row">error variants</th><td>exact</td></tr>
+          </tbody>
+        </table>
+        <p><code>fixed_1</code> allows one unit of 1/64 pixel per scalar. <code>coverage_8</code> fixes width, height, left and top exactly, admits a per-sample difference of at most 32 for 99 per cent of samples, holds ink mass within 2 per cent, allows the ink box to differ by 1 pixel, and requires non-zero winding at sizes 8, 12, 16, 24, 32, 48 or 96.</p>
+        <p>The committed fixture toolchain adds three rules of its own: scaled bounds within 1 pixel, outline command streams exact after canonicalisation, and ink coverage within 5 per cent. Anti-aliasing is not bit-identical across rasterisers, so hinted glyphs are excluded entirely.</p>
+      </div>
+      <div>
+        <h3>What is committed</h3>
+        <p>Two corpora, distinguished by producer. The synthetic corpus is a deterministic byte constructor, not an oracle; the parity goldens are where another implementation supplies the answer.</p>
+        <ul>
+          <li><code>6</code> fixture categories: font, tables, cmap, metrics, outlines, coverage</li>
+          <li><code>6</code> glyphs and <code>9</code> tables in <code>synthetic.ttf</code></li>
+          <li><code>5</code> codepoint-to-glyph-id mappings in a format 4 <code>cmap</code></li>
+          <li><code>6</code> outline streams and <code>6</code> coverage summaries</li>
+          <li><code>8</code> SHA-256 sidecars; 64 by 64 raster grid, 8 samples per axis</li>
+          <li>oracle <code>reference</code> version 1.0.0, pure standard library</li>
+          <li>font digest <code>f2e72b1c3adcf15f61e20a333d8c05eab337cae30bdd6d3932eb510faad4c0b1</code></li>
+        </ul>
+        <p>The hostile-input corpus in <code>integration/difftest/corpus/manifest.json</code> holds <code>39</code> cases: <code>34</code> refusals and <code>5</code> accepted files, of which <code>4</code> are legal but unusual. All nine <code>Refused</code> variants are exercised.</p>
+        <ul>
+          <li><code>8</code> Malformed, <code>7</code> MissingTable, <code>6</code> Truncated</li>
+          <li><code>5</code> OverLimit, <code>2</code> Unknown, <code>2</code> Unsupported</li>
+          <li><code>2</code> Recursion, <code>1</code> Unexpected, <code>1</code> MissingGlyph</li>
+        </ul>
+        <p>A replay cell always carries a word — match, disagrees or refused — and a mono delta. CI replays committed fixtures on wasm, wasm-gc, js and native; it never calls an oracle.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <blockquote class="colophon">
+      <p>Fixtures are produced offline by reference implementations written in other languages, committed to the repository as plain data, and replayed by MoonBit tests.</p>
+      <p><small>contracts/DIFFTEST.md, section 1.</small></p>
+    </blockquote>
+  </div>
+</main>
+<footer>
+  <div class="wrap row">
+    <span class="mark">moonfont</span>
+    <a href="index.html">Specimen</a>
+    <a href="guide.html">Guide</a>
+    <a href="api.html">Reference</a>
+    <a href="difftest.html">Comparison</a>
+    <a href="showcase.html">Measure</a>
+    <span>Apache-2.0 licence</span>
+  </div>
+</footer>
+<script src="theme.js" defer></script>
+<script src="site.js" defer></script>
+</body>
+</html>

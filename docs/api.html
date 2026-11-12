@@ -1,0 +1,1783 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>moonfont — Reference</title>
+<meta name="description" content="Every public type, function and doc comment in moonfont, set out compartment by compartment.">
+<script>
+  (() => {
+    let chosen = null;
+    try { chosen = localStorage.getItem("moonfont-theme"); } catch (e) {}
+    const theme = chosen === "light" || chosen === "dark"
+      ? chosen
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.dataset.theme = theme;
+  })();
+</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#case">Skip to the case</a>
+<header class="top">
+  <nav aria-label="Sections">
+    <a class="brand" href="index.html"><b>moonfont</b><span>font reading for MoonBit</span></a>
+    <a class="link" href="index.html">Specimen</a>
+    <a class="link" href="guide.html">Guide</a>
+    <a class="link" href="api.html" aria-current="page">Reference</a>
+    <a class="link" href="difftest.html">Comparison</a>
+    <a class="link" href="showcase.html">Measure</a>
+    <button class="theme-toggle" type="button" aria-label="Use the dark case" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <g class="face"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.4"/></g>
+        <g class="foot"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18M4 12h16" stroke="currentColor" stroke-width="1.4"/></g>
+      </svg>
+    </button>
+  </nav>
+</header>
+<main id="main">
+  <div class="wrap">
+    <div class="case">
+      <nav class="case-index" aria-label="Packages">
+        <ol class="case-index-list">
+          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont"><span class="case-index-name">moonbitstack/<wbr>moonfont</span><span class="case-index-count">27</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2flayout"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>layout</span><span class="case-index-count">1</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fmodel"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>model</span><span class="case-index-count">56</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2foutline"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>outline</span><span class="case-index-count">4</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fraster"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>raster</span><span class="case-index-count">1</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fsfnt"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>sfnt</span><span class="case-index-count">19</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2ftable"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>table</span><span class="case-index-count">30</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fwire"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>wire</span><span class="case-index-count">23</span></a></li>
+        </ol>
+      </nav>
+      <div class="case-body" id="case">
+        <h1 class="case-title">The case</h1>
+        <p class="case-intro">Every package is a drawer and every declaration a compartment. The cast line comes from the interface; the note beside it comes from the source.</p>
+        <section class="pkg" id="p--moonbitstack-2fmoonfont">
+          <div class="pkg-head">
+            <h2 class="pkg-name">moonbitstack/moonfont</h2>
+            <span class="pkg-kind">package</span>
+          </div>
+          <div class="pkg-doc"><p>The façade. One import gives a caller the types, the entry points and the whole vertical slice from bytes to a coverage mask. Every package below is also public, so a caller that only needs charmap lookup or only needs a rasteriser does not have to load the rest.</p></div>
+          <div class="pkg-list">
+            <article class="entry" id="d--moonbitstack-2fmoonfont--bounds--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Bounds</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">Bounds</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--coveragemask--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">CoverageMask</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">CoverageMask</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Face</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">struct</span> <span class="tok-ty">Face</span> {
+  <span class="tok-fn">head</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Head</span>
+  <span class="tok-fn">hhea</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Hhea</span>
+  <span class="tok-fn">maxp</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Maxp</span>
+  <span class="tok-fn">hmtx</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Hmtx</span>
+  <span class="tok-fn">cmap</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Cmap</span>
+  <span class="tok-fn">kern</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Kern</span>
+  <span class="tok-fn">os2</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Os2</span>
+  <span class="tok-fn">source</span> <span class="tok-op">:</span> <span class="tok-ty">@outline.GlyphSource</span>
+  <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">cmap</b><span class="field-type">@table.Cmap</span></li>
+                <li class="entry-field"><b class="field-name">head</b><span class="field-type">@table.Head</span></li>
+                <li class="entry-field"><b class="field-name">hhea</b><span class="field-type">@table.Hhea</span></li>
+                <li class="entry-field"><b class="field-name">hmtx</b><span class="field-type">@table.Hmtx</span></li>
+                <li class="entry-field"><b class="field-name">kern</b><span class="field-type">@table.Kern</span></li>
+                <li class="entry-field"><b class="field-name">limits</b><span class="field-type">@model.Limits</span></li>
+                <li class="entry-field"><b class="field-name">maxp</b><span class="field-type">@table.Maxp</span></li>
+                <li class="entry-field"><b class="field-name">os2</b><span class="field-type">@table.Os2</span></li>
+                <li class="entry-field"><b class="field-name">source</b><span class="field-type">@outline.GlyphSource</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>A loaded font face. It owns no bytes it did not borrow: parsing is lazy for glyph outlines, so loading a large font costs a table directory and a few small tables, not every glyph.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--fontmetrics--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">FontMetrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">FontMetrics</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--glyphid--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">GlyphId</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">GlyphId</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--glyphmetrics--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">GlyphMetrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">GlyphMetrics</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--limits--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Limits</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">Limits</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--outline--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Outline</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">Outline</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--pathcommand--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">PathCommand</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">PathCommand</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--point--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Point</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">Point</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--refused--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Refused</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">Refused</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--scale--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Scale</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">Scale</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--textmetrics--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">TextMetrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> using <span class="tok-ty">@model</span> {type <span class="tok-ty">TextMetrics</span>}</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--decode--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">decode</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">decode</span>(<span class="tok-fn">bytes</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>, <span class="tok-fn">limits</span>? <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Face</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>Read the first face of a font file. A TrueType collection also has a first face; <code>decode_all</code> is the entry point for the rest of them.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--decode-5fall--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">decode_all</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">decode_all</span>(<span class="tok-fn">bytes</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>, <span class="tok-fn">limits</span>? <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Array</span>[<span class="tok-ty">Face</span>] <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>Read every face in the file. A plain font yields exactly one.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--version--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">version</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">version</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">String</span></code>
+              <div class="entry-doc">
+                <p>The version of the library.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3afont-5fmetrics--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::font_metrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::font_metrics</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.FontMetrics</span></code>
+              <div class="entry-doc">
+                <p>Font-wide metrics, in font units.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3aglyph-5ffor--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::glyph_for</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::glyph_for</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>, <span class="tok-fn">character</span> <span class="tok-op">:</span> <span class="tok-ty">Char</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.GlyphId</span>?</code>
+              <div class="entry-doc">
+                <p>Translate a character to a glyph id.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3aglyph-5findex--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::glyph_index</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::glyph_index</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>, <span class="tok-fn">codepoint</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.GlyphId</span>?</code>
+              <div class="entry-doc">
+                <p>Translate a Unicode codepoint to a glyph id. <code>None</code> means the font has no glyph; a caller decides what to draw in its place.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3akern-5fbetween--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::kern_between</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::kern_between</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>, <span class="tok-fn">left</span> <span class="tok-op">:</span> <span class="tok-ty">@model.GlyphId</span>, <span class="tok-fn">right</span> <span class="tok-op">:</span> <span class="tok-ty">@model.GlyphId</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>The legacy kern adjustment between two glyphs, in font units. Zero for fonts that carry kerning only in GPOS, which this library does not shape.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3ameasure--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::measure</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::measure</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>, <span class="tok-fn">text</span> <span class="tok-op">:</span> <span class="tok-ty">String</span>, <span class="tok-fn">pixels_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">letter_spacing</span>? <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.TextMetrics</span></code>
+              <div class="entry-doc">
+                <p>Measure a run of text at a pixel size. Unknown codepoints are skipped, so the returned <code>glyphs</code> count can be smaller than the character count.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3ametrics--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::metrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::metrics</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>, <span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">@model.GlyphId</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.GlyphMetrics</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>Horizontal metrics of one glyph, in font units.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3anum-5fglyphs--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::num_glyphs</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::num_glyphs</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>How many glyphs the font declares.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3aoutline--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::outline</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::outline</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>, <span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">@model.GlyphId</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.Outline</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>The outline of one glyph, in font units, as path commands. Curves are kept as curves; flattening is the rasteriser's decision.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3arasterise--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::rasterise</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::rasterise</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>, <span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">@model.GlyphId</span>, <span class="tok-fn">pixels_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.CoverageMask</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>Eight-bit coverage of one glyph at a pixel size. The mask carries its own origin, so it can be copied into an atlas without further arithmetic.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3ascale--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::scale</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::scale</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>, <span class="tok-fn">pixels_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.Scale</span></code>
+              <div class="entry-doc">
+                <p>The scale for a pixel size, shared by measurement and rasterisation so the two never disagree about where the pen stands.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont--face-3a-3aunits-5fper-5fem--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Face::units_per_em</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Face::units_per_em</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Face</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>The units in which outlines and advances are measured.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+        <section class="pkg" id="p--moonbitstack-2fmoonfont-2flayout">
+          <div class="pkg-head">
+            <h2 class="pkg-name">moonbitstack/moonfont/layout</h2>
+            <span class="pkg-kind">package</span>
+          </div>
+          <div class="pkg-doc"><p>Text measurement, not shaping. It sums advances and applies legacy kerning as data. Bidi, line breaking, GSUB/GPOS and syllable clustering are out of scope by design: those are a different library's problem.</p></div>
+          <div class="pkg-list">
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2flayout--measure--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">measure</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">measure</span>(<span class="tok-fn">glyphs</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">@model.GlyphId</span>], <span class="tok-fn">hmtx</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Hmtx</span>, <span class="tok-fn">font</span> <span class="tok-op">:</span> <span class="tok-ty">@model.FontMetrics</span>, <span class="tok-fn">scale</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Scale</span>, <span class="tok-fn">kern</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Kern</span>, <span class="tok-fn">letter_spacing</span>? <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.TextMetrics</span></code>
+              <div class="entry-doc">
+                <p>The horizontal extent of a run of glyph ids, plus the font's vertical rhythm at the same size.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+        <section class="pkg" id="p--moonbitstack-2fmoonfont-2fmodel">
+          <div class="pkg-head">
+            <h2 class="pkg-name">moonbitstack/moonfont/model</h2>
+            <span class="pkg-kind">package</span>
+          </div>
+          <div class="pkg-doc"><p>The domain model: the vocabulary every other layer speaks. It knows nothing about bytes, tables, scanlines or pixels, and depends on nothing but the built-in library.</p></div>
+          <div class="pkg-list">
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--bounds--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Bounds</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Bounds</span> {
+  <span class="tok-fn">x_min</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">y_min</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">x_max</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">y_max</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">x_max</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">x_min</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">y_max</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">y_min</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>An axis-aligned box in font units.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--coveragemask--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">CoverageMask</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">CoverageMask</span> {
+  <span class="tok-fn">width</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">height</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">left</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">top</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">samples</span> <span class="tok-op">:</span> <span class="tok-ty">FixedArray</span>[<span class="tok-ty">Byte</span>]
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">height</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">left</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">samples</b><span class="field-type">FixedArray[Byte]</span></li>
+                <li class="entry-field"><b class="field-name">top</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">width</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>Eight-bit coverage of one glyph, top-down rows, left-to-right columns. <code>left</code> and <code>top</code> place the box relative to the pen in 26.6 pixels, so a caller can blit it into an atlas without recomputing the origin.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--fontmetrics--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">FontMetrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">FontMetrics</span> {
+  <span class="tok-fn">units_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">ascent</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">descent</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">line_gap</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">cap_height</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">x_height</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">num_glyphs</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">bounding_box</span> <span class="tok-op">:</span> <span class="tok-ty">Bounds</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">ascent</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">bounding_box</b><span class="field-type">Bounds</span></li>
+                <li class="entry-field"><b class="field-name">cap_height</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">descent</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">line_gap</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">num_glyphs</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">units_per_em</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">x_height</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>Font-wide metrics, in font units. All vertical values keep the font's y-up sign: descent is negative in a well-formed font.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--glyphid--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">GlyphId</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">GlyphId</span> {
+  <span class="tok-fn">index</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">index</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>A glyph's index in the font. Codepoints are not glyphs: translation belongs to the charmap, and everything downstream speaks only this.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--glyphmetrics--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">GlyphMetrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">GlyphMetrics</span> {
+  <span class="tok-fn">advance</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">left_side_bearing</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">bounds</span> <span class="tok-op">:</span> <span class="tok-ty">Bounds</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">advance</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">bounds</b><span class="field-type">Bounds</span></li>
+                <li class="entry-field"><b class="field-name">left_side_bearing</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>Horizontal metrics of one glyph, in font units.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--limits--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Limits</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Limits</span> {
+  <span class="tok-fn">file_bytes</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">table_bytes</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">glyphs</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">points</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">contours</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">composites</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">recursion</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">mask_pixels</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">composites</b><span class="field-type">Int32</span><span class="field-doc">The largest number of components accepted in one composite glyph.</span></li>
+                <li class="entry-field"><b class="field-name">contours</b><span class="field-type">Int32</span><span class="field-doc">The largest number of contours accepted in one glyph outline.</span></li>
+                <li class="entry-field"><b class="field-name">file_bytes</b><span class="field-type">Int32</span><span class="field-doc">The largest font file accepted, in bytes.</span></li>
+                <li class="entry-field"><b class="field-name">glyphs</b><span class="field-type">Int32</span><span class="field-doc">The largest number of glyphs accepted.</span></li>
+                <li class="entry-field"><b class="field-name">mask_pixels</b><span class="field-type">Int32</span><span class="field-doc">The largest coverage mask accepted, in pixels.</span></li>
+                <li class="entry-field"><b class="field-name">points</b><span class="field-type">Int32</span><span class="field-doc">The largest number of points accepted in one glyph outline.</span></li>
+                <li class="entry-field"><b class="field-name">recursion</b><span class="field-type">Int32</span><span class="field-doc">The deepest nesting of composite glyphs accepted.</span></li>
+                <li class="entry-field"><b class="field-name">table_bytes</b><span class="field-type">Int32</span><span class="field-doc">The largest single table accepted, in bytes.</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>The ceilings a reader works under.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--outline--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Outline</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Outline</span> {
+  <span class="tok-fn">commands</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">PathCommand</span>]
+  <span class="tok-fn">bounds</span> <span class="tok-op">:</span> <span class="tok-ty">Bounds</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">bounds</b><span class="field-type">Bounds</span></li>
+                <li class="entry-field"><b class="field-name">commands</b><span class="field-type">Array[PathCommand]</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>A glyph outline: a command stream and the box the font declared for it. The declared box is kept separate from the measured extent of the commands, because metrics and coverage are not obliged to agree with each other.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--pathcommand--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">PathCommand</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">enum</span> <span class="tok-ty">PathCommand</span> {
+  <span class="tok-fn">MoveTo</span>(<span class="tok-ty">Point</span>)
+  <span class="tok-fn">LineTo</span>(<span class="tok-ty">Point</span>)
+  <span class="tok-fn">QuadTo</span>(<span class="tok-ty">Point</span>, <span class="tok-ty">Point</span>)
+  <span class="tok-fn">CubicTo</span>(<span class="tok-ty">Point</span>, <span class="tok-ty">Point</span>, <span class="tok-ty">Point</span>)
+  <span class="tok-fn">Close</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">Close</b><span class="field-type"></span></li>
+                <li class="entry-field"><b class="field-name">CubicTo</b><span class="field-type">(Point, Point, Point)</span><span class="field-doc">Two control points, then end point.</span></li>
+                <li class="entry-field"><b class="field-name">LineTo</b><span class="field-type">(Point)</span></li>
+                <li class="entry-field"><b class="field-name">MoveTo</b><span class="field-type">(Point)</span></li>
+                <li class="entry-field"><b class="field-name">QuadTo</b><span class="field-type">(Point, Point)</span><span class="field-doc">Control point, then end point.</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>One step of an outline. Quadratic and cubic segments are kept as they are in the file: flattening is a rasteriser's decision, not a parser's. A consumer that wants SVG, a GPU tessellator or an SDF gets the same commands.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--point--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Point</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Point</span> {
+  <span class="tok-fn">x</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">y</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">x</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">y</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>A point in font units, with the font's own y-up orientation.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--refused--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Refused</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">suberror</span> <span class="tok-ty">Refused</span> {
+  <span class="tok-fn">Unknown</span>(<span class="tok-fn">at</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">got</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">String</span>)
+  <span class="tok-fn">Unexpected</span>(<span class="tok-fn">at</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">got</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">String</span>, <span class="tok-fn">want</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">String</span>)
+  <span class="tok-fn">Unsupported</span>(<span class="tok-fn">at</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">got</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">String</span>)
+  <span class="tok-fn">Truncated</span>(<span class="tok-fn">at</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">want</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>)
+  <span class="tok-fn">OverLimit</span>(<span class="tok-fn">limit</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">got</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>)
+  <span class="tok-fn">Malformed</span>(<span class="tok-fn">at</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">got</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">String</span>)
+  <span class="tok-fn">MissingTable</span>(<span class="tok-fn">tag</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">String</span>)
+  <span class="tok-fn">MissingGlyph</span>(<span class="tok-fn">glyph</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>)
+  <span class="tok-fn">Recursion</span>(<span class="tok-fn">depth</span><span class="tok-op">~</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>)
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">Malformed</b><span class="field-type">(at~ : Int32, got~ : String)</span><span class="field-doc">A structurally impossible value in an otherwise readable table.</span></li>
+                <li class="entry-field"><b class="field-name">MissingGlyph</b><span class="field-type">(glyph~ : Int32)</span><span class="field-doc">A glyph id outside <code>maxp.numGlyphs</code>.</span></li>
+                <li class="entry-field"><b class="field-name">MissingTable</b><span class="field-type">(tag~ : String)</span><span class="field-doc">A required table is absent from the directory.</span></li>
+                <li class="entry-field"><b class="field-name">OverLimit</b><span class="field-type">(limit~ : Int32, got~ : Int32)</span><span class="field-doc">A declaration past the caller's ceiling.</span></li>
+                <li class="entry-field"><b class="field-name">Recursion</b><span class="field-type">(depth~ : Int32)</span><span class="field-doc">Composite glyphs nested past the caller's recursion ceiling.</span></li>
+                <li class="entry-field"><b class="field-name">Truncated</b><span class="field-type">(at~ : Int32, want~ : Int32)</span><span class="field-doc">The bytes end <code>want</code> short of where the format needs them.</span></li>
+                <li class="entry-field"><b class="field-name">Unexpected</b><span class="field-type">(at~ : Int32, got~ : String, want~ : String)</span><span class="field-doc">The bytes at <code>at</code> are not allowed here; <code>want</code> says what would be.</span></li>
+                <li class="entry-field"><b class="field-name">Unknown</b><span class="field-type">(at~ : Int32, got~ : String)</span><span class="field-doc">The signature at <code>at</code> is not one this library reads.</span></li>
+                <li class="entry-field"><b class="field-name">Unsupported</b><span class="field-type">(at~ : Int32, got~ : String)</span><span class="field-doc">A well-formed part of the format that this library does not read yet.</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>A refusal to read bytes as a font, or to turn a glyph into a bitmap.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--scale--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Scale</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Scale</span> {
+  <span class="tok-fn">ppem</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">units_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">ppem</b><span class="field-type">Int32</span><span class="field-doc">Pixels per em, in 26.6 fixed point.</span></li>
+                <li class="entry-field"><b class="field-name">units_per_em</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>A size in 26.6 fixed point. The whole library computes with integers: a rasteriser that used floating point would produce different coverage on wasm, js and native for the same bytes, and a differential test could not say what the right answer is.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--textmetrics--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">TextMetrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">TextMetrics</span> {
+  <span class="tok-fn">advance</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">ascent</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">descent</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">line_gap</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">glyphs</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">advance</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">ascent</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">descent</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">glyphs</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">line_gap</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>The measured shape of a run of text, in 26.6 pixels.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--show-20for-20refused--impl">
+              <div class="entry-head">
+                <span class="entry-kind">impl</span>
+                <h3 class="entry-name">Show for Refused</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">impl</span> <span class="tok-ty">Show</span> for <span class="tok-ty">Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--bounds-3a-3aempty--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Bounds::empty</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Bounds::empty</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Bounds</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--bounds-3a-3aequal--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Bounds::equal</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Bounds::equal</span>(<span class="tok-ty">Self</span>, <span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--bounds-3a-3aheight--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Bounds::height</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Bounds::height</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Bounds</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--bounds-3a-3ais-5fempty--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Bounds::is_empty</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Bounds::is_empty</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Bounds</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--bounds-3a-3anot-5fequal--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Bounds::not_equal</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Bounds::not_equal</span>(<span class="tok-ty">Self</span>, <span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--bounds-3a-3ato-5frepr--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Bounds::to_repr</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Bounds::to_repr</span>(<span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@debug.Repr</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--bounds-3a-3awidth--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Bounds::width</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Bounds::width</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Bounds</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--coveragemask-3a-3aat--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">CoverageMask::at</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">CoverageMask::at</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">CoverageMask</span>, <span class="tok-fn">x</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">y</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>The coverage at <code>x</code>, <code>y</code>, from 0 to 255. Out of the box is transparent.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--coveragemask-3a-3aof--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">CoverageMask::of</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">CoverageMask::of</span>(<span class="tok-fn">width</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">height</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">left</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">top</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">samples</span> <span class="tok-op">:</span> <span class="tok-ty">FixedArray</span>[<span class="tok-ty">Byte</span>]) <span class="tok-op">-&gt;</span> <span class="tok-ty">CoverageMask</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--glyphid-3a-3aequal--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">GlyphId::equal</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">GlyphId::equal</span>(<span class="tok-ty">Self</span>, <span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--glyphid-3a-3anot-5fequal--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">GlyphId::not_equal</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">GlyphId::not_equal</span>(<span class="tok-ty">Self</span>, <span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--glyphid-3a-3aof--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">GlyphId::of</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">GlyphId::of</span>(<span class="tok-fn">index</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">GlyphId</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--glyphid-3a-3ato-5fint--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">GlyphId::to_int</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">GlyphId::to_int</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">GlyphId</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--glyphid-3a-3ato-5frepr--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">GlyphId::to_repr</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">GlyphId::to_repr</span>(<span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@debug.Repr</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--limits-3a-3acheck-5fcomposites--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Limits::check_composites</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Limits::check_composites</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Limits</span>, <span class="tok-fn">count</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Unit</span> <span class="tok-kw">raise</span> <span class="tok-ty">Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--limits-3a-3acheck-5fdepth--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Limits::check_depth</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Limits::check_depth</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Limits</span>, <span class="tok-fn">depth</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Unit</span> <span class="tok-kw">raise</span> <span class="tok-ty">Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--limits-3a-3acheck-5ffile--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Limits::check_file</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Limits::check_file</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Limits</span>, <span class="tok-fn">size</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Unit</span> <span class="tok-kw">raise</span> <span class="tok-ty">Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--limits-3a-3acheck-5fglyphs--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Limits::check_glyphs</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Limits::check_glyphs</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Limits</span>, <span class="tok-fn">count</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Unit</span> <span class="tok-kw">raise</span> <span class="tok-ty">Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--limits-3a-3acheck-5fmask--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Limits::check_mask</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Limits::check_mask</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Limits</span>, <span class="tok-fn">width</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">height</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Unit</span> <span class="tok-kw">raise</span> <span class="tok-ty">Refused</span></code>
+              <div class="entry-doc">
+                <p>The pixel count is multiplied in 64 bits so that a declared 65535 by 65535 cannot wrap into a small number and slip through.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--limits-3a-3acheck-5foutline--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Limits::check_outline</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Limits::check_outline</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Limits</span>, <span class="tok-fn">points</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">contours</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Unit</span> <span class="tok-kw">raise</span> <span class="tok-ty">Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--limits-3a-3acheck-5ftable--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Limits::check_table</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Limits::check_table</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Limits</span>, <span class="tok-fn">size</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Unit</span> <span class="tok-kw">raise</span> <span class="tok-ty">Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--limits-3a-3adefault--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Limits::default</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Limits::default</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Limits</span></code>
+              <div class="entry-doc">
+                <p>Desktop defaults: generous, but finite at every declaration.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--limits-3a-3astrict--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Limits::strict</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Limits::strict</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Limits</span></code>
+              <div class="entry-doc">
+                <p>What a service handling untrusted uploads would choose.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--outline-3a-3abounds--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Outline::bounds</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Outline::bounds</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Outline</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bounds</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--outline-3a-3acommands--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Outline::commands</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Outline::commands</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Outline</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Array</span>[<span class="tok-ty">PathCommand</span>]</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--outline-3a-3ais-5fempty--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Outline::is_empty</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Outline::is_empty</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Outline</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--outline-3a-3aof--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Outline::of</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Outline::of</span>(<span class="tok-fn">commands</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">PathCommand</span>], <span class="tok-fn">bounds</span> <span class="tok-op">:</span> <span class="tok-ty">Bounds</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Outline</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--pathcommand-3a-3aequal--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">PathCommand::equal</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">PathCommand::equal</span>(<span class="tok-ty">Self</span>, <span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--pathcommand-3a-3anot-5fequal--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">PathCommand::not_equal</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">PathCommand::not_equal</span>(<span class="tok-ty">Self</span>, <span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--pathcommand-3a-3ato-5frepr--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">PathCommand::to_repr</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">PathCommand::to_repr</span>(<span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@debug.Repr</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--point-3a-3aequal--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Point::equal</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Point::equal</span>(<span class="tok-ty">Self</span>, <span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--point-3a-3anot-5fequal--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Point::not_equal</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Point::not_equal</span>(<span class="tok-ty">Self</span>, <span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--point-3a-3aof--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Point::of</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Point::of</span>(<span class="tok-fn">x</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">y</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Point</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--point-3a-3ato-5frepr--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Point::to_repr</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Point::to_repr</span>(<span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@debug.Repr</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--refused-3a-3aequal--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Refused::equal</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Refused::equal</span>(<span class="tok-ty">Self</span>, <span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--refused-3a-3aname--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Refused::name</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Refused::name</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Refused</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">String</span></code>
+              <div class="entry-doc">
+                <p>The variant name. A differential test records this rather than a rendered message, because the prose may change while the contract does not. The text is stable and part of the public interface.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--refused-3a-3anot-5fequal--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Refused::not_equal</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Refused::not_equal</span>(<span class="tok-ty">Self</span>, <span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--refused-3a-3aoutput--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Refused::output</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Refused::output</span>(<span class="tok-ty">Self</span>, &amp;<span class="tok-ty">Logger</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Unit</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--refused-3a-3ato-5frepr--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Refused::to_repr</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Refused::to_repr</span>(<span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@debug.Repr</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--refused-3a-3ato-5fstring--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Refused::to_string</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Refused::to_string</span>(<span class="tok-ty">Self</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">String</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--scale-3a-3aapply--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Scale::apply</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Scale::apply</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Scale</span>, <span class="tok-fn">units</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>Font units to 26.6 pixels. The product is taken in 64 bits so a large coordinate at a large size cannot wrap.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--scale-3a-3aof--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Scale::of</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Scale::of</span>(<span class="tok-fn">pixels_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">units_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Scale</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--scale-3a-3appem--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Scale::ppem</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Scale::ppem</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Scale</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+          </div>
+        </section>
+        <section class="pkg" id="p--moonbitstack-2fmoonfont-2foutline">
+          <div class="pkg-head">
+            <h2 class="pkg-name">moonbitstack/moonfont/outline</h2>
+            <span class="pkg-kind">package</span>
+          </div>
+          <div class="pkg-doc"><p>Geometry, not pixels. A TrueType glyph is a set of points and an on-curve bit; this layer turns those into a path command stream and resolves composite glyphs. Nothing here decides how a curve is flattened.</p></div>
+          <div class="pkg-list">
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2foutline--glyphsource--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">GlyphSource</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">GlyphSource</span> {
+  <span class="tok-fn">glyf</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>
+  <span class="tok-fn">loca</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Loca</span>
+  <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">glyf</b><span class="field-type">BytesView</span></li>
+                <li class="entry-field"><b class="field-name">limits</b><span class="field-type">@model.Limits</span></li>
+                <li class="entry-field"><b class="field-name">loca</b><span class="field-type">@table.Loca</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>Everything needed to turn a glyph id into an outline, without owning the font: the glyf bytes, the glyph boundaries and the caller's ceilings.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2foutline--simple-5foutline--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">simple_outline</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">simple_outline</span>(<span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">@table.SimpleGlyph</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.Outline</span></code>
+              <div class="entry-doc">
+                <p>The path of one simple glyph.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2foutline--glyphsource-3a-3aof--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">GlyphSource::of</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">GlyphSource::of</span>(<span class="tok-fn">glyf</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>, <span class="tok-fn">loca</span> <span class="tok-op">:</span> <span class="tok-ty">@table.Loca</span>, <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">GlyphSource</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2foutline--glyphsource-3a-3aoutline--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">GlyphSource::outline</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">GlyphSource::outline</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">GlyphSource</span>, <span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">@model.GlyphId</span>, <span class="tok-fn">depth</span>? <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.Outline</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>The outline of one glyph. Composite components are resolved recursively; the depth ceiling is checked before each descent, so a cyclic component chain is refused rather than looping.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+        <section class="pkg" id="p--moonbitstack-2fmoonfont-2fraster">
+          <div class="pkg-head">
+            <h2 class="pkg-name">moonbitstack/moonfont/raster</h2>
+            <span class="pkg-kind">package</span>
+          </div>
+          <div class="pkg-doc"><p>The one place that decides how geometry becomes coverage. It consumes path commands and knows nothing about SFNT, tables, charmaps or files.</p></div>
+          <div class="pkg-list">
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fraster--rasterise--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">rasterise</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">rasterise</span>(<span class="tok-fn">outline</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Outline</span>, <span class="tok-fn">scale</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Scale</span>, <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.CoverageMask</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>Turn an outline into eight-bit coverage at <code>scale</code>.</p>
+                <p>Each pixel row is sampled at eight vertical positions. At each of them the edges crossing that line are intersected, sorted and paired by non-zero winding; the horizontal span between a pair is accumulated into the pixels it covers as an exact 26.6 length. Eight samples times 64 units per pixel is 512, so the final scaling to 0..255 is exact and integer.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+        <section class="pkg" id="p--moonbitstack-2fmoonfont-2fsfnt">
+          <div class="pkg-head">
+            <h2 class="pkg-name">moonbitstack/moonfont/sfnt</h2>
+            <span class="pkg-kind">package</span>
+          </div>
+          <div class="pkg-doc"><p>The SFNT container only: signatures, the table directory, and TrueType collections. It knows where tables are, never what is inside them.</p></div>
+          <div class="pkg-list">
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--directory--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Directory</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Directory</span> {
+  <span class="tok-fn">scaler</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">records</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">TableRecord</span>]
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">records</b><span class="field-type">Array[TableRecord]</span></li>
+                <li class="entry-field"><b class="field-name">scaler</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>One face's directory. A single font is a collection of one; that is the whole difference between a .ttf and a .ttc at this layer.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tablerecord--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">TableRecord</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">TableRecord</span> {
+  <span class="tok-fn">tag</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">checksum</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">offset</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">length</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">checksum</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">length</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">offset</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">tag</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>One entry of the table directory. Offsets are absolute in the file.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--read--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">read</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">read</span>(<span class="tok-fn">bytes</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>, <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Array</span>[<span class="tok-ty">Directory</span>] <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>Read every face in the file. A plain font yields one directory, a TrueType collection yields one per face, and a caller never has to branch on which.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fcmap--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_cmap</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_cmap</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fglyf--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_glyf</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_glyf</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fhead--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_head</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_head</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>Table tags are four ASCII bytes held as a word. Comparison stays integer comparison, and no string has to be built to find a table.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fhhea--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_hhea</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_hhea</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fhmtx--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_hmtx</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_hmtx</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fkern--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_kern</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_kern</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5floca--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_loca</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_loca</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fmaxp--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_maxp</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_maxp</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fname--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_name</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_name</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fos2--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_os2</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_os2</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fpost--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_post</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_post</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--tag-5fstring--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">tag_string</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">tag_string</span>(<span class="tok-fn">tag</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">String</span></code>
+              <div class="entry-doc">
+                <p>A readable name for a refusal message; never built during a table lookup.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--directory-3a-3afind--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Directory::find</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Directory::find</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Directory</span>, <span class="tok-fn">tag</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">TableRecord</span>?</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--directory-3a-3ahas--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Directory::has</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Directory::has</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Directory</span>, <span class="tok-fn">tag</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Bool</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--directory-3a-3arequire--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Directory::require</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Directory::require</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Directory</span>, <span class="tok-fn">tag</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">TableRecord</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fsfnt--directory-3a-3atable--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Directory::table</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Directory::table</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Directory</span>, <span class="tok-fn">bytes</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>, <span class="tok-fn">tag</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@wire.Cursor</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>A cursor bounded to exactly the table's bytes. This is the only way any higher layer gets to read a table.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+        <section class="pkg" id="p--moonbitstack-2fmoonfont-2ftable">
+          <div class="pkg-head">
+            <h2 class="pkg-name">moonbitstack/moonfont/table</h2>
+            <span class="pkg-kind">package</span>
+          </div>
+          <div class="pkg-doc"><p>Table decoders. Each one turns a bounded cursor into domain values and stops there: no outline commands are built here, and no pixel is touched here.</p></div>
+          <div class="pkg-list">
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--cmap--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Cmap</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Cmap</span> {
+  <span class="tok-fn">data</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>
+  <span class="tok-fn">chosen</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">format</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">chosen</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">data</b><span class="field-type">BytesView</span></li>
+                <li class="entry-field"><b class="field-name">format</b><span class="field-type">Int32</span></li>
+              </ul>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--component--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Component</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Component</span> {
+  <span class="tok-fn">glyph_index</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">dx</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">dy</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">a</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">b</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">c</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">d</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">a</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">b</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">c</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">d</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">dx</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">dy</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">glyph_index</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>One reference in a composite glyph. <code>a</code>, <code>b</code>, <code>c</code> and <code>d</code> are F2Dot14 values (16384 is 1.0); <code>dx</code> and <code>dy</code> are in font units.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--compositeglyph--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">CompositeGlyph</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">CompositeGlyph</span> {
+  <span class="tok-fn">components</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">Component</span>]
+  <span class="tok-fn">bounds</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Bounds</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">bounds</b><span class="field-type">@model.Bounds</span></li>
+                <li class="entry-field"><b class="field-name">components</b><span class="field-type">Array[Component]</span></li>
+              </ul>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--glyphdata--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">GlyphData</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">enum</span> <span class="tok-ty">GlyphData</span> {
+  <span class="tok-fn">Empty</span>
+  <span class="tok-fn">Simple</span>(<span class="tok-ty">SimpleGlyph</span>)
+  <span class="tok-fn">Composite</span>(<span class="tok-ty">CompositeGlyph</span>)
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">Composite</b><span class="field-type">(CompositeGlyph)</span></li>
+                <li class="entry-field"><b class="field-name">Empty</b><span class="field-type"></span></li>
+                <li class="entry-field"><b class="field-name">Simple</b><span class="field-type">(SimpleGlyph)</span></li>
+              </ul>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--head--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Head</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Head</span> {
+  <span class="tok-fn">units_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">index_to_loc_format</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">mac_style</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">lowest_rec_ppem</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">bounding_box</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Bounds</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">bounding_box</b><span class="field-type">@model.Bounds</span></li>
+                <li class="entry-field"><b class="field-name">index_to_loc_format</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">lowest_rec_ppem</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">mac_style</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">units_per_em</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p><code>head</code>: the font-wide scale and the shape of the <code>loca</code> table.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--hhea--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Hhea</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Hhea</span> {
+  <span class="tok-fn">ascender</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">descender</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">line_gap</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">number_of_h_metrics</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">ascender</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">descender</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">line_gap</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">number_of_h_metrics</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p><code>hhea</code>: the vertical rhythm and the width of one <code>hmtx</code> long metric.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--hmtx--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Hmtx</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Hmtx</span> {
+  <span class="tok-fn">advances</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">Int32</span>]
+  <span class="tok-fn">bearings</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">Int32</span>]
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">advances</b><span class="field-type">Array[Int32]</span></li>
+                <li class="entry-field"><b class="field-name">bearings</b><span class="field-type">Array[Int32]</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p><code>hmtx</code>: advances and left side bearings. The tail of the table holds only bearings for glyphs whose advance is the last long metric's, which is why a glyph's metrics are a lookup rather than a fixed stride.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--kern--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Kern</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Kern</span> {
+  <span class="tok-fn">pairs</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[(<span class="tok-ty">Int32</span>, <span class="tok-ty">Int32</span>, <span class="tok-ty">Int32</span>)]
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">pairs</b><span class="field-type">Array[(Int32, Int32, Int32)]</span><span class="field-doc">(left glyph, right glyph, adjustment in font units).</span></li>
+              </ul>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--loca--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Loca</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Loca</span> {
+  <span class="tok-fn">offsets</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">Int32</span>]
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">offsets</b><span class="field-type">Array[Int32]</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p><code>loca</code>: one offset per glyph boundary, in either short or long form.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--maxp--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Maxp</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Maxp</span> {
+  <span class="tok-fn">num_glyphs</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">max_points</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">max_contours</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">max_composite_points</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">max_composite_contours</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">max_composite_contours</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">max_composite_points</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">max_contours</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">max_points</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">num_glyphs</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p><code>maxp</code>: how many glyphs the file claims to have.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--os2--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Os2</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">Os2</span> {
+  <span class="tok-fn">weight_class</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">width_class</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">x_height</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">cap_height</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">typo_ascender</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">typo_descender</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+  <span class="tok-fn">typo_line_gap</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">cap_height</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">typo_ascender</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">typo_descender</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">typo_line_gap</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">weight_class</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">width_class</b><span class="field-type">Int32</span></li>
+                <li class="entry-field"><b class="field-name">x_height</b><span class="field-type">Int32</span></li>
+              </ul>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--simpleglyph--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">SimpleGlyph</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub(all)</span> <span class="tok-kw">struct</span> <span class="tok-ty">SimpleGlyph</span> {
+  <span class="tok-fn">end_points</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">Int32</span>]
+  <span class="tok-fn">points</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">@model.Point</span>]
+  <span class="tok-fn">on_curve</span> <span class="tok-op">:</span> <span class="tok-ty">Array</span>[<span class="tok-ty">Bool</span>]
+  <span class="tok-fn">bounds</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Bounds</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">bounds</b><span class="field-type">@model.Bounds</span></li>
+                <li class="entry-field"><b class="field-name">end_points</b><span class="field-type">Array[Int32]</span><span class="field-doc">The index of the last point of each contour.</span></li>
+                <li class="entry-field"><b class="field-name">on_curve</b><span class="field-type">Array[Bool]</span></li>
+                <li class="entry-field"><b class="field-name">points</b><span class="field-type">Array[@model.Point]</span></li>
+              </ul>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--cmap-3a-3aformat--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cmap::format</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cmap::format</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cmap</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--cmap-3a-3aglyph-5findex--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cmap::glyph_index</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cmap::glyph_index</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cmap</span>, <span class="tok-fn">codepoint</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@model.GlyphId</span>?</code>
+              <div class="entry-doc">
+                <p>Translate a Unicode codepoint to a glyph id, or <code>None</code> when the font has no glyph for it. <code>.notdef</code> is deliberately NOT returned: a caller decides whether to show a missing-glyph box.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--cmap-3a-3aparse--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cmap::parse</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cmap::parse</span>(<span class="tok-fn">cursor</span> <span class="tok-op">:</span> <span class="tok-ty">@wire.Cursor</span>, <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Cmap</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--glyphdata-3a-3aparse--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">GlyphData::parse</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">GlyphData::parse</span>(<span class="tok-fn">view</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>, <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">GlyphData</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>Decode one glyph's bytes. An empty range is a space or an empty glyph, not an error: asking for its outline yields no commands and asking for its mask yields a zero-sized mask.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--head-3a-3aparse--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Head::parse</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Head::parse</span>(<span class="tok-fn">cursor</span> <span class="tok-op">:</span> <span class="tok-ty">@wire.Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Head</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--hhea-3a-3aparse--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Hhea::parse</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Hhea::parse</span>(<span class="tok-fn">cursor</span> <span class="tok-op">:</span> <span class="tok-ty">@wire.Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Hhea</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--hmtx-3a-3ametrics--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Hmtx::metrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Hmtx::metrics</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Hmtx</span>, <span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> (<span class="tok-ty">Int32</span>, <span class="tok-ty">Int32</span>)</code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--hmtx-3a-3aparse--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Hmtx::parse</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Hmtx::parse</span>(<span class="tok-fn">cursor</span> <span class="tok-op">:</span> <span class="tok-ty">@wire.Cursor</span>, <span class="tok-fn">num_glyphs</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">number_of_h_metrics</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Hmtx</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--kern-3a-3abetween--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Kern::between</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Kern::between</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Kern</span>, <span class="tok-fn">left</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">right</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>The adjustment between two glyphs, in font units. Zero when there is none.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--kern-3a-3acount--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Kern::count</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Kern::count</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Kern</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--kern-3a-3aempty--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Kern::empty</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Kern::empty</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Kern</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--kern-3a-3aparse--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Kern::parse</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Kern::parse</span>(<span class="tok-fn">cursor</span> <span class="tok-op">:</span> <span class="tok-ty">@wire.Cursor</span>, <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Kern</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--loca-3a-3acount--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Loca::count</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Loca::count</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Loca</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--loca-3a-3aparse--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Loca::parse</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Loca::parse</span>(<span class="tok-fn">cursor</span> <span class="tok-op">:</span> <span class="tok-ty">@wire.Cursor</span>, <span class="tok-fn">num_glyphs</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">index_to_loc_format</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Loca</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--loca-3a-3arange--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Loca::range</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Loca::range</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Loca</span>, <span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> (<span class="tok-ty">Int32</span>, <span class="tok-ty">Int32</span>)?</code>
+              <div class="entry-doc">
+                <p>The half-open byte range of one glyph inside <code>glyf</code>. An empty range is a space, a combining mark built entirely from components, or an empty glyph.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--maxp-3a-3aparse--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Maxp::parse</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Maxp::parse</span>(<span class="tok-fn">cursor</span> <span class="tok-op">:</span> <span class="tok-ty">@wire.Cursor</span>, <span class="tok-fn">limits</span> <span class="tok-op">:</span> <span class="tok-ty">@model.Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Maxp</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--os2-3a-3aempty--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Os2::empty</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Os2::empty</span>() <span class="tok-op">-&gt;</span> <span class="tok-ty">Os2</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2ftable--os2-3a-3aparse--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Os2::parse</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Os2::parse</span>(<span class="tok-fn">cursor</span> <span class="tok-op">:</span> <span class="tok-ty">@wire.Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Os2</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+          </div>
+        </section>
+        <section class="pkg" id="p--moonbitstack-2fmoonfont-2fwire">
+          <div class="pkg-head">
+            <h2 class="pkg-name">moonbitstack/moonfont/wire</h2>
+            <span class="pkg-kind">package</span>
+          </div>
+          <div class="pkg-doc"><p>Bounds-checked big-endian reads over bytes that already exist in memory. This layer knows nothing about fonts; it only knows that a short file is the same failure wherever it happens.</p></div>
+          <div class="pkg-list">
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor--type">
+              <div class="entry-head">
+                <span class="entry-kind">type</span>
+                <h3 class="entry-name">Cursor</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">struct</span> <span class="tok-ty">Cursor</span> {
+  <span class="tok-fn">data</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>
+  mut <span class="tok-fn">pos</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>
+}</code>
+              <ul class="entry-fields">
+                <li class="entry-field"><b class="field-name">data</b><span class="field-type">BytesView</span></li>
+                <li class="entry-field"><b class="field-name">pos</b><span class="field-type">Int32</span></li>
+              </ul>
+              <div class="entry-doc">
+                <p>A position in a run of bytes. Opaque: a caller that could set <code>pos</code> could make it disagree with the data it points into.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3aall--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::all</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::all</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">BytesView</span></code>
+              <div class="entry-doc">
+                <p>The whole window this cursor was bounded to, from its start rather than from its current position. A table that needs random access keeps this instead of seeking back and forth.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3aat--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::at</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::at</span>(<span class="tok-fn">data</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>, <span class="tok-fn">offset</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Cursor</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>A cursor at <code>at</code> inside <code>data</code>. Used for a table slice, so that offsets inside that table stay relative to the table rather than to the file.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3abytes--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::bytes</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::bytes</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>, <span class="tok-fn">length</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">BytesView</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3ai16--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::i16</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::i16</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3ai16-5fat--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::i16_at</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::i16_at</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>, <span class="tok-fn">at</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3ai8--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::i8</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::i8</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3aleft--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::left</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::left</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3alength--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::length</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::length</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3anew--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::new</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::new</span>(<span class="tok-fn">data</span> <span class="tok-op">:</span> <span class="tok-ty">BytesView</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Cursor</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3aposition--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::position</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::position</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3arest--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::rest</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::rest</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">BytesView</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3aseek--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::seek</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::seek</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>, <span class="tok-fn">at</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Unit</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3askip--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::skip</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::skip</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>, <span class="tok-fn">count</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Unit</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3atag--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::tag</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::tag</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>Four ASCII bytes as a table tag, held as a word so that a table lookup is a comparison of integers rather than of strings.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3atag-5fat--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::tag_at</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::tag_at</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>, <span class="tok-fn">at</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3au16--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::u16</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::u16</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3au16-5fat--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::u16_at</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::u16_at</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>, <span class="tok-fn">at</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>Read a value at an absolute offset without moving the cursor. Table directories are full of offsets into their own table, and a reader that sought there would lose its place in the directory.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3au24--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::u24</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::u24</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3au32--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::u32</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::u32</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>A 32-bit big-endian word. Font files are bounded by Limits.file_bytes well below 2 GiB, so a value with the high bit set is either corrupt or hostile; it arrives as a negative number and every caller's range check refuses it.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3au32-5fat--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::u32_at</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::u32_at</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>, <span class="tok-fn">at</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3au8--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::u8</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::u8</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fwire--cursor-3a-3awindow--method">
+              <div class="entry-head">
+                <span class="entry-kind">method</span>
+                <h3 class="entry-name">Cursor::window</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Cursor::window</span>(<span class="tok-fn">self</span> <span class="tok-op">:</span> <span class="tok-ty">Cursor</span>, <span class="tok-fn">at</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">length</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Cursor</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+              <div class="entry-doc">
+                <p>A bounded window into the same bytes. Lengths in a font are declared by the font, so this is the one place that decides whether a declaration is honest.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+        <p class="api-note">This page is rebuilt from the interface files and the notes in the source. It carries no dates and no ordering of its own.</p>
+      </div>
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="wrap row">
+    <span class="mark">moonfont</span>
+    <a href="index.html">Specimen</a>
+    <a href="guide.html">Guide</a>
+    <a href="api.html">Reference</a>
+    <a href="difftest.html">Comparison</a>
+    <a href="showcase.html">Measure</a>
+    <span>Apache-2.0 licence</span>
+  </div>
+</footer>
+<script src="theme.js" defer></script>
+<script src="site.js" defer></script>
+</body>
+</html>

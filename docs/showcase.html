@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>moonfont — Measure</title>
+<meta name="description" content="Set a sort at a chosen point size and read its 26.6 measurements, drawn live from the committed outline commands.">
+<script>
+  (() => {
+    let chosen = null;
+    try { chosen = localStorage.getItem("moonfont-theme"); } catch (e) {}
+    const theme = chosen === "light" || chosen === "dark"
+      ? chosen
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.dataset.theme = theme;
+  })();
+</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="top">
+  <nav aria-label="Sections">
+    <a class="brand" href="index.html"><b>moonfont</b><span>font reading for MoonBit</span></a>
+    <a class="link" href="index.html">Specimen</a>
+    <a class="link" href="guide.html">Guide</a>
+    <a class="link" href="api.html">Reference</a>
+    <a class="link" href="difftest.html">Comparison</a>
+    <a class="link" href="showcase.html" aria-current="page">Measure</a>
+    <button class="theme-toggle" type="button" aria-label="Use the dark case" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <g class="face"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.4"/></g>
+        <g class="foot"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18M4 12h16" stroke="currentColor" stroke-width="1.4"/></g>
+      </svg>
+    </button>
+  </nav>
+</header>
+<main id="main">
+  <section class="band" aria-labelledby="gauge">
+    <div class="wrap">
+      <h1 id="gauge">The point-size ruler and the em square, live.</h1>
+      <p>Choose a size and a character. The sort is drawn from the outline commands parsed out of <code>synthetic.ttf</code>, and every reading is recomputed with the library's own 26.6 integer arithmetic.</p>
+      <figure class="rule-figure">
+        <svg id="stage-svg" viewBox="-20 -860 1500 1120" role="img" aria-label="The em square with five measurement rules and the chosen sort">
+          <g fill="none" stroke="currentColor">
+            <rect x="0" y="-800" width="1000" height="1000" stroke-width="1"/>
+            <line x1="0" y1="-800" x2="1000" y2="-800" stroke-width="1"/>
+            <line x1="0" y1="-700" x2="1000" y2="-700" stroke-width="1" stroke-dasharray="12 12"/>
+            <line x1="0" y1="-500" x2="1000" y2="-500" stroke-width="1" stroke-dasharray="12 12"/>
+            <line x1="0" y1="0" x2="1000" y2="0" stroke-width="3"/>
+            <line x1="0" y1="200" x2="1000" y2="200" stroke-width="1"/>
+          </g>
+          <g fill="currentColor" font-size="12">
+            <text x="1020" y="-796">ascender 800</text>
+            <text x="1020" y="-696">cap height 700</text>
+            <text x="1020" y="-496">x-height 500</text>
+            <text x="1020" y="4">baseline 0</text>
+            <text x="1020" y="204">descender -200</text>
+          </g>
+          <g id="stage-glyph" fill="currentColor"></g>
+        </svg>
+        <figcaption id="stage-caption">Choose a character to set a sort.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="measure" aria-labelledby="controls">
+      <div>
+        <h2 id="controls">Set the gauge</h2>
+        <p>The slider sets <code>pixels_per_em</code>. <code>Scale::of</code> shifts it left by six bits; <code>Scale::apply</code> multiplies in 64 bits and truncates toward zero, exactly as the MoonBit implementation does. Move the slider and the case table below changes with it.</p>
+        <label for="size-slider">Point size in pixels per em</label>
+        <input type="range" id="size-slider" min="8" max="96" step="1" value="16">
+        <output id="size-reading" for="size-slider">16</output>
+        <label for="glyph-select">Sort</label>
+        <select id="glyph-select">
+          <option value="">Choose a character to set a sort.</option>
+          <option value="0">0 .notdef</option>
+          <option value="1">1 U+0020 space</option>
+          <option value="2">2 U+0041 A</option>
+          <option value="3">3 U+0042 B</option>
+          <option value="4">4 U+0061 a</option>
+          <option value="5">5 U+00C1 composite</option>
+        </select>
+        <p><button type="button" id="probe-sort">Probe an absent sort</button> <button type="button" id="show-notdef" hidden>Show the .notdef box</button></p>
+        <p id="stage-note" hidden></p>
+        <p>A face with no sort for a codepoint is not an error: <code>glyph_index</code> returns <code>None</code>. The previous sort stays on the sheet until the .notdef box is chosen.</p>
+      </div>
+      <figure class="rule-figure">
+        <svg id="grid-svg" viewBox="-20 -860 6020 1120" role="img" aria-label="All six sorts of synthetic.ttf laid out in case order">
+          <g id="grid-body"></g>
+        </svg>
+        <figcaption>All six sorts in case order, each drawn from its own outline. Empty sorts are shown as a ruled box. The grid is built from the same command streams as the stage.</figcaption>
+      </figure>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <table class="case-table">
+      <caption>Readings at <span id="ppem-reading">16</span> pixels per em. Font units, 26.6 fixed point and pixels are computed from the committed outline and metrics of <code>synthetic.ttf</code>.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Reading</th>
+          <th scope="col">Font units</th>
+          <th scope="col">26.6</th>
+          <th scope="col">Pixels</th>
+        </tr>
+      </thead>
+      <tbody id="metric-body">
+        <tr><th scope="row">ascent</th><td>800</td><td>819</td><td>12.80</td></tr>
+        <tr><th scope="row">descent</th><td>-200</td><td>-204</td><td>-3.19</td></tr>
+        <tr><th scope="row">line_gap</th><td>0</td><td>0</td><td>0.00</td></tr>
+        <tr><th scope="row">cap_height</th><td>700</td><td>716</td><td>11.19</td></tr>
+        <tr><th scope="row">x_height</th><td>500</td><td>512</td><td>8.00</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wrap">
+    <blockquote class="colophon">
+      <p>A compositor's gauge: choose a size and a character, see the sort and its metrics change.</p>
+      <p><small>DESIGN.md, section 2. No network, no framework, no floating point in the readings.</small></p>
+    </blockquote>
+  </div>
+</main>
+<footer>
+  <div class="wrap row">
+    <span class="mark">moonfont</span>
+    <a href="index.html">Specimen</a>
+    <a href="guide.html">Guide</a>
+    <a href="api.html">Reference</a>
+    <a href="difftest.html">Comparison</a>
+    <a href="showcase.html">Measure</a>
+    <span>Apache-2.0 licence</span>
+  </div>
+</footer>
+<script src="theme.js" defer></script>
+<script src="site.js" defer></script>
+</body>
+</html>

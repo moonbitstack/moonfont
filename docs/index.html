@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>moonfont — Specimen</title>
+<meta name="description" content="A specimen sheet for moonfont: drawn sorts, the em square with its five readings, and the measured inventory of the library.">
+<script>
+  (() => {
+    let chosen = null;
+    try { chosen = localStorage.getItem("moonfont-theme"); } catch (e) {}
+    const theme = chosen === "light" || chosen === "dark"
+      ? chosen
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.dataset.theme = theme;
+  })();
+</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="top">
+  <nav aria-label="Sections">
+    <a class="brand" href="index.html"><b>moonfont</b><span>font reading for MoonBit</span></a>
+    <a class="link" href="index.html" aria-current="page">Specimen</a>
+    <a class="link" href="guide.html">Guide</a>
+    <a class="link" href="api.html">Reference</a>
+    <a class="link" href="difftest.html">Comparison</a>
+    <a class="link" href="showcase.html">Measure</a>
+    <button class="theme-toggle" type="button" aria-label="Use the dark case" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <g class="face"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.4"/></g>
+        <g class="foot"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18M4 12h16" stroke="currentColor" stroke-width="1.4"/></g>
+      </svg>
+    </button>
+  </nav>
+</header>
+<main id="main">
+  <section class="band" aria-labelledby="opening">
+    <div class="wrap">
+      <h1 id="opening">moonfont reads font bytes and sets the letterforms it has measured.</h1>
+      <p>A pure MoonBit font reader. No I/O, no platform font discovery, no C binding, no floating point. The same bytes produce the same coverage mask on wasm, wasm-gc, js and native, which is what makes a differential test meaningful.</p>
+      <svg viewBox="-20 -820 1580 1040" role="img" aria-label="The sorts A, B and a drawn from the outline commands of synthetic.ttf">
+        <g transform="scale(1 -1)" fill="currentColor">
+          <path d="M100 0 L500 0 Q600 300 500 500 Q400 700 200 700 Q0 300 100 0 Z"/>
+          <path transform="translate(600 0)" d="M50 0 L450 0 L450 700 L50 700 L50 0 Z"/>
+          <path transform="translate(1100 0)" d="M50 0 L300 0 Q400 250 200 500 L50 500 L50 0 Z"/>
+        </g>
+      </svg>
+      <p>The line above is not set in a web face. It is three sorts drawn from the outline commands parsed out of <code>synthetic.ttf</code>, at advances 600, 500 and 450 font units. Version 0.1.0 reads SFNT containers, TrueType <code>glyf</code> outlines and <code>cmap</code> formats 0, 4, 6 and 12; it deliberately does not shape text.</p>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="measure" aria-labelledby="layers">
+      <div>
+        <h2 id="layers">Eight packages, one direction</h2>
+        <p>Dependency direction is strictly downwards. A lower layer never imports a higher one, and a lower layer never knows what a higher one is for. The counts are the declarations published in each interface.</p>
+        <ul>
+          <li><code>moonbitstack/moonfont/model</code> — domain vocabulary, 56 declarations</li>
+          <li><code>moonbitstack/moonfont/wire</code> — bounded big-endian reads, 23 declarations</li>
+          <li><code>moonbitstack/moonfont/sfnt</code> — container and table directory, 19 declarations</li>
+          <li><code>moonbitstack/moonfont/table</code> — nine table decoders, 30 declarations</li>
+          <li><code>moonbitstack/moonfont/outline</code> — path commands, 4 declarations</li>
+          <li><code>moonbitstack/moonfont/raster</code> — coverage, 1 declaration</li>
+          <li><code>moonbitstack/moonfont/layout</code> — measurement, 1 declaration</li>
+          <li><code>moonbitstack/moonfont</code> — the façade, 27 declarations</li>
+        </ul>
+        <p>One hundred and sixty-one declarations in total. Only the façade needs importing: <code>decode</code>, <code>decode_all</code> and the methods on <code>Face</code> re-export the twelve model types a caller needs.</p>
+      </div>
+      <figure class="rule-figure">
+        <svg viewBox="-20 -860 1500 1120" role="img" aria-label="The em square with ascender, cap height, x-height, baseline and descender rules, and a drawn sort A">
+          <g fill="none" stroke="currentColor">
+            <rect x="0" y="-800" width="1000" height="1000" stroke-width="1"/>
+            <line x1="0" y1="-800" x2="1000" y2="-800" stroke-width="1"/>
+            <line x1="0" y1="-700" x2="1000" y2="-700" stroke-width="1" stroke-dasharray="12 12"/>
+            <line x1="0" y1="-500" x2="1000" y2="-500" stroke-width="1" stroke-dasharray="12 12"/>
+            <line x1="0" y1="0" x2="1000" y2="0" stroke-width="3"/>
+            <line x1="0" y1="200" x2="1000" y2="200" stroke-width="1"/>
+          </g>
+          <g fill="currentColor" fill-rule="nonzero">
+            <path d="M100 0 L500 0 Q600 -300 500 -500 Q400 -700 200 -700 Q0 -300 100 0 Z"/>
+          </g>
+          <g fill="currentColor" font-size="12">
+            <text x="1020" y="-796">ascender 800</text>
+            <text x="1020" y="-696">cap height 700</text>
+            <text x="1020" y="-496">x-height 500</text>
+            <text x="1020" y="4">baseline 0</text>
+            <text x="1020" y="204">descender -200</text>
+          </g>
+        </svg>
+        <figcaption>The em square of <code>synthetic.ttf</code>: <code>units_per_em 1000</code>, <code>ascender 800</code>, <code>descender -200</code>, <code>line_gap 0</code>. Cap height 700 and x-height 500 are measured from the drawn sorts, because this face carries no <code>OS/2</code> table.</figcaption>
+      </figure>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <figure class="rule-figure" aria-labelledby="sorts">
+      <figcaption id="sorts">Alphabet of sorts in case order. Six glyphs, each drawn from its own outline commands; the empty sorts are shown as a ruled box.</figcaption>
+      <ul>
+        <li>
+          <svg viewBox="0 -800 1000 1000" role="img" aria-label="Glyph 0, .notdef, empty outline">
+            <g fill="none" stroke="currentColor" stroke-width="3"><rect x="250" y="-600" width="500" height="500" stroke-dasharray="24 24"/></g>
+          </svg>
+          <code>0 .notdef</code>
+        </li>
+        <li>
+          <svg viewBox="0 -800 1000 1000" role="img" aria-label="Glyph 1, space, empty outline">
+            <g fill="none" stroke="currentColor" stroke-width="3"><rect x="250" y="-600" width="500" height="500" stroke-dasharray="24 24"/></g>
+          </svg>
+          <code>1 U+0020 space</code>
+        </li>
+        <li>
+          <svg viewBox="0 -800 1000 1000" role="img" aria-label="Glyph 2, capital A, with an implied quadratic midpoint">
+            <g transform="scale(1 -1)" fill="currentColor"><path d="M100 0 L500 0 Q600 300 500 500 Q400 700 200 700 Q0 300 100 0 Z"/></g>
+          </svg>
+          <code>2 U+0041 A</code>
+        </li>
+        <li>
+          <svg viewBox="0 -800 1000 1000" role="img" aria-label="Glyph 3, capital B, a rectangle">
+            <g transform="scale(1 -1)" fill="currentColor"><path d="M50 0 L450 0 L450 700 L50 700 L50 0 Z"/></g>
+          </svg>
+          <code>3 U+0042 B</code>
+        </li>
+        <li>
+          <svg viewBox="0 -800 1000 1000" role="img" aria-label="Glyph 4, lower-case a, with a quadratic curve">
+            <g transform="scale(1 -1)" fill="currentColor"><path d="M50 0 L300 0 Q400 250 200 500 L50 500 L50 0 Z"/></g>
+          </svg>
+          <code>4 U+0061 a</code>
+        </li>
+        <li>
+          <svg viewBox="0 -800 1000 1000" role="img" aria-label="Glyph 5, a composite of A and B with offsets">
+            <g transform="scale(1 -1)" fill="currentColor"><path d="M140 20 L540 20 Q640 320 540 520 Q440 720 240 720 Q40 320 140 20 Z M60 10 L460 10 L460 710 L60 710 L60 10 Z"/></g>
+          </svg>
+          <code>5 U+00C1 composite</code>
+        </li>
+      </ul>
+    </figure>
+  </div>
+
+  <div class="wrap">
+    <table class="case-table">
+      <caption>Six sorts from <code>synthetic.ttf</code>. Advances and bearings are integer font units; ink coverage is a percentage of the 64 by 64 em square.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Glyph id</th>
+          <th scope="col">Codepoint</th>
+          <th scope="col">Advance</th>
+          <th scope="col">LSB</th>
+          <th scope="col">Bounds</th>
+          <th scope="col">Ink coverage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">0</th><td>unmapped</td><td>500</td><td>0</td><td>0 0 0 0</td><td>0.000000</td></tr>
+        <tr><th scope="row">1</th><td>U+0020</td><td>250</td><td>0</td><td>0 0 0 0</td><td>0.000000</td></tr>
+        <tr><th scope="row">2</th><td>U+0041</td><td>600</td><td>0</td><td>0 0 600 700</td><td>27.825928</td></tr>
+        <tr><th scope="row">3</th><td>U+0042</td><td>500</td><td>50</td><td>50 0 450 700</td><td>27.859497</td></tr>
+        <tr><th scope="row">4</th><td>U+0061</td><td>450</td><td>50</td><td>50 0 400 500</td><td>12.459946</td></tr>
+        <tr><th scope="row">5</th><td>U+00C1</td><td>700</td><td>40</td><td>40 10 640 720</td><td>34.243774</td></tr>
+      </tbody>
+    </table>
+    <p>The face declares 9 tables and 6 glyphs, uses long <code>loca</code> and a format 4 <code>cmap</code>, and carries the magic word <code>0x5F0F3CF5</code>. Its digest is <code>f2e72b1c3adcf15f61e20a333d8c05eab337cae30bdd6d3932eb510faad4c0b1</code>.</p>
+  </div>
+
+  <div class="wrap">
+    <blockquote class="colophon">
+      <p>A font library can only be described honestly with letterforms it has itself read, measured and set on a line.</p>
+      <p><small>DESIGN.md, section 1. The library is Apache-2.0 licensed.</small></p>
+    </blockquote>
+  </div>
+</main>
+<footer>
+  <div class="wrap row">
+    <span class="mark">moonfont</span>
+    <a href="index.html">Specimen</a>
+    <a href="guide.html">Guide</a>
+    <a href="api.html">Reference</a>
+    <a href="difftest.html">Comparison</a>
+    <a href="showcase.html">Measure</a>
+    <span>Apache-2.0 licence</span>
+  </div>
+</footer>
+<script src="theme.js" defer></script>
+<script src="site.js" defer></script>
+</body>
+</html>

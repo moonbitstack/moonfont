@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>moonfont — Guide</title>
+<meta name="description" content="Set a line with moonfont: decode, look up a glyph, read its outline, rasterise it, measure a run, and handle one Refused.">
+<script>
+  (() => {
+    let chosen = null;
+    try { chosen = localStorage.getItem("moonfont-theme"); } catch (e) {}
+    const theme = chosen === "light" || chosen === "dark"
+      ? chosen
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.dataset.theme = theme;
+  })();
+</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="top">
+  <nav aria-label="Sections">
+    <a class="brand" href="index.html"><b>moonfont</b><span>font reading for MoonBit</span></a>
+    <a class="link" href="index.html">Specimen</a>
+    <a class="link" href="guide.html" aria-current="page">Guide</a>
+    <a class="link" href="api.html">Reference</a>
+    <a class="link" href="difftest.html">Comparison</a>
+    <a class="link" href="showcase.html">Measure</a>
+    <button class="theme-toggle" type="button" aria-label="Use the dark case" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <g class="face"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.4"/></g>
+        <g class="foot"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18M4 12h16" stroke="currentColor" stroke-width="1.4"/></g>
+      </svg>
+    </button>
+  </nav>
+</header>
+<main id="main">
+  <div class="wrap">
+    <div class="case">
+      <nav class="case-index" aria-label="Steps">
+        <ol class="case-index-list">
+          <li class="case-index-item"><a class="case-index-link" href="#step-1"><span class="case-index-name">Decode the bytes</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#step-2"><span class="case-index-name">Look up a glyph</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#step-3"><span class="case-index-name">Read the outline</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#step-4"><span class="case-index-name">Rasterise at a size</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#step-5"><span class="case-index-name">Measure a run</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#step-6"><span class="case-index-name">Limits and refusals</span></a></li>
+        </ol>
+      </nav>
+      <div class="case-body">
+        <h1 class="case-title">The composing stick</h1>
+        <p class="case-intro">One line at a fixed measure, set step by step. Every reading below comes from <code>synthetic.ttf</code>, the six-glyph face committed with the fixtures, so the numbers can be checked against <a class="xref" href="difftest.html">the comparison sheet</a>.</p>
+
+        <section class="measure" aria-labelledby="pipeline">
+          <div>
+            <h2 id="pipeline">From bytes to a line</h2>
+            <p>One import and one door. <code>decode</code> borrows the bytes and returns a <code>Face</code>; every other operation is a method on that face. Outlines stay lazy until a glyph is asked for.</p>
+            <code class="sig"><span class="tok-kw">pub fn</span> <span class="tok-fn">decode</span>(<span class="tok-fn">bytes</span> : <span class="tok-ty">BytesView</span>, <span class="tok-fn">limits</span>? : <span class="tok-ty">Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Face</span> <span class="tok-kw">raise</span> <span class="tok-ty">Refused</span></code>
+            <p>A caller that imports only the façade has <code>Bounds</code>, <code>CoverageMask</code>, <code>FontMetrics</code>, <code>GlyphId</code>, <code>GlyphMetrics</code>, <code>Limits</code>, <code>Outline</code>, <code>PathCommand</code>, <code>Point</code>, <code>Refused</code>, <code>Scale</code> and <code>TextMetrics</code> in hand.</p>
+          </div>
+          <div>
+            <h3>The line it produced</h3>
+            <code class="sig">let face = @moonfont.decode(bytes, limits=@moonfont.Limits::strict())
+let gid = face.glyph_index(0x41).unwrap()
+let outline = face.outline(gid)
+let mask = face.rasterise(gid, 16)
+let measured = face.measure("ABa", 16)</code>
+            <code class="sig">units_per_em()       1000
+num_glyphs()         6
+glyph_index(0x41)    Some(GlyphId { index: 2 })
+outline.commands()   6
+measure("ABa", 16)   advance 1586  glyphs 3</code>
+          </div>
+        </section>
+
+        <ol class="stick" aria-label="Setting the line in six steps">
+          <li id="step-1">
+            <h3>Decode the bytes</h3>
+            <p>Hand over a complete font held by the caller. The bytes must stay alive and unchanged for the face's life. <code>decode</code> reads the table directory and nine small tables only; outlines remain lazy. <code>decode_all</code> returns one <code>Face</code> per face of a TrueType collection, and raises <code>Malformed</code> on an empty one.</p>
+            <code class="sig">let face = @moonfont.decode(font_bytes, limits=@moonfont.Limits::strict())
+let faces = @moonfont.decode_all(collection_bytes)
+let upem = face.units_per_em()   // 1000
+let count = face.num_glyphs()    // 6</code>
+            <p>Scaler words <code>0x00010000</code>, <code>0x4F54544F</code> and <code>0x74727565</code> are accepted at the container layer. A CFF face under <code>OTTO</code> has no <code>glyf</code> table, so <code>decode</code> correctly ends in <code>MissingTable</code>.</p>
+            <code class="sig">units_per_em() -&gt; 1000
+num_glyphs()   -&gt; 6</code>
+          </li>
+
+          <li id="step-2">
+            <h3>Look up a glyph</h3>
+            <p>A codepoint is not a glyph. <code>glyph_index</code> translates through <code>cmap</code> formats 0, 4, 6 and 12 and returns <code>GlyphId?</code>; <code>None</code> means the face has no sort and is not an error. <code>glyph_for</code> does the same for a <code>Char</code>.</p>
+            <code class="sig">let gid = face.glyph_index(0x41).unwrap()   // U+0041 to glyph 2
+let absent = face.glyph_index(0x43)        // U+0043 is unmapped
+let by_char = face.glyph_for('A')</code>
+            <p>In <code>synthetic.ttf</code> the charmap maps <code>U+0020</code> to 1, <code>U+0041</code> to 2, <code>U+0042</code> to 3, <code>U+0061</code> to 4 and <code>U+00C1</code> to 5.</p>
+            <code class="sig">glyph_index(0x41) -&gt; Some(GlyphId { index: 2 })
+glyph_index(0x43) -&gt; None</code>
+          </li>
+
+          <li id="step-3">
+            <h3>Read the outline</h3>
+            <p><code>Face::outline</code> returns an <code>Outline</code> in font units, with quadratic and cubic curves kept as curves. Flattening is the rasteriser's decision, not the parser's. Implied on-curve midpoints between consecutive off-curve points are resolved here, and composite components are decomposed with their offsets applied.</p>
+            <code class="sig">let outline = face.outline(gid)
+let commands = outline.commands()
+let bounds = outline.bounds()</code>
+            <p>The six commands for <code>U+0041</code>, straight from the fixture outline stream. <code>QuadTo</code> carries one control point followed by the end point.</p>
+            <code class="sig">MoveTo(Point::of(100, 0))
+LineTo(Point::of(500, 0))
+QuadTo(Point::of(600, 300), Point::of(500, 500))
+QuadTo(Point::of(400, 700), Point::of(200, 700))
+QuadTo(Point::of(0, 300), Point::of(100, 0))
+Close</code>
+            <code class="sig">bounds() -&gt; Bounds { x_min: 0, y_min: 0, x_max: 600, y_max: 700 }</code>
+          </li>
+
+          <li id="step-4">
+            <h3>Rasterise at a size</h3>
+            <p><code>Face::rasterise</code> returns an eight-bit grey <code>CoverageMask</code>: non-zero winding, unhinted, with its own <code>left</code> and <code>top</code> origin in 26.6 pixels so it can be copied into an atlas without more arithmetic. The rasteriser takes eight vertical subsamples per pixel row and accumulates exact horizontal area in 26.6 fixed point. There is no floating point in the path.</p>
+            <code class="sig">let mask = face.rasterise(gid, 16)
+let width = mask.width
+let height = mask.height
+let sample = mask.at(0, 0)   // 0..255, or 0 outside the mask</code>
+            <p><code>Scale::of(ppem, units_per_em)</code> stores <code>ppem &lt;&lt; 6</code>; <code>Scale::apply(v)</code> returns <code>v * ppem * 64 / units_per_em</code> in 26.6 units, truncating toward zero. The same <code>Scale</code> is shared by measurement and rasterisation, so the two never disagree about where the pen stands.</p>
+            <code class="sig">Scale::of(16, 1000).apply(600) -&gt; 614   (9.59 px)
+Scale::of(16, 1000).apply(700) -&gt; 716   (11.19 px)
+Scale::of(16, 1000).apply(-200) -&gt; -204</code>
+          </li>
+
+          <li id="step-5">
+            <h3>Measure a run</h3>
+            <p><code>Face::measure</code> sums scaled advances and legacy <code>kern</code> pairs in 26.6 pixels. Unmapped codepoints are skipped, so <code>glyphs</code> can be smaller than the character count. Measurement needs advances and kern data, never geometry: <code>layout</code> imports <code>model</code> and <code>table</code>, not <code>outline</code> or <code>raster</code>.</p>
+            <code class="sig">let measured = face.measure("ABa", 16)
+let spaced = face.measure("ABa", 16, letter_spacing=8)</code>
+            <p>The three sorts have advances 600, 500 and 450 font units. Each is scaled separately, so the run advance is the sum of three truncated values, not one scaling of the total.</p>
+            <code class="sig">advance 614 + 512 + 460 = 1586   (24.78 px)
+ascent   819   descent -204   line_gap 0   glyphs 3</code>
+          </li>
+
+          <li id="step-6">
+            <h3>Limits and refusals</h3>
+            <p>Every length in a font is declared by the font. <code>Limits</code> checks each declaration before the allocation it guards. <code>Limits::strict()</code> is the preset for untrusted uploads; <code>Limits::default()</code> is for an application reading its own assets. Both are finite at every ceiling.</p>
+            <code class="sig">Limits::default()  file_bytes 268435456  table_bytes 268435456
+                   glyphs 65536  points 65536  contours 8192
+                   composites 1024  recursion 16  mask_pixels 67108864
+
+Limits::strict()   file_bytes 16777216   table_bytes 16777216
+                   glyphs 65536  points 8192   contours 1024
+                   composites 256   recursion 8   mask_pixels 4194304</code>
+            <p>One <code>Refused</code> suberror covers the whole library, so a caller needs exactly one <code>try</code>/<code>raise</code> handler. Each variant names a byte offset or the two values that disagreed.</p>
+            <code class="sig">Unknown(at~, got~)                     not a font this library reads
+Unexpected(at~, got~, want~)           a field is wrong
+Unsupported(at~, got~)                 a part not read yet
+Truncated(at~, want~)                  bytes wanted
+OverLimit(limit~, got~)                past a ceiling
+Malformed(at~, got~)                   impossible declaration
+MissingTable(tag~)                     required table absent
+MissingGlyph(glyph~)                   id outside maxp
+Recursion(depth~)                      composite nested too deep</code>
+            <p><code>Refused::name()</code> returns the variant as a stable string, which is what a differential test records rather than the rendered prose. No public function panics, loops without a bound, or returns a partial value.</p>
+          </li>
+        </ol>
+
+        <blockquote class="colophon">
+          <p>A rasteriser built on <code>Float</code> would return different coverage on different backends for the same bytes, and no differential test could say which answer was right.</p>
+          <p><small>README.md, Why integers.</small></p>
+        </blockquote>
+      </div>
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="wrap row">
+    <span class="mark">moonfont</span>
+    <a href="index.html">Specimen</a>
+    <a href="guide.html">Guide</a>
+    <a href="api.html">Reference</a>
+    <a href="difftest.html">Comparison</a>
+    <a href="showcase.html">Measure</a>
+    <span>Apache-2.0 licence</span>
+  </div>
+</footer>
+<script src="theme.js" defer></script>
+<script src="site.js" defer></script>
+</body>
+</html>

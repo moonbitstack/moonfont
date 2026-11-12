@@ -1,0 +1,60 @@
+/* The theme control. The choice itself is made before the first paint by the
+   script in the head; this file only keeps the control, the stored choice and
+   the two aria attributes in step with it. */
+
+(() => {
+  "use strict";
+
+  const KEY = "moonfont-theme";
+  const root = document.documentElement;
+  const toggle = document.querySelector(".theme-toggle");
+  const scheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+  const storedChoice = () => {
+    try {
+      const value = localStorage.getItem(KEY);
+      return value === "light" || value === "dark" ? value : null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const apply = (theme) => {
+    root.dataset.theme = theme;
+    if (!toggle) {
+      return;
+    }
+    const dark = theme === "dark";
+    toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    toggle.setAttribute(
+      "aria-label",
+      dark ? "Use the daylight proof" : "Use the dark case"
+    );
+  };
+
+  apply(root.dataset.theme === "dark" ? "dark" : "light");
+
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      const next = root.dataset.theme === "dark" ? "light" : "dark";
+      try {
+        localStorage.setItem(KEY, next);
+      } catch (e) {
+        /* A file:// page may refuse storage; the choice still holds for this page. */
+      }
+      apply(next);
+    });
+  }
+
+  const followOs = (event) => {
+    if (storedChoice() === null) {
+      apply(event.matches ? "dark" : "light");
+    }
+  };
+
+  if (typeof scheme.addEventListener === "function") {
+    scheme.addEventListener("change", followOs);
+  } else if (typeof scheme.addListener === "function") {
+    scheme.addListener(followOs);
+  }
+})();
