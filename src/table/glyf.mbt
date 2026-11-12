@@ -55,16 +55,18 @@ fn read_flags(
     flags.push(flag)
     if (flag & 0x08) != 0 {
       let repeats = cursor.u8()
+      if flags.length() + repeats > count {
+        raise @model.Malformed(
+          at=cursor.position(),
+          got="a repeat flag past the declared point count",
+        )
+      }
       for _ in 0..<repeats {
         flags.push(flag)
       }
     }
   }
-  let result : Array[Int32] = []
-  for i in 0..<count {
-    result.push(flags[i])
-  }
-  result
+  flags
 }
 
 ///|
@@ -174,6 +176,10 @@ pub fn GlyphData::parse(
   if contours < 0 {
     return Composite(parse_composite(cursor, bounds, limits))
   }
+  // The contour ceiling is checked before reading the endpoint array, so a
+  // font that declares too many contours is refused as OverLimit rather than
+  // as a truncated read halfway through that array.
+  limits.check_outline(0, contours)
   let end_points : Array[Int32] = []
   for _ in 0..<contours {
     end_points.push(cursor.u16())
@@ -183,8 +189,26 @@ pub fn GlyphData::parse(
   if point_count <= 0 {
     return Empty
   }
+  let mut previous = -1
+  for i in 0..<contours {
+    if end_points[i] <= previous {
+      raise @model.Malformed(
+        at=10 + i * 2,
+        got="contour endpoints that do not increase",
+      )
+    }
+    previous = end_points[i]
+  }
   let instructions = cursor.u16()
   cursor.skip(instructions)
+  // Every point needs at least one flag byte. This catches a contour count
+  // that consumed the coordinate data as endpoints.
+  if point_count > cursor.left() {
+    raise @model.Malformed(
+      at=cursor.position(),
+      got="more points than bytes remain in the glyph",
+    )
+  }
   let flags = read_flags(cursor, point_count)
   let xs = read_coords(cursor, flags, true)
   let ys = read_coords(cursor, flags, false)

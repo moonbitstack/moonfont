@@ -57,3 +57,21 @@ pub impl Show for Refused with fn output(self, logger) {
 
 ///|
 pub extend Refused with Show::{to_string, output}
+
+///|
+/// The variant name. A differential test records this rather than a rendered
+/// message, because the prose may change while the contract does not. The text
+/// is stable and part of the public interface.
+pub fn Refused::name(self : Refused) -> String {
+  match self {
+    Unknown(..) => "Unknown"
+    Unexpected(..) => "Unexpected"
+    Unsupported(..) => "Unsupported"
+    Truncated(..) => "Truncated"
+    OverLimit(..) => "OverLimit"
+    Malformed(..) => "Malformed"
+    MissingTable(..) => "MissingTable"
+    MissingGlyph(..) => "MissingGlyph"
+    Recursion(..) => "Recursion"
+  }
+}

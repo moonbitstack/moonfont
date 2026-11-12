@@ -17,6 +17,11 @@ pub(all) struct Head {
 
 ///|
 pub fn Head::parse(cursor : @wire.Cursor) -> Head raise @model.Refused {
+  cursor.seek(12)
+  let magic = cursor.u32()
+  if magic != 0x5F0F3CF5 {
+    raise @model.Unexpected(at=12, got="head magic \{magic}", want="0x5F0F3CF5")
+  }
   cursor.seek(18)
   let units_per_em = cursor.u16()
   if units_per_em < 16 || units_per_em > 16384 {

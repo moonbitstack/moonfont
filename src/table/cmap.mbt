@@ -81,12 +81,17 @@ pub fn Cmap::parse(
   let mut best = 0
   let mut chosen = -1
   let mut format = 0
+  let mut broken_offset = -1
   for i in 0..<count {
     let at = 4 + i * 8
     let platform = u16_at(data, at)
     let encoding = u16_at(data, at + 2)
     let offset = u32_at(data, at + 4)
-    if offset >= 0 && offset + 2 <= data.length() {
+    if offset < 0 || offset + 2 > data.length() {
+      // An encoding record pointing outside the table is damage, not a
+      // feature we decline: say Truncated at the record that points nowhere.
+      broken_offset = at
+    } else {
       let sub_format = u16_at(data, offset)
       let score = rank(platform, encoding, sub_format)
       if score > best {
@@ -97,12 +102,29 @@ pub fn Cmap::parse(
     }
   }
   if chosen < 0 {
+    if broken_offset >= 0 {
+      raise @model.Truncated(at=broken_offset, want=2)
+    }
     raise @model.Unsupported(at=0, got="a cmap with no readable subtable")
   }
   // Both formats put a loop count in the file. Check it once here rather than
   // trusting it on every lookup.
   if format == 4 {
-    limits.check_outline(u16_at(data, chosen + 6) / 2, 0)
+    let seg_count_x2 = u16_at(data, chosen + 6)
+    let segments = seg_count_x2 / 2
+    limits.check_outline(segments, 0)
+    let end_base = chosen + 14
+    let start_base = end_base + seg_count_x2 + 2
+    for i in 0..<segments {
+      let first = u16_at(data, start_base + i * 2)
+      let last = u16_at(data, end_base + i * 2)
+      if first > last {
+        raise @model.Malformed(
+          at=start_base + i * 2,
+          got="a cmap segment whose startCode exceeds its endCode",
+        )
+      }
+    }
   }
   if format == 12 {
     let groups = u32_at(data, chosen + 12)
