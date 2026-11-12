@@ -1,0 +1,16 @@
+// The web adapter. It re-exposes moonfont through a flat surface that a
+// browser caller can use without constructing or introspecting MoonBit
+// structs: every entry point takes and returns only primitives, Bytes or
+// Strings. The CoverageMask and FontMetrics records it returns are read by
+// field from JavaScript.
+//
+// This package is a foreign library so the JS and WASM backends emit a
+// loadable module whose named exports are the browser-facing surface below.
+// Each export is pinned with #export_name so the names survive minification and
+// are stable across backends.
+
+pkgtype(kind: "foreign_library")
+
+import {
+  "moonbitstack/moonfont",
+}

@@ -1,14 +1,12 @@
-# MoonBit build artefacts
+# Ignore every hidden file and directory (tooling, editor and OS cruft)
+.*
+!.gitignore
+!.gitattributes
+!.github/
+
+# MoonBit build artefacts (non-hidden)
 _build/
-.repos/
-.moon/
 
-# Local scratch
-.probe/
+# Logs and OS cruft (non-hidden)
 *.log
-
-# Editor and OS files
-.DS_Store
 Thumbs.db
-.idea/
-.vscode/
