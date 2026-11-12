@@ -77,141 +77,16 @@ lexicographic key order matches numeric codepoint order.
 
 ## Schema and exact field names
 
-`fixtures.json` has schema `moonfont.difftest/1`. `docs/difftest.json` has schema
-`moonfont.difftest.index/1`. The master document has exactly these top-level
-keys:
+The authoritative schema, exact field names and tolerance rules live in
+`contracts/DIFFTEST.md`; this file only records the local fixture files and the
+regeneration recipe. In brief: `fixtures.json` carries schema
+`moonfont.difftest/1` with the top-level keys `schema`, `categories`,
+`tolerances`, `font`, `oracle`, `tables`, `cmap`, `metrics`, `outlines` and
+`coverage`; `docs/difftest.json` carries schema `moonfont.difftest.index/1`.
 
-`schema`, `categories`, `tolerances`, `font`, `oracle`, `tables`, `cmap`,
-`metrics`, `outlines`, `coverage`.
-
-- `categories` is the fixed array `["font", "tables", "cmap", "metrics",
-  "outlines", "coverage"]`. Each name is also emitted as its own category file
-  listed above.
-- `tolerances` maps each category name to its rule, as given in the tolerance
-  table below.
-
-### `font`
-
-`file`, `sha256`, `sfnt_version`, `num_tables`, `table_tags`, `units_per_em`,
-`num_glyphs`, `index_to_loc_format`. Version-like values are `"0x..."` strings.
-
-### `oracle`
-
-`name`, `version`, `providers`, `raster_algorithm`, `raster_grid`,
-`raster_samples_per_axis`, `raster_y_axis`, `moonbit_raster_algorithm`,
-`library_versions`. `providers` maps every category name to a producer label, so
-no section is ever silently self-referential.
-
-### `tables`
-
-An object with `head`, `hhea` and `maxp`.
-
-- `head`: `version`, `font_revision`, `check_sum_adjustment`, `magic_number`,
-  `flags`, `units_per_em`, `created`, `modified`, `x_min`, `y_min`, `x_max`,
-  `y_max`, `mac_style`, `lowest_rec_ppem`, `font_direction_hint`,
-  `index_to_loc_format`, `glyph_data_format`.
-- `hhea`: `version`, `ascender`, `descender`, `line_gap`, `advance_width_max`,
-  `min_left_side_bearing`, `min_right_side_bearing`, `x_max_extent`,
-  `caret_slope_rise`, `caret_slope_run`, `caret_offset`, `metric_data_format`,
-  `number_of_h_metrics`.
-- `maxp`: `version`, `num_glyphs`, `max_points`, `max_contours`,
-  `max_composite_points`, `max_composite_contours`, `max_zones`,
-  `max_twilight_points`, `max_storage`, `max_function_defs`,
-  `max_instruction_defs`, `max_stack_elements`, `max_size_of_instructions`,
-  `max_component_elements`, `max_component_depth`.
-
-### `cmap`
-
-An object mapping four-digit upper-case hex codepoint strings to integer glyph
-ids. The sentinel `0xFFFF` is excluded.
-
-### `metrics`
-
-An array with one object per glyph id, in ascending order. Each object has
-`glyph_id`, `advance`, `lsb`, `bounds` and `scaled_bounds`. `bounds` is
-`[x_min, y_min, x_max, y_max]` in font units, taken from the `glyf` header;
-empty glyphs report `[0, 0, 0, 0]`. `scaled_bounds` is the same box scaled to
-the 64-pixel em square with `round(v * 64 / unitsPerEm)`.
-
-### `outlines`
-
-An array with one object per glyph id. Each object has `glyph_id` and
-`commands`. A command is an array whose first element is one of `"move"`,
-`"line"`, `"quad"` or `"close"`:
-
-- `["move", x, y]`
-- `["line", x, y]`
-- `["quad", cx, cy, x, y]` (a quadratic Bezier from the current point with
-  control `(cx, cy)` to `(x, y)`)
-- `["close"]`
-
-All coordinates are integer font units with y up. A contour begins with `move`
-and ends with `close`; the closing segment back to the start point is emitted
-explicitly before `close`. Consecutive off-curve points are resolved into
-implied on-curve midpoints, so the stream contains only explicit quadratic
-segments. Composite glyphs are decomposed: their commands are the concatenated
-component streams with the component offsets added. Empty glyphs have an empty
-command list.
-
-### `coverage`
-
-An array with one object per glyph id. Each object has `glyph_id`,
-`ink_coverage` and `ink_bbox`. Only a summary is stored, never a raw bitmap,
-because cross-engine anti-aliasing is not bit-identical.
-
-- `ink_coverage` is the summed subpixel coverage over a 64 by 64 pixel em
-  square, divided by `64 * 64`, expressed as a percentage in `[0, 100]`.
-- `ink_bbox` is `[min_x, min_y, max_x, max_y]`, the inclusive pixel indices of
-  pixels with non-zero coverage in a y-up coordinate system whose origin is the
-  bottom-left of the em square, or `null` for an empty glyph.
-
-For the `reference` and `fonttools` oracles the summarised mask comes from an
-independent rasteriser: 8 by 8 uniform-grid supersampling, with every subpixel
-sample classified by a non-zero winding count of flattened quadratic edges
-crossing its sub-scanline. Thirty-two line segments approximate each quadratic.
-This is deliberately a different algorithm from the MoonBit rasteriser, which
-uses eight-times vertical subsampling with exact horizontal area in 26.6 fixed
-point. For the `pillow` oracle the mask comes from `ImageFont.getmask2`, which
-is FreeType's 8-bit grey rasteriser, and is converted to the same y-up em-square
-coordinate frame using the reported ascent and mask offset.
-
-## Oracles
-
-| Name | Provider | Rasteriser |
-| --- | --- | --- |
-| `reference` | Independent standard-library SFNT parser in `make_fixtures.py` | Independent 8x8 uniform-grid supersampling with non-zero winding |
-| `fonttools` | `fontTools` for table fields, cmap, metrics and outlines | Independent reference supersampler |
-| `pillow` | Independent reference parser for structure, cmap, metrics and outlines | Pillow / FreeType `getmask2` |
-
-The `reference` oracle is the default and needs only the Python standard
-library. It is independent of the MoonBit implementation in two ways: its
-parser is a separate SFNT decoder, and its coverage algorithm is a two-dimensional
-sample-counting fill rather than the exact-horizontal-area vertical subsampling
-used by MoonBit.
-
-If `fonttools` or `pillow` is requested but the corresponding package is not
-installed, `make_fixtures.py` exits with a clear error and writes nothing. It
-never falls back to reference data while labelling the output as a third-party
-oracle. The `oracle.providers` map records the real producer of every category.
-
-## Tolerance rules
-
-Tolerances are pre-registered before any fixture is consumed. They may not be
-relaxed afterwards to make a failing test pass.
-
-| Category | Rule |
-| --- | --- |
-| `font` | Exact. Every field, including the SHA-256 and the sorted `table_tags`, must match. |
-| `tables` | Exact for every `head`, `hhea` and `maxp` field. All values are unscaled integers or version strings. |
-| `cmap` | Exact for the full codepoint-to-glyph-id mapping and for glyph ids in general. |
-| `metrics` | `advance`, `lsb` and `bounds` are exact in font units. `scaled_bounds` may differ by at most 1 pixel because engines round scaled boxes differently. |
-| `outlines` | Exact after canonicalisation. Canonicalisation is limited to the removal of degenerate closing segments and the insertion of implied on-curve midpoints; no other geometry may be rewritten. |
-| `coverage` | `ink_coverage` must agree within 5 per cent. `ink_bbox` may differ by at most 1 pixel on each side. |
-
-The outline rule is exact because outline coordinates are integers in font
-units; only the rasterised coverage is a floating measurement. The coverage rule
-is a summary comparison rather than a per-pixel comparison precisely because
-anti-aliasing is not portable bit for bit.
+The field-by-field layout of every category, the oracle matrix and the
+per-category tolerance rules are specified once in `contracts/DIFFTEST.md`; this
+file does not restate them.
 
 ## Regeneration recipe
 

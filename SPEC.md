@@ -1,4 +1,4 @@
-# moonfont — Technical Specification
+# moonfont -- Technical Specification
 
 Status: authoritative for v0.1.0. Module `moonbitstack/moonfont`. Last revised 2026-11-12.
 This document is the single source of truth for the architecture. `contracts/API.md`
@@ -7,7 +7,8 @@ direction, `contracts/DIFFTEST.md` owns fixtures and tolerances. Where those thr
 and this document disagree, the contract named by the subject wins; the disagreement
 is a defect to be repaired, not a licence to interpret.
 
-Language: en-GB throughout. No attribution or signature appears in any file.
+Language: en-GB throughout. No byline, attribution line or contributor mark
+appears in any file.
 
 ---
 
@@ -20,17 +21,17 @@ Its single organising principle is **a font is a value, a face is a result, and
 the byte span is the only state**: each layer either narrows bytes (source, reader,
 table directory, table decoders) or widens meaning (decoders, domain values, path
 commands, coverage, measurement), and every arrow points one way. Every predecessor
-put a mutable, device-aware session at the centre — FreeType's `FT_Face` with its
+put a mutable, device-aware session at the centre -- FreeType's `FT_Face` with its
 glyph slot, `FT_Size` and `FT_Library`; Skia's `SkTypeface` plus `SkFont` pair;
 DirectWrite's `IDWriteFontFace` bound to a render target; fontTools' lazy `TTFont`
-dictionary of tables; HarfBuzz's `hb_font_t` with callbacks — and then had to
+dictionary of tables; HarfBuzz's `hb_font_t` with callbacks -- and then had to
 invent a second object to escape it. moonfont makes `Face` an immutable bundle of
 borrowed, decoded tables returned by `decode`, so the same face serves a GUI at
 12 px and a game at 96 px at the same time, on four backends, with zero declared
 dependencies, and the parser cannot learn what a pixel is. This is why the surface
 is small: once state is removed, the pen protocol, the outline builder, the raster
 target, the colour painter and the subsetter cease to be five subsystems and become
-five optional views over the same two values — `PathCommand` and `CoverageMask`.
+five optional views over the same two values -- `PathCommand` and `CoverageMask`.
 
 ## 2. Constraints (fixed before any design work)
 
@@ -74,10 +75,10 @@ L0     |        | CONTRACTS + MODEL src/model/   |  Refused, Limits, values
 | L1 | Byte source and random access | `moonbitstack/moonfont/wire` | A bounds-checked big-endian `Cursor` over a `BytesView`; windows into a table; `u8`/`i8`/`u16`/`i16`/`u24`/`u32`/`tag`, seek, skip, rest. | L0. Byte order, cursor position, `Refused`. | What a font is, what a table is, any table tag, any pixel. |
 | L2 | SFNT container and table directory | `moonbitstack/moonfont/sfnt` | Signature recognition (`0x00010000`, `OTTO`, `true`, `ttcf`), TTC versions 1.0/2.0, `TableRecord`, `Directory`, range validation, `tag_*` helpers, `read`. | L0, L1. The 12-byte header and 16-byte directory record. | The meaning of any table body. Never parses a table. |
 | L3 | Table decoders | `moonbitstack/moonfont/table` | `Head`, `Hhea`, `Maxp`, `Hmtx`, `Cmap`, `Loca`, `Os2`, `Kern`, `GlyphData` (`Simple`, `Composite`, `Empty`). Each turns a bounded cursor into domain values and stops. | L0, L1, L2 via a bounded `Cursor`. Its own table's binary layout. | Path commands, curves, pixels, scanlines, other tables' semantics, the face. |
-| L4 | Outline commands | `moonbitstack/moonfont/outline` | `GlyphSource::outline`: points plus on-curve bits become `PathCommand`s, composite components are resolved and transformed, recursion is bounded. | L0, L3. Quadratic Bézier geometry. | How a curve is flattened, how coverage is computed, which table a point came from, device pixels. |
+| L4 | Outline commands | `moonbitstack/moonfont/outline` | `GlyphSource::outline`: points plus on-curve bits become `PathCommand`s, composite components are resolved and transformed, recursion is bounded. | L0, L3. Quadratic Bezier geometry. | How a curve is flattened, how coverage is computed, which table a point came from, device pixels. |
 | L5 | Rasterisation | `moonbitstack/moonfont/raster` | The one place where geometry becomes coverage. Analytic area accumulation in 26.6 fixed point, eight vertical subsamples, non-zero winding, no floating point. | L0 only: `Outline`, `Scale`, `Limits`, `CoverageMask`. | SFNT, tables, charmaps, glyph ids, files, colour, compositing, the face. |
 | L6 | Layout | `moonbitstack/moonfont/layout` | `measure`: sum advances, apply legacy `kern` pairs and letter spacing, produce `TextMetrics`. | L0, L3 (`Hmtx`, `Kern`, `FontMetrics`). | Pixels, outlines, Unicode properties, bidi, script itemisation, shaping. |
-| L7 | Face façade | `moonbitstack/moonfont` (`src/`) | `decode`, `decode_all`, `Face` methods, `pub using @model` re-exports. Wiring and default resolution only; no algorithm of its own. | All of L0–L6. | Nothing new. It introduces no type that a lower layer needs. |
+| L7 | Face facade | `moonbitstack/moonfont` (`src/`) | `decode`, `decode_all`, `Face` methods, `pub using @model` re-exports. Wiring and default resolution only; no algorithm of its own. | All of L0-L6. | Nothing new. It introduces no type that a lower layer needs. |
 
 ### Invariants
 
@@ -87,11 +88,11 @@ L0     |        | CONTRACTS + MODEL src/model/   |  Refused, Limits, values
 - **INV-02 (no platform font discovery).** No family matching, system font
   enumeration, fontconfig, registry lookup, installed-font cache or fallback
   chain. Such work belongs in an integration package owned by the host.
-- **INV-03 (no raster concerns in the parser).** L0–L4 contain no pixel, no
+- **INV-03 (no raster concerns in the parser).** L0-L4 contain no pixel, no
   scanline, no sample buffer, no anti-aliasing decision and no `Double`. L5 is
   the only package that may produce a `CoverageMask`.
 - **INV-04 (one-way narrowing).** Lower layers never import upper layers. `raster`
-  imports `model` alone — a check that the seam is real, not decorative.
+  imports `model` alone -- a check that the seam is real, not decorative.
 - **INV-05 (borrowed bytes).** `Face` holds `BytesView` slices, not copies of the
   file. A caller keeps the byte span alive and unchanged for the face's lifetime.
 - **INV-06 (immutable face).** Every `Face` method is a pure read. There is no
@@ -107,12 +108,13 @@ L0     |        | CONTRACTS + MODEL src/model/   |  Refused, Limits, values
 - **INV-09 (single error type).** One `Refused` suberror with nine variants and a
   stable field vocabulary (`at`, `got`, `want`, `limit`, `tag`, `glyph`, `depth`).
   A caller writes one handler.
-- **INV-10 (explicit defaults).** A default is resolved once at the façade and the
+- **INV-10 (explicit defaults).** A default is resolved once at the facade and the
   resolved value is passed down. No internal function consults a default.
 - **INV-11 (no orphan capability).** A contract with no implementation and no
   consumer is not opened in this release. Colour painting, variation locations,
-  writing and subsetting are named in §4 as convergent abstractions and listed as
-  OUT in §5; no trait, stub or placeholder for them exists in `src/`.
+  writing and subsetting are named in section 4 as convergent abstractions and
+  listed as OUT in section 5; no trait, stub or placeholder for them exists in
+  `src/`.
 
 ## 4. Core abstractions as neutral contracts
 
@@ -137,7 +139,7 @@ straightforward (`DECISIONS.md` D-03).
 | `Scale` | Font units to 26.6 pixel units, passed per call rather than set on the face. | `of(ppem, units_per_em)`, `apply`, `ppem` | FreeType `FT_Set_Char_Size` / `FT_Set_Pixel_Sizes` / `FT_Matrix` / `FT_Size`; HarfBuzz `hb_font_set_scale` / `hb_font_set_ppem`; Skia `SkFont::setSize`; DirectWrite `IDWriteTextLayout` size; CoreText `CGAffineTransform`; skrifa `Size`; stb_truetype `stbtt_ScaleForPixelHeight`; opentype.js `unitsPerEm`; Pillow `size` | L0 | `model.Scale { ppem, units_per_em }`, produced by `Face::scale`. Measurement and rasterisation share it, so they cannot disagree about the pen position. |
 | `VariationLocation` | Normalised coordinates along a font's variation axes. | `default(axes)`, `get(axis)`, `set(axis, value)` | FreeType `FT_Set_Var_Design_Coordinates` / `FT_MM_Var`; HarfBuzz `hb_font_set_variations` / `hb_ot_var_normalize_coords`; fontTools `varLib.instancer` / `setLocation`; DirectWrite `IDWriteFontFace5`; CoreText `CTFontCopyVariationAxes`; skrifa `Location` / `AxisCollection` / `NormalizedCoord`; opentype.js `fvar`; fontkit `getVariation`; CSS `font-variation-settings`; Android `FontVariationAxis` | L0 (reserved) | **Not opened in v0.1.0.** Only the default instance is read; `fvar`/`gvar` raise `Unsupported`. The seam is named here so that adding it later is a new subpackage, not a change to `Face`. |
 | `RasterTarget` | The destination for eight-bit coverage, with its own origin and stride so an atlas can be filled without a copy. | `width`, `height`, `put(x, y, coverage)`, `at(x, y)` | FreeType `FT_Bitmap` / `FT_Render_Glyph` / `FT_GlyphSlot`; stb_truetype `stbtt_GetGlyphBitmap`; fontdue `RasterizedGlyph`; `ab_glyph` `GlyphBitmap`; Skia `SkMask` / `SkPixmap`; DirectWrite `IDWriteGlyphRunAnalysis` / `IDWriteBitmapRenderTarget`; CoreText `CGBitmapContext`; Pillow `ImageFont.getmask`; Go `golang-freetype/raster.Painter` + `image.Alpha`; msdfgen `Bitmap`; SixLabors `Buffer2D`; gioui atlas | L0 / L5 | `model.CoverageMask { width, height, left, top, samples : FixedArray[Byte] }` with `of` and `at`. It is an owned value with its own origin, which is the whole atlas-writing requirement; a trait would add indirection without adding a capability. |
-| `LayoutEngine` | Turns a run of glyph ids into advances and positions. | `measure(glyphs, metrics, scale, kern, spacing)` | HarfBuzz `hb_shape` / `hb_buffer_t`; ICU `LayoutEngine`; DirectWrite `IDWriteTextAnalyzer` / `GetGlyphs`; CoreText `CTTypesetter` / `CTLine` / `CTRun`; Pango; Skia `SkShaper` / `SkParagraph`; Java `TextLayout` / `LineBreakMeasurer`; Android `StaticLayout`; `rustybuzz::shape`; `cosmic-text`; SixLabors `TextLayout`; Go `x/image/font` shaping | L6 | `layout.measure`, a pure function returning `TextMetrics`. This is measurement, not shaping: bidi, itemisation, GSUB/GPOS and syllable clustering are OUT (§5). |
+| `LayoutEngine` | Turns a run of glyph ids into advances and positions. | `measure(glyphs, metrics, scale, kern, spacing)` | HarfBuzz `hb_shape` / `hb_buffer_t`; ICU `LayoutEngine`; DirectWrite `IDWriteTextAnalyzer` / `GetGlyphs`; CoreText `CTTypesetter` / `CTLine` / `CTRun`; Pango; Skia `SkShaper` / `SkParagraph`; Java `TextLayout` / `LineBreakMeasurer`; Android `StaticLayout`; `rustybuzz::shape`; `cosmic-text`; SixLabors `TextLayout`; Go `x/image/font` shaping | L6 | `layout.measure`, a pure function returning `TextMetrics`. This is measurement, not shaping: bidi, itemisation, GSUB/GPOS and syllable clustering are OUT (section 5). |
 | `ColourPainter` | A visitor over a colour-glyph paint graph: transforms, clips, palette fills and nested glyphs. | `push_transform`, `push_clip`, `fill(palette_index)`, `paint_glyph`, `pop` | FreeType `FT_Paint_*` / `FT_Color` / `FT_LayerIterator` / `FT_PaintFormat`; skrifa `ColorPainter` / `ColorGlyph`; HarfBuzz `hb_paint_funcs_t`; Skia `SkCanvas` COLRv1; DirectWrite `IDWriteColorGlyphRunEnumerator` / `IDWritePaintReader`; CoreText `kCTFontPaletteColorsAttribute`; fontTools `COLR` / `CPAL` paint graph; Android COLRv1 | L5 (reserved) | **Not opened in v0.1.0.** See OUT-05. The `CoverageMask` is already the single-layer monochrome case, so a painter can be added without changing `Face::rasterise`. |
 | `Writer` / `Subsetter` | The inverse transform: emit a valid SFNT from selected tables and glyph ids. | `encode(face, selection)`, `subset(glyphs)` | fontTools `TTFont.save` / `subset.Subsetter` / `pyftsubset`; HarfBuzz `hb_subset` / `hb_subset_input_t`; `klippa`; fontkit `Subset`; opentype.js `toArrayBuffer`; PDFBox `PDType0Font` subsetting; php-font-lib writer; Go `sfnt` explicitly has no encoder | Outside this stack | **Not opened in v0.1.0.** See OUT-06. Writing is the inverse transform and roughly doubles the surface; a reader that also writes is not a small library. |
 
@@ -147,14 +149,14 @@ A capability is only live when all three of the first columns are filled.
 
 | Capability | Definition | Implementation | Consumer | Default | Failure semantics |
 | --- | --- | --- | --- | --- | --- |
-| Random access | `Source` contract, §4 | `wire.Cursor` over `BytesView` | `sfnt.Directory::table`, every `table::*::parse` | The caller's `BytesView` | `Truncated` at the absolute offset; `OverLimit` before allocation |
-| Table lookup | `TableDirectory` contract, §4 | `sfnt.Directory` | `src/font.mbt::build`, `Face` methods | Required tables are `head`, `hhea`, `maxp`, `hmtx`, `cmap`, `loca`, `glyf` | `MissingTable(tag=...)`; unknown tags ignored |
-| Outline emission | `OutlineSink` contract, §4 | `outline.GlyphSource::outline` → owned `Outline` | `Face::outline`, `raster::rasterise`, `Face::metrics` | Quadratic curves preserved, in font units | `Refused`; no partial outline is returned |
-| Coverage | `RasterTarget` contract, §4 | `raster::rasterise` → `CoverageMask` | `Face::rasterise` | 8-bit grey, non-zero winding, unhinted | `OverLimit` on `mask_pixels`; no silent clamp |
-| Measurement | `LayoutEngine` contract, §4 | `layout::measure` | `Face::measure` | `letter_spacing = 0`; `kern` empty when the table is absent | No refusal; unmapped codepoints are skipped |
-| Colour painting | `ColourPainter` contract, §4 | none | none | not applicable | not opened (OUT-05) |
-| Variation | `VariationLocation` contract, §4 | none | none | default instance | `Unsupported` on `fvar` / `gvar` |
-| Writing | `Writer` / `Subsetter` contract, §4 | none | none | not applicable | not opened (OUT-06) |
+| Random access | `Source` contract, section 4 | `wire.Cursor` over `BytesView` | `sfnt.Directory::table`, every `table::*::parse` | The caller's `BytesView` | `Truncated` at the absolute offset; `OverLimit` before allocation |
+| Table lookup | `TableDirectory` contract, section 4 | `sfnt.Directory` | `src/font.mbt::build`, `Face` methods | Required tables are `head`, `hhea`, `maxp`, `hmtx`, `cmap`, `loca`, `glyf` | `MissingTable(tag=...)`; unknown tags ignored |
+| Outline emission | `OutlineSink` contract, section 4 | `outline.GlyphSource::outline` -> owned `Outline` | `Face::outline`, `raster::rasterise`, `Face::metrics` | Quadratic curves preserved, in font units | `Refused`; no partial outline is returned |
+| Coverage | `RasterTarget` contract, section 4 | `raster::rasterise` -> `CoverageMask` | `Face::rasterise` | 8-bit grey, non-zero winding, unhinted | `OverLimit` on `mask_pixels`; no silent clamp |
+| Measurement | `LayoutEngine` contract, section 4 | `layout::measure` | `Face::measure` | `letter_spacing = 0`; `kern` empty when the table is absent | No refusal; unmapped codepoints are skipped |
+| Colour painting | `ColourPainter` contract, section 4 | none | none | not applicable | not opened (OUT-05) |
+| Variation | `VariationLocation` contract, section 4 | none | none | default instance | `Unsupported` on `fvar` / `gvar` |
+| Writing | `Writer` / `Subsetter` contract, section 4 | none | none | not applicable | not opened (OUT-06) |
 
 ## 5. Functional boundary
 
@@ -186,7 +188,7 @@ A capability is only live when all three of the first columns are filled.
 | OUT-05 | Colour fonts (`COLR`/`CPAL`, `sbix`, `CBDT`, SVG-in-OpenType), compositing, blending, LCD/subpixel filtering, gamma | Paint graphs are an orthogonal pipeline and pixel storage belongs to the host's image type. | `moonbitstack/moonfont/colour` from v0.3.0; `moonimage@0.1.4` and `moonrgba@0.1.3` stay out of the core. |
 | OUT-06 | Subsetting and font writing; name-table editing; font compilation | Writing is the inverse transform and roughly doubles the public surface. | A separate `moonbitstack/moonfont/subset` subpackage from v0.3.0 with symmetric `encode`. |
 | OUT-07 | CFF1/CFF2 outlines, WOFF, WOFF2 | Each adds an independent interpreter or decompressor before one glyph has been verified. | `src/cff/`, `src/woff/` from v0.2.0; `moonzip@0.3.8` is pinned for the WOFF adapter. |
-| OUT-08 | Variable fonts (`fvar`/`gvar`/`HVAR`), non-default variation locations | Delta machinery would change every metric signature. | `src/variations/` from v0.2.0, additive; `VariationLocation` is reserved in §4. |
+| OUT-08 | Variable fonts (`fvar`/`gvar`/`HVAR`), non-default variation locations | Delta machinery would change every metric signature. | `src/variations/` from v0.2.0, additive; `VariationLocation` is reserved in section 4. |
 | OUT-09 | Glyph caches, raster caches, atlas packing, LRU eviction, glyph slots | Stateful, policy-laden and device-specific; INV-06 forbids mutable face state. | The consumer's GPU atlas (`moongfx`) or GUI glyph cache (`moonegui`). |
 | OUT-10 | Pixel formats, colour management, alpha blending, image encode/decode | A coverage mask is the only output; choosing a pixel format would couple the parser to a device. | `moonbitstack/moonimage@0.1.4` / `moonrgba@0.1.3` in the consumer. |
 | OUT-11 | Bitmap glyph strikes, embedded bitmaps | Bypasses the outline seam entirely and needs a pixel format. | A future bitmap-extraction subpackage, extraction only, no compositing. |
@@ -259,8 +261,11 @@ as a value; no internal function re-resolves it (INV-10).
   cursor bounded to exactly that table's bytes; a decoder cannot read another
   table's bytes by accident.
 - `wire.Cursor` validates `pos + count` before every read and raises `Truncated`
-  with the offset. A 32-bit field above `2^31` is refused rather than wrapped,
-  because every such field here is a length or an offset.
+  with the offset. `u32` builds an `Int32` from two 16-bit halves, so a declared
+  offset or length above `2^31` arrives as a negative number and is refused by
+  `parse_directory`'s `offset < 0 || length < 0` check rather than wrapping into
+  a plausible small range. `tag` reads may use the full 32-bit word because a
+  table tag is not a length.
 - Composite glyphs carry both a component-count ceiling and a depth ceiling.
   A self-referencing composite terminates at the depth ceiling, not by looping.
   Depth is an explicit argument (`GlyphSource::outline(depth?)`), not ambient state.
@@ -298,7 +303,7 @@ compiler-injected import, not an authored one.
 | L4 | `outline` | `model`, `table` | `GlyphData` to `PathCommand`. |
 | L5 | `raster` | `model` **only** | Consumes `Outline`; the seam is real. |
 | L6 | `layout` | `model`, `table` | `Hmtx`, `Kern`, `FontMetrics`. |
-| L7 | `src` (façade) | `model`, `sfnt`, `table`, `outline`, `raster`, `layout` | Wiring and re-exports. |
+| L7 | `src` (facade) | `model`, `sfnt`, `table`, `outline`, `raster`, `layout` | Wiring and re-exports. |
 | tests | `moonbitlang/core/buffer` for `"test"` | Built-in only | Byte literals in fixtures. |
 
 ### Exact pinned versions for the whole repository
@@ -405,7 +410,7 @@ pub fn Face::font_metrics(self : Face) -> @model.FontMetrics
 pub fn Face::scale(self : Face, pixels_per_em : Int32) -> @model.Scale
 ```
 
-The façade re-exports twelve types with `pub using @model { ... }`, so a caller
+The facade re-exports twelve types with `pub using @model { ... }`, so a caller
 importing only `moonbitstack/moonfont` holds the error, limits, metrics, outline
 and mask without knowing how many packages sit beneath. Every lower package is
 also public, so a caller that wants only charmap lookup or only the rasteriser
@@ -437,13 +442,13 @@ Constraints that follow:
 
 | Attribute | Number or decision |
 | --- | --- |
-| Decode cost | O(directory + nine small tables + `num_glyphs` for `loca`/`hmtx`), not O(file size). Target P95: ≤ 8 ms native and ≤ 25 ms wasm for a 12 MiB font with ≤ 100 tables. |
+| Decode cost | O(directory + nine small tables + `num_glyphs` for `loca`/`hmtx`), not O(file size). Target P95: <= 8 ms native and <= 25 ms wasm for a 12 MiB font with <= 100 tables. |
 | Outline | O(points + contours + components) per glyph; one `Outline` allocation; no per-point heap object. |
-| Rasterise | Target P95 ≤ 1.5 ms for one 32 ppem glyph on native; worst case bounded by `mask_pixels`. |
+| Rasterise | Target P95 <= 1.5 ms for one 32 ppem glyph on native; worst case bounded by `mask_pixels`. |
 | Memory | Borrowed byte span plus O(`num_glyphs` + `num_tables`). `glyf` is a `BytesView`, not a copy. |
 | Capacity | 65 536 glyphs; 65 536 points and 8 192 contours per glyph; 1 024 components; 16 nesting levels; 67 108 864 mask pixels (default). |
 | Security | Untrusted input; nine validation boundaries; no unbounded allocation, recursion or loop; no path handling; no floating point; no panic on file-derived data. |
-| Reliability | Stateless; no persistence, therefore RPO and RTO are not applicable. Recovery is regeneration: `make_corpus.py`, oracle replay, `moon info`, `gen_api.py`. Six reproducible assets: `pkg.generated.mbti` files, `docs/api.html`, corpus binaries, `manifest.json`, `ORACLES.lock`, generated `.mbt` fixture literals. |
+| Reliability | Stateless; no persistence, therefore RPO and RTO are not applicable. Recovery is regeneration: `make_font.py`, `make_fixtures.py --oracle reference`, `make_corpus.py`, `moon info`, `gen_api.py`. Six reproducible assets: `pkg.generated.mbti` files, `docs/api.html`, corpus binaries, `corpus/manifest.json`, `fixtures.json` with its SHA-256 sidecars, and embedded `.mbt` fixture literals. |
 | Degradation | No partial results. Unknown tags ignored; absent optional tables synthesise empty values; unmapped codepoints return `None`; unsupported features raise `Unsupported`; excess declarations raise `OverLimit`. A caller decides every substitute. |
 | Data evolution | No database. The `.mbti` files are the schema. Within 0.1.x, public changes are additive only; a breaking change requires a minor version and a regenerated corpus. |
 | Commercialisation | Not applicable: no payments, no accounts, no subscription. |
@@ -469,59 +474,66 @@ Constraints that follow:
 Full field names, tolerances and the regeneration interface are binding in
 `contracts/DIFFTEST.md`. Summary here.
 
-**Categories.** (1) Hostile input — 39 synthetic fonts, each with one damaged
-declaration, one removed table or one truncated run; asserts the exact `Refused`
-variant. (2) Container structure — scaler types, TTC versions, table records,
-checksums, required and unknown tables. (3) Charmap — formats 0/4/6/12, BMP and
-supplementary codepoints, unmapped codepoints, sentinel segments. (4) Metrics —
-`unitsPerEm`, ascender, descender, line gap, advance widths, side bearings,
-bounding boxes. (5) Outlines — simple and composite glyphs, implied on-curve
-points, transforms, empty glyphs, quadratic curves preserved. (6) Coverage —
-8-bit masks at 8, 12, 16, 24, 32, 48 and 96 ppem, with anti-aliasing tolerances.
-(7) Measurement — advance sums, `kern` pairs, letter spacing, skipped codepoints.
-(8) Limits — every ceiling breached by one, under both `default()` and `strict()`.
+**Two corpora.** `integration/difftest/corpus/` holds 39 synthetic hostile-input
+fonts: 34 with one damaged declaration, one removed table or one truncated run
+that assert the exact `Refused` variant, and 5 that must be accepted.
+`integration/difftest/fixtures/` holds the parity goldens for one deterministic
+`synthetic.ttf`: categories `font`, `tables`, `cmap`, `metrics`, `outlines` and
+`coverage`, covering container structure, format 4 charmap, advances and
+bearings, simple and composite outlines with implied midpoints, and summarised
+ink coverage. Measurement and every `Limits` ceiling are exercised by the
+hostile corpus and by the library's own tests.
 
-**Language-neutral format.** JSON manifests plus raw font binaries plus base16
-coverage strings. No MoonBit type, no Python pickle, no binary blob that a second
-language cannot read. Font bytes are SHA-256 identified. Every record names the
-oracle and its pinned version.
+**Language-neutral format.** Canonical JSON (`sort_keys=True`, `indent=2`, one
+trailing newline), raw font binaries and one SHA-256 sidecar per file. No MoonBit
+type, no pickle, no binary blob a second language cannot read, no timestamp and
+no absolute path. `ink_coverage` is the sole floating value and is rounded to
+six decimal places. Coverage is a **summary** (`ink_coverage` and `ink_bbox`),
+never a raw bitmap, because anti-aliasing is not portable bit for bit.
 
-**Oracles.** Produced offline, never at test time. Primary: FreeType 2.13.3 for
-outlines, metrics and coverage, with `FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP |
-FT_LOAD_TARGET_NORMAL`; fontTools 4.55.3 for table structure and `cmap`.
-Secondary cross-checks: Go `golang.org/x/image/font/sfnt` v0.23.0, skrifa
-(read-fonts) for outlines, HarfBuzz 10.1.0 via `uharfbuzz` for glyph ids and
-draw callbacks, opentype.js 1.3.4 for JS parity. Advisory only: Pillow 11.0.0,
-stb_truetype 1.26 (different anti-aliasing, no tolerance claim).
-Excluded: SixLabors.Fonts (build-time licence key), SkiaSharp (a binding, not an
-independent decoder), and every third-party MoonBit font module (circular, and
-forbidden by the dependency rule). Oracle versions are pinned because FreeType
-output changed in 2.14.2 and 2.15.0.
+**Oracles.** Produced offline, never at test time. The committed goldens use the
+`reference` oracle (Python `1.0.0`): an independent standard-library SFNT parser
+and an 8 by 8 uniform-grid supersampler with non-zero winding -- deliberately a
+different algorithm from moonfont's exact-horizontal-area vertical subsampling.
+Secondary providers are pinned at fontTools `4.47.2` and Pillow `10.1.0`
+(binding FreeType `2.15.0`), on Python `3.11+`. A requested third-party oracle
+that is not installed is a loud failure, never a silent fallback. The wider
+cross-language survey (C, C++, Rust, Go, JS, JVM, .NET, Swift, Kotlin, Ruby,
+PHP, Haskell) supplies design references and reserved secondary oracles; every
+third-party MoonBit font module is excluded as circular and forbidden.
+FreeType output changed in 2.14.2 and 2.15.0, which is why versions are pinned.
 
-**Tolerance rules.** Structural, charmap, metrics, outline, error-variant and
-limit comparisons are exact. Coverage is not: anti-aliasing and hinting are never
-bit-identical across rasterisers. Hinted glyphs are excluded from the corpus
-entirely. Pre-registered tolerances may not be relaxed to make a failing test
-pass; one calibration round is permitted before enforcement.
+**Tolerance rules.** `font`, `tables`, `cmap`, advance, `lsb`, `bounds`, outline
+command streams, error variants and limits are exact. `scaled_bounds` and
+`ink_bbox` allow 1 pixel per side; `ink_coverage` allows 5 per cent. Anti-aliasing
+and hinting are never bit-identical, so hinted glyphs are excluded entirely.
+Pre-registered tolerances may not be relaxed to make a failing test pass; one
+calibration round is permitted before enforcement.
 
 **Regeneration recipe (offline, maintainer-initiated).**
 
 ```
-python3 scripts/difftest/make_corpus.py                 # synthetic hostile fonts
-python3 scripts/difftest/oracles.py --all --bump        # external references, offline
-python3 scripts/difftest/moonbit.py                    # emit .mbt byte literals
-python3 scripts/difftest/index_fixtures.py
-moon test --target all integration/difftest
+python3 scripts/difftest/make_font.py
+python3 scripts/difftest/make_font.py --check
+python3 scripts/difftest/make_fixtures.py --oracle reference
+python3 scripts/difftest/make_corpus.py
 python3 scripts/difftest/make_corpus.py --check
 python3 scripts/difftest/verify_fixtures.py
+python3 scripts/difftest/verify_fixtures.py --check
+python3 scripts/difftest/index_fixtures.py
+python3 scripts/difftest/index_fixtures.py --check
+python3 scripts/difftest/embed_corpus.py --check
+moon test --target all integration/difftest
+moon info --target all
+python3 scripts/docs/gen_api.py
 ```
 
 **CI shape.** `.github/workflows/ci.yml` runs `verify_fixtures.py` and
 `moon test --target all integration/difftest` on Linux only, plus the four-backend
 gate chain on three operating systems. CI replays committed fixtures; it never
 installs a reference toolchain, never calls an oracle at test time and never
-resolves a third-party MoonBit module. Oracle drift is detected offline by
-`ORACLES.lock` digests, not in CI.
+resolves a third-party MoonBit module. Oracle drift is caught by committed
+sidecars and by `--check` during offline regeneration, not in CI.
 
 ## 12. Interface export and static-site pipeline
 
@@ -536,24 +548,34 @@ moon info --target all
 
 - `moon info --target all` writes one `pkg.generated.mbti` per package. The
   toolchain owns those files; they are committed and never hand-edited.
-- `scripts/docs/gen_api.py` reads **every** `src/**/pkg.generated.mbti` by glob,
-  plus the `///` doc comments in the sibling `.mbt` files, and renders
-  `docs/api.html`. The interface decides what exists; the source comments say
-  what it means. Derived `Eq` / `Debug` methods are filtered out by a fixed set
-  so the page lists only deliberate public API.
-- Determinism: packages sorted by path, entries sorted by name, UTF-8, LF line
-  endings, no timestamps, no filesystem-order dependence, no network. Two runs
-  on a clean tree produce byte-identical output.
-- `--check` regenerates into memory, compares byte-for-byte with the committed
-  `docs/api.html`, exits non-zero with a `file:line` diff on a mismatch and
-  writes nothing. CI runs this mode. Plain invocation writes the page.
+- `scripts/docs/gen_api.py` reads **every** `src/**/pkg.generated.mbti`, plus
+  the `///` doc comments in the sibling `.mbt` files, and writes one complete
+  `docs/api.html` from a literal shell constant. The interface decides what
+  exists; the source comments say what it means. `DESIGN.md` section 6 is the
+  sole authority for the emitted markup, the closed class vocabulary and the
+  anchor scheme; this section owns only the pipeline, the determinism rules and
+  the CI gates. No fact is stated in both places.
+- Determinism: discovered `.mbti` paths are sorted before any output is
+  produced; declarations are sorted by a fixed kind ranking then qualified
+  name, and fields, variants and parameters by name. UTF-8, LF endings, no
+  BOM, exactly one trailing newline. The page contains no date, time, build
+  identifier, version string, script name, absolute path or
+  environment-derived count, and makes no network request. Two runs on a clean
+  tree produce byte-identical output; that is the acceptance check.
+- `--check` rebuilds in memory, compares byte-for-byte with the committed
+  `docs/api.html`, prints a unified diff and exits non-zero on a mismatch,
+  writing nothing. CI runs this mode. Plain invocation builds the whole page
+  in memory and replaces the file atomically, so a partial page is never
+  written; a malformed `.mbti` exits non-zero naming the offending file.
 - `Makefile`: `make api` runs `moon info --target all` then the generator;
   `make docs` runs `--check`; `make site` also rebuilds the fixture index.
 - **A new package appears on the site automatically.** Create
   `src/<name>/moon.pkg` and its `.mbt` files, run `moon info --target all`, and a
-  `src/<name>/pkg.generated.mbti` appears. The generator's glob picks it up with
-  no edit to any list; its section title falls back to the package path unless
-  `docs/packages.json` supplies a title and blurb. The CI step
+  `src/<name>/pkg.generated.mbti` appears. The generator's recursive glob over
+  `pkg.generated.mbti` is sorted after collection and picks it up with no edit
+  to any list. The section heading comes from the package path and the section
+  prose from the leading `//` note in that package's `moon.pkg`, omitted when
+  there is none, so no metadata file is needed either. The CI step
   `moon info --target all && git diff --exit-code` then requires both the `.mbti`
   and the regenerated page to be committed. No hard-coded package list exists.
 - `.github/workflows/docs.yml` re-checks the interfaces and the page, then calls
@@ -574,13 +596,13 @@ architecture-affecting entries, with their consequences, are:
 | A-04 | Accepted | Untrusted input and four-backend determinism. | One `Refused`, `Limits` before allocation, integer-only unhinted coverage. | No floating point, no panics, one golden corpus valid on all four backends. | D-06, D-11 |
 | A-05 | Accepted | Dependency whitelist is a constraint, not a quota. | Zero declared dependencies in v0.1.0; pinned reservations for later adapters. | Four-backend portability is trivial; every new import is a one-way door. | D-05 |
 | A-06 | Accepted | Shaping and Unicode properties. | Out; measurement only, `kern` as data. | `moonucd@0.1.4` never enters the core; a shaping library consumes our values. | D-10 |
-| A-07 | Accepted | Colour, variation and writing are mature convergent capabilities. | Named in §4, not opened in v0.1.0, additive subpackages later. | No orphan contract, no placeholder trait, no breaking change to `Face`. | D-12 |
-| A-08 | Accepted | Correctness oracle. | Offline FreeType + fontTools goldens; tolerances pre-registered. | No third-party MoonBit dependency; changing the oracle re-baselines the corpus. | D-08, D-09 |
+| A-07 | Accepted | Colour, variation and writing are mature convergent capabilities. | Named in section 4, not opened in v0.1.0, additive subpackages later. | No orphan contract, no placeholder trait, no breaking change to `Face`. | D-12 |
+| A-08 | Accepted | Correctness oracle. | Offline, independent `reference` parser and supersampler as the committed golden; fontTools and Pillow/FreeType as pinned secondary providers; tolerances pre-registered. | No third-party MoonBit dependency; changing the oracle re-baselines the corpus. | D-08, D-09 |
 
 Two items in `DECISIONS.md` remain marked `Open - needs decision` (D-02 on the
 rasterisation boundary and D-10 on whether a consumer expects shaped text). The
 code implements the recommended option for both. The decision cards must be
-closed before the v0.1.0 API is frozen; otherwise §5 and §8 remain provisional.
+closed before the v0.1.0 API is frozen; otherwise section 5 and section 8 remain provisional.
 
 ## 14. End-to-end verification
 
@@ -599,9 +621,14 @@ python3 scripts/docs/gen_api.py --check
 moon fmt && git diff --exit-code
 ```
 
-Success path: `decode(valid_minimal.ttf)` -> `glyph_index(0x41)` ->
-`outline(glyph)` -> `rasterise(glyph, 32)` -> a `CoverageMask` whose dimensions
-and ink mass match the pinned golden.
+`scripts/gates/layer_direction.py` is the one gate in that chain required by
+this specification but not yet present; until it lands, the chain is not
+complete and the v0.1.0 API must not be frozen.
+
+Success path: `decode(synthetic.ttf)` -> `glyph_index(0x41)` ->
+`outline(glyph)` -> `rasterise(glyph, 64)` -> a `CoverageMask` whose ink
+bounding box and summed coverage agree with the pinned `coverage` golden within
+the `one_pixel` and `five_percent` tolerances.
 Error path: `decode(bad_signature.bin)` raises `Refused::Unknown(at=0, ...)`;
 `decode(table_offset_past_eof.ttf)` raises `Refused::Truncated` at the declared
 offset; `decode(contours_over_limit.ttf)` raises `Refused::OverLimit`. No case

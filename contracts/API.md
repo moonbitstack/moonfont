@@ -1,4 +1,4 @@
-# moonfont — Public API Contract
+# moonfont -- Public API Contract
 
 Version 1.0.0, covering `moonbitstack/moonfont` v0.1.0. en-GB throughout.
 
@@ -21,7 +21,7 @@ that order, not an invitation to reinterpret.
 
 | Path | Role | Public |
 | --- | --- | --- |
-| `moonbitstack/moonfont` | Façade. `decode`, `decode_all`, `Face`, re-exports. | Yes |
+| `moonbitstack/moonfont` | Facade. `decode`, `decode_all`, `Face`, re-exports. | Yes |
 | `moonbitstack/moonfont/model` | Domain vocabulary, `Refused`, `Limits`, `PathCommand`, `Outline`, `CoverageMask`, metrics. | Yes |
 | `moonbitstack/moonfont/wire` | Bounds-checked big-endian `Cursor`. | Yes |
 | `moonbitstack/moonfont/sfnt` | Container signatures, `Directory`, `TableRecord`, tag helpers. | Yes |
@@ -30,20 +30,20 @@ that order, not an invitation to reinterpret.
 | `moonbitstack/moonfont/raster` | `rasterise` into a coverage mask. | Yes |
 | `moonbitstack/moonfont/layout` | `measure`. | Yes |
 
-Every package is public. A caller that imports only the façade gets the whole
+Every package is public. A caller that imports only the facade gets the whole
 vertical slice; a caller that imports only `raster` or only `table` does not load
 the rest. No package outside this table is part of the contract.
 
-## 2. The façade re-export list
+## 2. The facade re-export list
 
-The façade re-exports exactly these twelve types with `pub using @model { ... }`.
+The facade re-exports exactly these twelve types with `pub using @model { ... }`.
 The list is closed for 0.1.x. Adding a type is additive and requires only a
 regenerated interface; removing one is breaking.
 
 `Bounds`, `CoverageMask`, `FontMetrics`, `GlyphId`, `GlyphMetrics`, `Limits`,
 `Outline`, `PathCommand`, `Point`, `Refused`, `Scale`, `TextMetrics`.
 
-## 3. Exact façade signatures
+## 3. Exact facade signatures
 
 Parameter names are part of the contract because labelled arguments use them.
 
@@ -84,7 +84,7 @@ Face::measure(self : Face, text : String, pixels_per_em : Int32, letter_spacing?
 | `Face::metrics` | `glyph` is in range. | `GlyphMetrics` in font units, `bounds` from the outline. | `MissingGlyph`, plus every `outline` failure |
 | `Face::rasterise` | `glyph` in range, `pixels_per_em > 0`. | Eight-bit grey `CoverageMask`, non-zero winding, unhinted, with its own origin. | every `outline` failure, plus `OverLimit` on `mask_pixels` |
 | `Face::kern_between` | face is valid. | Legacy `kern` adjustment in font units; `0` when the table is absent. | never |
-| `Face::measure` | face is valid. | `TextMetrics`; unmapped codepoints are skipped, so `glyphs ≤ text.length()`. | never |
+| `Face::measure` | face is valid. | `TextMetrics`; unmapped codepoints are skipped, so `glyphs <= text.length()`. | never |
 
 `Face` is opaque. Its nine private fields (`head`, `hhea`, `maxp`, `hmtx`,
 `cmap`, `kern`, `os2`, `source`, `limits`) appear in `pkg.generated.mbti` as
@@ -182,15 +182,21 @@ pub(all) struct Limits {
 
 ### Field semantics that a caller may rely on
 
-- `CoverageMask.left` and `CoverageMask.top` are the mask origin in 26.6 pixel
-  units relative to the pen. `samples` is row-major, `width * height` bytes, each
-  in `[0, 255]`. `at(x, y)` returns the sample, or `0` outside the mask.
-- `Scale::apply(v)` computes `v * ppem * 64 / units_per_em` in integer
-  arithmetic with a 64-bit intermediate; the result is 26.6 fixed point.
+- `CoverageMask.left` and `CoverageMask.top` are the mask origin in **whole
+  pixels** relative to the pen: the 26.6 device coordinates divided by 64 and
+  rounded down. `width` and `height` are whole pixels. `samples` is row-major,
+  `width * height` bytes, each in `[0, 255]`; `at(x, y)` returns the sample, or
+  `0` outside the mask. An empty outline yields a `0 x 0` mask with a zero-length
+  `samples` array.
+- `Scale::of(pixels_per_em, units_per_em)` stores
+  `ppem = pixels_per_em << 6`, so `Scale.ppem` is already 26.6 fixed point.
+  `Scale::apply(units)` computes `units * self.ppem / self.units_per_em` with a
+  64-bit intermediate and returns 26.6 pixels; it returns `0` when
+  `units_per_em <= 0`.
 - `Refused` derives `Eq` and `Debug` and implements `Show`. Variant names, field
   labels and `Show` text are stable. `Refused::to_string` names the offset and
   the two values.
-- `Limits::default()` and `Limits::strict()` values are fixed in `SPEC.md` §6.
+- `Limits::default()` and `Limits::strict()` values are fixed in `SPEC.md` section 6.
   Every ceiling is checked before its allocation. A caller supplying its own
   `Limits` record is responsible for positive ceilings.
 
@@ -211,8 +217,10 @@ Cursor::all(self) -> BytesView
 Cursor::seek(self, Int32) -> Unit raise @model.Refused
 Cursor::skip(self, Int32) -> Unit raise @model.Refused
 Cursor::bytes(self, Int32) -> BytesView raise @model.Refused
-Cursor::u8 / i8 / u16 / i16 / u24 / u32 / tag (self) -> Int32 raise @model.Refused
-Cursor::u16_at / i16_at / u32_at / tag_at (self, Int32) -> Int32 raise @model.Refused
+Cursor::u8 / Cursor::i8 / Cursor::u16 / Cursor::i16 / Cursor::u24 /
+Cursor::u32 / Cursor::tag (self) -> Int32 raise @model.Refused
+Cursor::u16_at / Cursor::i16_at / Cursor::u32_at / Cursor::tag_at
+  (self, Int32) -> Int32 raise @model.Refused
 ```
 
 A `Cursor` returned by `window` cannot read outside its parent range. All
@@ -264,7 +272,9 @@ pub(all) enum GlyphData { Empty; Simple(SimpleGlyph); Composite(CompositeGlyph) 
 
 Required tags: `head`, `hhea`, `maxp`, `hmtx`, `cmap`, `loca`, `glyf`. Optional:
 `kern`, `OS/2`, `name`, `post`. Unknown tags are ignored. `cmap` formats 0, 4,
-6 and 12 are supported; other formats raise `Unsupported`.
+6 and 12 are readable; a subtable of any other format is skipped during
+selection. `Cmap::parse` raises `Unsupported` only when no readable subtable
+exists at all, so `Cmap::format()` always returns one of those four values.
 
 **`outline`**
 
@@ -316,7 +326,7 @@ A caller needs exactly one `try`/`raise` handler for the whole library.
   variant, field label, re-export or `Show` string changes. `pkg.generated.mbti`
   may grow; a diff that changes an existing line is a break.
 - **0.2.0 (minor).** May add subpackages (`cff`, `woff`, `variations`) and
-  additive functions. Changing a façade signature, removing a re-export,
+  additive functions. Changing a facade signature, removing a re-export,
   changing a `Refused` field label or changing `CoverageMask` semantics requires
   a minor version **and** a migration note, **and** a regenerated differential
   corpus.
@@ -345,15 +355,15 @@ The following are implementation detail and may change within a patch release:
 the nine private fields of `Face`; the set of `tag_*` helper functions; private
 structs in `raster`; the order of `Directory.records`; the exact `Show` wording
 of `Refused` beyond the variant name and the values it prints; the rasteriser's
-internal subsample count; and which `cmap` subtable wins when several are
-equally eligible (the result must be deterministic and must satisfy the pinned
+internal subsample count; and the fixed ranking order used to choose a `cmap`
+subtable (the choice must be deterministic and must satisfy the pinned
 goldens).
 
 The following are not part of the surface at all and must not be inferred from a
 `pkg.generated.mbti` that happens to mention them: `Source`, `Reader`,
 `TableDirectory`, `Collection`, `Charmap`, `OutlineSink`, `RasterTarget`,
 `ColourPainter`, `LayoutEngine`, `VariationLocation` and `Writer` as **named
-traits or types**. They are convergent abstractions documented in `SPEC.md` §4,
+traits or types**. They are convergent abstractions documented in `SPEC.md` section 4,
 realised by concrete MoonBit values or deliberately not opened. Introducing any
 of them as a public trait is an additive API change requiring a version of this
 file.

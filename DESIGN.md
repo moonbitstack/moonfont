@@ -255,8 +255,10 @@ The 4px unit is a quarter of the 16px em, not an arbitrary grid: the spacing sca
 
 Inputs are the `.mbti` files produced by `moon info` for each package under `src/`, and the `///|` doc-comment blocks immediately preceding each declaration in the `.mbt` sources. Package paths come from `moon.pkg` and `moon.mod`, for example `moonbitstack/moonfont/model`.
 
-- Collect paths with `sorted()` over an explicit list; never emit in `os.listdir`, `glob`, `set` or `dict` iteration order.
+- Package section prose (`.pkg-doc`) is the leading `//` note in `moon.pkg`; omit `.pkg-doc` entirely when there is none.
+- Discover `.mbti` paths recursively under `src/` and sort them before anything is emitted; never emit in raw discovery order, or in `set` or `dict` iteration order. Discovery must be automatic: adding a package under `src/` requires no edit to the generator.
 - Sort packages by path. Sort declarations within a package by `(KIND_RANK[kind], qualified_name)`, where `KIND_RANK` is a fixed literal ordering: `type, trait, impl, const, fn, method`. Sort fields, variants and parameters by name. Doc paragraphs keep source order.
+- Emit every declaration present in the `.mbti`, including derived `Eq` and `Debug` methods. Do not filter by name or by whether a doc comment exists: a declaration with no note still gets `.entry-kind` and `.sig`, but no `.entry-doc` element, and an empty `.pkg-doc` or `.entry-doc` is never emitted.
 - Do not depend on file mtimes, the current working directory, locale, Python version, or the internal ordering of `.mbti` entries; sort after parsing.
 - Output one complete `docs/api.html` in UTF-8, LF line endings, no BOM, exactly one trailing newline, via an explicit `newline="\n"` write.
 - The output contains **no date, time, build identifier, version string, script name, absolute path or environment-derived count**. Running the script twice produces byte-identical output; this is the acceptance check.

@@ -43,7 +43,7 @@ not repeated here.
 - **RECOMMENDED**: A, with C recorded as the fallback if the user prefers B. The task card explicitly names glyph rasterisation, and the consumer seam observed in `moonegui@0.1.0` and a third-party WGSL renderer is an alpha mask.
 - **Rationale**: The disconfirming search found an independent public charter (`RFC 0004: mb-font Charter`) arguing the opposite: "the consumer rasterizes via mb-canvas", with pixel storage in `mb-image` and shaping in `mb-text`. Its provenance and authority relative to moonbitstack are unverified, but the disagreement is real and must not be assumed away. Option C is cheap insurance: an isolated `raster/` package can be consumed or ignored.
 - **Who decides**: User, via team-lead. This is a scope and architecture boundary, not a technical detail.
-- **Status**: `Open - needs decision`. Must be resolved before P1 is frozen.
+- **Status**: `Decided - A`. The task card explicitly names glyph rasterisation, and the team-lead confirmed option A on the user's behalf; the implementation ships an 8-bit coverage mask plus metrics. D-02 is closed.
 - **Door**: One-way. It determines the public API and which downstream package owns the pixel.
 
 ### D-03 - Outline representation
@@ -123,7 +123,7 @@ not repeated here.
 - **RECOMMENDED**: A.
 - **Rationale**: HarfBuzz owns shaping and explicitly delegates rasterisation; FreeType's FAQ excludes text layout; Go `sfnt` carries TODO comments for shaping and ligatures; fontdue calls shaping a non-goal; skrifa needs three more crates for a complete stack. This keeps `moonbitstack/moonucd@0.1.4` in the layout layer rather than in moonfont. The disconfirming evidence (`SixLabors.Fonts` and `mizchi/font` both ship layout) narrowed the recommendation rather than overturning it: simple horizontal advances and legacy `kern` pairs remain available as data.
 - **Who decides**: Team-lead, with the architect. The user should confirm this if a consumer expects shaped text from moonfont.
-- **Status**: `Proposed`.
+- **Status**: `Decided - A`. The team-lead confirmed option A; moonfont exposes advances, bearings and optional legacy kern pair data only, with no shaping. D-10 is closed.
 - **Door**: One-way. Adding shaping later would change the library's contract and dependency set.
 
 ### D-11 - Hinting and determinism
@@ -186,10 +186,10 @@ summary, not a second source of truth; the full entries are above.
 
 ## Open Items Requiring a Decision Card
 
-Two entries are not settled by this ledger and must not be assumed:
+Both entries below were settled during delivery and are recorded as decided:
 
-1. **D-02**: whether rasterisation stays in moonfont. A public charter argues the opposite boundary; the task card argues for rasterisation. This is a scope choice with an irreversible API consequence.
-2. **D-10**: whether any consumer expects shaped text from moonfont. If a consumer does, the layout boundary must be drawn explicitly with that consumer's owner, not inferred here.
+1. **D-02**: rasterisation stays inside moonfont (option A). Confirmed by the team-lead on the user's behalf; the task card names glyph rasterisation.
+2. **D-10**: no shaping (option A). Confirmed by the team-lead; moonfont exposes advances, bearings and legacy kern data only.
 
 All other entries are recommendations for the named decider to ratify. No
 implementation work, no version pinning in `moon.mod`, and no repository

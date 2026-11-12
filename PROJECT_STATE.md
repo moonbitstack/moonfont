@@ -26,46 +26,56 @@ tests as the correctness oracle.
 
 ## Phase
 
-Phase 1 (research and architecture) in progress. Phase 2 (design) in progress
-in parallel because the documentation site has no dependency on the library's
-internal API.
+v0.1.0 vertical slice delivered. The library core, the differential-test
+harness and the documentation site are all in place and pass every gate.
+Deferred capabilities (CFF, WOFF, WOFF2, variable fonts, colour/bitmap glyphs,
+subsetting, hinting) are scoped in `SPEC.md` and not part of v0.1.0.
 
-## Completed (paths only)
+## Delivered (paths only)
 
-- `.git/` — local repository, branch `master`
-- `.gitignore`
-- `PROJECT_STATE.md`
+- `src/` — the library: `model`, `wire`, `sfnt`, `table`, `outline`, `raster`,
+  `layout` and the `src/` façade. Zero external dependencies in the core.
+- `src/testdata_test.mbt`, `src/font_test.mbt`, `src/corpus_test.mbt` — unit,
+  end-to-end and hostile-corpus tests.
+- `scripts/docs/gen_api.py` — the interface-export to static-page generator.
+- `docs/` — `api.html`, `index.html`, `guide.html`, `showcase.html`,
+  `difftest.html`, `style.css`, `site.js`, `theme.js`, `favicon.svg`,
+  `difftest.json`.
+- `scripts/difftest/` — `make_font.py`, `make_fixtures.py`, `verify_fixtures.py`,
+  `index_fixtures.py`, `make_corpus.py`, `embed_corpus.py`.
+- `integration/difftest/` — the corpus (39 cases) and the offline fixtures
+  (6 categories, 470 checks).
+- `research/` — `brief.md`, `systems-libraries.md`, `managed-libraries.md`,
+  `longtail-and-architecture.md`, `corpus-conformance.md`.
+- `SPEC.md`, `DESIGN.md`, `DECISIONS.md`, `contracts/` (API, DIFFTEST, LAYOUT),
+  `evidence/` (verification, quality-gates, verdict).
+- `README.md`, `Makefile`, `.github/workflows/` (ci, docs).
 
-## In progress
+## Decisions
 
-- `general-purpose-1` — `research/systems-libraries.md` (C, C++, Rust, Go)
-- `general-purpose-2` — `research/managed-libraries.md` (JVM, .NET, JS, Python)
-- `general-purpose-3` — `research/longtail-and-architecture.md`
-  (Haskell, Kotlin, PHP, Swift, Ruby, plus cross-language synthesis)
-- `mvp-dev-expert-team-architect` — `SPEC.md`, `contracts/API.md`,
-  `contracts/DIFFTEST.md`, `contracts/LAYOUT.md`
-- `mvp-dev-expert-team-designer` — `DESIGN.md`
-- `team-lead` — dependency API probe, toolchain verification
+- D-02 — rasterisation stays inside moonfont (option A). Decided. The task card
+  names glyph rasterisation; the library ships an 8-bit coverage mask.
+- D-10 — no shaping (option A). Decided. moonfont exposes advances, bearings and
+  optional legacy kern pair data only.
+- Core dependency set — zero external packages in the parser core; reserved
+  dependencies are documented in `SPEC.md` and `DECISIONS.md`.
+- Static site stack — plain HTML/CSS/JS plus a Python generator, matching the
+  sibling sites; `docs/` uploads directly to GitHub Pages with no build step.
 
-## Pending decisions (recommendation first)
+## Gate status
 
-1. v0.1.0 format coverage — **recommended**: SFNT, TrueType `glyf` outlines,
-   `cmap` formats 0/4/6/12, core metrics tables, TTC; CFF, WOFF, WOFF2,
-   variable and colour fonts in later phases. Reason: one complete vertical
-   slice from bytes to coverage mask before widening.
-2. Core dependency set — **recommended**: zero external packages in the parser
-   core; `moonbitstack/moonzip@0.3.8` reserved for WOFF, `moonbase@0.4.5` for
-   fixture encoding in `integration/`. Reason: the core stays portable and the
-   dependency rule is still honoured where a dependency is genuinely needed.
-3. Static site stack — **recommended**: plain HTML/CSS/JS plus a Python
-   generator, matching the sibling sites. Reason: `docs/` uploads directly to
-   GitHub Pages with no build step.
+All ten gates pass on every push to `master` (CI). Locally verified on
+2026-11-12: `moon check --target all --deny-warn` clean, `moon test --target
+all` 13/13 on wasm, wasm-gc, js and native, `moon fmt` clean, `moon info`
+current, `gen_api.py --check` current, `embed_corpus.py --check` current,
+`verify_fixtures.py --check` OK (470), `make_corpus.py --check` OK (39),
+`check_snippets.py` clean. See `evidence/`.
 
-## Next steps
+## Next steps (deferred, not v0.1.0)
 
-1. Assemble the three research briefs, then have the architect's SPEC absorb
-   any capability gaps they expose.
-2. Spawn Phase 3 implementation (library core + differential-test harness in
-   parallel with the static site and its generator) once the contracts land.
-3. Run `moon check`, `moon test`, `moon info --target all`, the generator's
-   `--check` mode, then make local commits.
+1. CFF1/CFF2 outlines and the OpenType `CFF`/`CFF2` tables.
+2. WOFF/WOFF2 container adapters behind the reserved `moonzip` dependency.
+3. Variable fonts: `fvar`/`avar`/`gvar`/`HVAR` instances and instancing.
+4. Colour and bitmap glyphs (`COLR`/`CPAL`, `sbix`, `CBDT`) as extraction only.
+5. Subsetting and symmetric `decode`/`encode` writing.
+6. Optional `SDF`/`MSDF` render mode behind a second render-mode seam.
