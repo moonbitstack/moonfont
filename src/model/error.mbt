@@ -7,6 +7,9 @@
 // this not a font (Unknown), is it damaged (Truncated, Malformed), is it a part
 // we do not read (Unsupported, MissingTable), or did it ask for more than the
 // caller allowed (OverLimit, Recursion).
+//
+// Fallible entry points raise this suberror; there is no Result type, so a
+// caller wraps every decode and rasterise call in a single handler.
 
 ///|
 /// A refusal to read bytes as a font, or to turn a glyph into a bitmap.

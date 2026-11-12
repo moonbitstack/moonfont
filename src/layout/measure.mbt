@@ -4,6 +4,9 @@
 // A measured run is a sum in 26.6 pixels. Keeping the sum in the same fixed
 // point as the rasteriser means `measure` and `rasterise` agree about where the
 // next glyph starts, with no conversion at the boundary.
+//
+// This is measurement only: advances plus kerning. Shaping (GSUB/GPOS, bidi,
+// line-breaking) is a separate library and is excluded from the core.
 
 ///|
 /// The horizontal extent of a run of glyph ids, plus the font's vertical

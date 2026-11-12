@@ -7,6 +7,10 @@
 // js and native for the same bytes, and no differential test could then say
 // what the right answer was. Integer arithmetic makes the mask a function of
 // the input alone.
+//
+// This single 8-bit layer is the only raster mode for 0.1.x. Colour and bitmap
+// glyphs (COLR/sbix/CBDT) and SDF/MSDF modes are reserved for v0.3.0, and
+// glyphs are rendered unhinted; hinting is a gated later release.
 
 ///|
 priv struct Edge {

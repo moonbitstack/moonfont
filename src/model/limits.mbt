@@ -7,7 +7,8 @@
 // guards. The ceilings also cap the work a single glyph can cause.
 
 ///|
-/// The ceilings a reader works under.
+/// The ceilings a reader works under. A caller-built Limits is not validated at
+/// construction; the intended `Limits::validate()` guard is advisory for v0.2.0.
 pub(all) struct Limits {
   /// The largest font file accepted, in bytes.
   file_bytes : Int32

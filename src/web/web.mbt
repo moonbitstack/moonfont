@@ -6,6 +6,8 @@
 // top-level functions; everything else in the library stays behind them. A
 // caller decodes a font once, keeps the returned face, and asks it for masks,
 // metrics and SVG outlines as the interface needs them.
+// The exported set is a deliberate subset of the façade; outline_svg is a
+// web-only convenience and is not part of the core contract.
 //
 // The wrappers that can fail (decode, rasterise, outline) carry
 // `raise @moonfont.Refused` so the library's Refused error propagates to the

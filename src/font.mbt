@@ -5,6 +5,9 @@
 // method on that face. The types are re-exported from the model, so a caller
 // that only imports `moonfont` has the error, the limits, the metrics and the
 // masks in hand without knowing how many packages sit underneath.
+//
+// The re-export list above is closed for 0.1.x; later releases are additive
+// only. The inverse transform (encode, subset) is reserved for v0.3.0.
 
 ///|
 pub using @model {

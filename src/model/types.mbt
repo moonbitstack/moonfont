@@ -195,6 +195,8 @@ pub fn CoverageMask::at(self : CoverageMask, x : Int32, y : Int32) -> Int32 {
 /// rasteriser that used floating point would produce different coverage on
 /// wasm, js and native for the same bytes, and a differential test could not
 /// say what the right answer is.
+/// Variable fonts (fvar/gvar/HVAR) are out of scope for 0.1.x; the default
+/// instance is used and a variation seam is reserved for v0.2.0.
 pub(all) struct Scale {
   /// Pixels per em, in 26.6 fixed point.
   ppem : Int32

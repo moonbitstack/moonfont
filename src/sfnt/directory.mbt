@@ -5,6 +5,10 @@
 // layer for one range and gets a cursor that cannot walk outside it: a table
 // decoder therefore cannot read another table's bytes by accident, and a
 // hostile offset is refused at the directory rather than deep in a parser.
+//
+// Only TrueType `glyf` outlines are read. CFF and CFF2 (an `OTTO` container
+// without `glyf`) are refused as MissingTable, and a PostScript-outline
+// interpreter is reserved for v0.2.0.
 
 ///|
 /// Table tags are four ASCII bytes held as a word. Comparison stays integer

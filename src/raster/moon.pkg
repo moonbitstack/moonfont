@@ -1,5 +1,8 @@
 // The one place that decides how geometry becomes coverage. It consumes path
 // commands and knows nothing about SFNT, tables, charmaps or files.
+// Dependency contract: this package may import only `model`. The raster -> model
+// direction is a hard rule (LD-01); the CI gate that enforces it is not yet
+// present in 0.1.x, so reviewers must check imports by hand.
 import {
   "moonbitstack/moonfont/model",
 }
