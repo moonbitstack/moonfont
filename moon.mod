@@ -1,15 +1,15 @@
-name = "moonbitstack/CHANGE-ME"
+name = "moonbitstack/moonfont"
 
 version = "0.1.0"
 
 readme = "README.md"
 
-repository = "https://github.com/moonbitstack/CHANGE-ME"
+repository = "https://github.com/moonbitstack/moonfont"
 
 license = "Apache-2.0"
 
-keywords = [ "moonbit", "CHANGE-ME" ]
+keywords = [ "moonbit", "font", "truetype", "opentype", "glyph", "rasterizer" ]
 
-description = "One sentence saying what this is and what it is not."
+description = "Font parsing and glyph rasterisation: outlines, metrics and coverage masks. Not a text shaper."
 
 source = "src"
