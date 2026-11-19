@@ -1,0 +1,30 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonfont/web"
+
+import {
+  "moonbitstack/moonfont",
+  "moonbitstack/moonfont/model",
+}
+
+// Values
+pub fn decode(Bytes) -> @moonfont.Face raise @model.Refused
+
+pub fn font_metrics(@moonfont.Face) -> @model.FontMetrics
+
+pub fn glyph_index(@moonfont.Face, Int32) -> Int32
+
+pub fn num_glyphs(@moonfont.Face) -> Int32
+
+pub fn outline_svg(@moonfont.Face, Int32) -> String raise @model.Refused
+
+pub fn rasterise(@moonfont.Face, Int32, Int32) -> @model.CoverageMask raise @model.Refused
+
+pub fn units_per_em(@moonfont.Face) -> Int32
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

@@ -22,11 +22,14 @@ Each exclusion is a separate concern with its own owner, not a gap to paper over
 ## From bytes to a mask
 
 ```moonbit
-let face = @moonfont.decode(font_bytes, limits=@moonfont.Limits::strict())
-let glyph = face.glyph_index(65).unwrap()
-let outline = face.outline(glyph)
-let mask = face.rasterise(glyph, 16)
-let measured = face.measure("Hello", 16)
+fn draw_a(font_bytes : Bytes) -> Unit raise {
+  let face = @moonfont.decode(font_bytes, limits=@moonfont.Limits::strict())
+  guard face.glyph_index(65) is Some(glyph) else { return }
+  let outline = face.outline(glyph)
+  let mask = face.rasterise(glyph, 16)
+  let measured = face.measure("Hello", 16)
+  ignore((outline, mask, measured))
+}
 ```
 
 `decode_all` reads every face in a collection. `Face::metrics` gives advance and

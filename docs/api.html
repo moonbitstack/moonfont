@@ -49,6 +49,7 @@
           <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fraster"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>raster</span><span class="case-index-count">1</span></a></li>
           <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fsfnt"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>sfnt</span><span class="case-index-count">19</span></a></li>
           <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2ftable"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>table</span><span class="case-index-count">30</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fweb"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>web</span><span class="case-index-count">7</span></a></li>
           <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fwire"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>wire</span><span class="case-index-count">23</span></a></li>
         </ol>
       </nav>
@@ -478,7 +479,7 @@
                 <li class="entry-field"><b class="field-name">table_bytes</b><span class="field-type">Int32</span><span class="field-doc">The largest single table accepted, in bytes.</span></li>
               </ul>
               <div class="entry-doc">
-                <p>The ceilings a reader works under.</p>
+                <p>The ceilings a reader works under. A caller-built Limits is not validated at construction; the intended <code>Limits::validate()</code> guard is advisory for v0.2.0.</p>
               </div>
             </article>
             <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--outline--type">
@@ -583,7 +584,7 @@
                 <li class="entry-field"><b class="field-name">units_per_em</b><span class="field-type">Int32</span></li>
               </ul>
               <div class="entry-doc">
-                <p>A size in 26.6 fixed point. The whole library computes with integers: a rasteriser that used floating point would produce different coverage on wasm, js and native for the same bytes, and a differential test could not say what the right answer is.</p>
+                <p>A size in 26.6 fixed point. The whole library computes with integers: a rasteriser that used floating point would produce different coverage on wasm, js and native for the same bytes, and a differential test could not say what the right answer is. Variable fonts (fvar/gvar/HVAR) are out of scope for 0.1.x; the default instance is used and a variation seam is reserved for v0.2.0.</p>
               </div>
             </article>
             <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--textmetrics--type">
@@ -997,7 +998,7 @@
             <h2 class="pkg-name">moonbitstack/moonfont/raster</h2>
             <span class="pkg-kind">package</span>
           </div>
-          <div class="pkg-doc"><p>The one place that decides how geometry becomes coverage. It consumes path commands and knows nothing about SFNT, tables, charmaps or files.</p></div>
+          <div class="pkg-doc"><p>The one place that decides how geometry becomes coverage. It consumes path commands and knows nothing about SFNT, tables, charmaps or files. Dependency contract: this package may import only <code>model</code>. The raster -&gt; model direction is a hard rule (LD-01); the CI gate that enforces it is not yet present in 0.1.x, so reviewers must check imports by hand.</p></div>
           <div class="pkg-list">
             <article class="entry" id="d--moonbitstack-2fmoonfont-2fraster--rasterise--fn">
               <div class="entry-head">
@@ -1560,6 +1561,85 @@
                 <h3 class="entry-name">Os2::parse</h3>
               </div>
               <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">Os2::parse</span>(<span class="tok-fn">cursor</span> <span class="tok-op">:</span> <span class="tok-ty">@wire.Cursor</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Os2</span> <span class="tok-kw">raise</span> <span class="tok-ty">@model.Refused</span></code>
+            </article>
+          </div>
+        </section>
+        <section class="pkg" id="p--moonbitstack-2fmoonfont-2fweb">
+          <div class="pkg-head">
+            <h2 class="pkg-name">moonbitstack/moonfont/web</h2>
+            <span class="pkg-kind">package</span>
+          </div>
+          <div class="pkg-doc"><p>The web adapter. It re-exposes moonfont through a flat surface that a browser caller can use without constructing or introspecting MoonBit structs: every entry point takes and returns only primitives, Bytes or Strings. The CoverageMask and FontMetrics records it returns are read by field from JavaScript.</p><p>This package is a foreign library so the JS and WASM backends emit a loadable module whose named exports are the browser-facing surface below. Each export is pinned with #export_name so the names survive minification and are stable across backends.</p></div>
+          <div class="pkg-list">
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--decode--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">decode</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">decode</span>(<span class="tok-fn">bytes</span> <span class="tok-op">:</span> <span class="tok-ty">Bytes</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@moonfont.Face</span> <span class="tok-kw">raise</span> <span class="tok-ty">@moonfont.Refused</span></code>
+              <div class="entry-doc">
+                <p>Decode a font from its bytes. Raises on input the library refuses.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--font-5fmetrics--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">font_metrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">font_metrics</span>(<span class="tok-fn">face</span> <span class="tok-op">:</span> <span class="tok-ty">@moonfont.Face</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@moonfont.FontMetrics</span></code>
+              <div class="entry-doc">
+                <p>Font-wide metrics as plain integers, in font units.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--glyph-5findex--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">glyph_index</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">glyph_index</span>(<span class="tok-fn">face</span> <span class="tok-op">:</span> <span class="tok-ty">@moonfont.Face</span>, <span class="tok-fn">codepoint</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>The glyph id for a Unicode codepoint, or -1 when the font has no glyph.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--num-5fglyphs--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">num_glyphs</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">num_glyphs</span>(<span class="tok-fn">face</span> <span class="tok-op">:</span> <span class="tok-ty">@moonfont.Face</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>The number of glyphs in the face.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--outline-5fsvg--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">outline_svg</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">outline_svg</span>(<span class="tok-fn">face</span> <span class="tok-op">:</span> <span class="tok-ty">@moonfont.Face</span>, <span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">String</span> <span class="tok-kw">raise</span> <span class="tok-ty">@moonfont.Refused</span></code>
+              <div class="entry-doc">
+                <p>One glyph's outline as an SVG path in font units, with y flipped so it draws correctly in SVG space. Used for vector display and for 3D extrusion.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--rasterise--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">rasterise</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">rasterise</span>(<span class="tok-fn">face</span> <span class="tok-op">:</span> <span class="tok-ty">@moonfont.Face</span>, <span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">pixels_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@moonfont.CoverageMask</span> <span class="tok-kw">raise</span> <span class="tok-ty">@moonfont.Refused</span></code>
+              <div class="entry-doc">
+                <p>Eight-bit coverage of one glyph at a pixel size. <code>samples</code> is a Uint8Array of length <code>width * height</code>, row-major and top-down, values 0..255.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--units-5fper-5fem--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">units_per_em</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">units_per_em</span>(<span class="tok-fn">face</span> <span class="tok-op">:</span> <span class="tok-ty">@moonfont.Face</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>The font's units-per-em, in font units.</p>
+              </div>
             </article>
           </div>
         </section>

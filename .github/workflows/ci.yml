@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - master
+  # Twice a month, so a new toolchain or a dependency's release shows up while nothing is pushed.
+  schedule:
+    - cron: "43 1 1,16 * *"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -58,6 +62,14 @@ jobs:
 
       - name: the embedded corpus matches the corpus files
         run: python3 scripts/difftest/embed_corpus.py --check
+
+      - name: the skills are valid
+        if: runner.os == 'Linux'
+        run: |
+          for dir in docs/skills/*/; do
+            [ -f "$dir/SKILL.md" ] || continue
+            pipx run --spec skills-ref agentskills validate "$dir"
+          done
 
       - name: the code in the docs compiles
         if: runner.os == 'Linux'
