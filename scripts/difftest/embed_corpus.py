@@ -133,7 +133,8 @@ def main() -> int:
         if not OUT.exists():
             print(f"{OUT.name} is missing; run scripts/difftest/embed_corpus.py", file=sys.stderr)
             return 1
-        current = OUT.read_text(encoding="utf-8", newline="")
+        with OUT.open(encoding="utf-8", newline="") as f:
+            current = f.read()
         match = re.search(r"//\s*embed-checksum:\s*([0-9a-f]{64})", current)
         if not match or match.group(1) != embed_checksum():
             print(f"{OUT.name} is out of date; run scripts/difftest/embed_corpus.py", file=sys.stderr)
