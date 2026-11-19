@@ -1,12 +1,11 @@
-# Ignore every hidden file and directory (tooling, editor and OS cruft)
 .*
+
+!.git*
 !.gitignore
 !.gitattributes
 !.github/
 
-# MoonBit build artefacts (non-hidden)
 _build/
 
-# Logs and OS cruft (non-hidden)
 *.log
 Thumbs.db
