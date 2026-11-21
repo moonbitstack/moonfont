@@ -1,0 +1,111 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonfont/variations"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/wire",
+}
+
+// Values
+pub fn div_round(Int64, Int64) -> Int32
+
+pub fn scale_f2dot14(Int32, Int32) -> Int32
+
+pub fn scale_fixed(Int32, Int32) -> Int32
+
+pub fn tag_name(Int32) -> String
+
+pub fn tag_of(String) -> Int32
+
+// Errors
+
+// Types and methods
+#derive(Eq, @debug.Debug)
+pub(all) struct Avar {
+  maps : Array[Array[(Int32, Int32)]]
+}
+pub fn Avar::map_axis(Self, Int32, Int32) -> Int32
+pub fn Avar::parse(@wire.Cursor, Int32, @model.Limits) -> Self raise @model.Refused
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Axis {
+  tag : Int32
+  min : Int32
+  default_value : Int32
+  max : Int32
+  flags : Int32
+  name_id : Int32
+}
+pub fn Axis::is_hidden(Self) -> Bool
+pub fn Axis::tag_name(Self) -> String
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Fvar {
+  axes : Array[Axis]
+  instances : Array[Instance]
+}
+pub fn Fvar::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
+
+#derive(@debug.Debug)
+pub(all) struct Gvar {
+  data : BytesView
+  axis_count : Int32
+  shared_tuples : Int32
+  glyph_count : Int32
+  offsets : Array[Int32]
+  offset_to_data : Int32
+}
+pub fn Gvar::deltas(Self, Int32, Int32, Array[Int32], Array[(Int32, Int32)], Array[Int32]) -> Array[(Int32, Int32)] raise @model.Refused
+pub fn Gvar::parse(@wire.Cursor, Int32, @model.Limits) -> Self raise @model.Refused
+
+#derive(@debug.Debug)
+pub(all) struct Hvar {
+  store : Store
+  advance_map : Int32
+  lsb_map : Int32
+  data : BytesView
+}
+pub fn Hvar::advance_delta(Self, Int32, Array[Int32]) -> Int32
+pub fn Hvar::lsb_delta(Self, Int32, Array[Int32]) -> Int32
+pub fn Hvar::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Instance {
+  subfamily_name_id : Int32
+  coords : Array[Int32]
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Location {
+  coords : Array[Int32]
+}
+pub fn Location::at(Self, Fvar, Int32) -> Int32
+pub fn Location::default(Fvar) -> Self
+pub fn Location::get(Self, Int32) -> Int32
+pub fn Location::normalise(Self, Fvar, avar? : Avar) -> Array[Int32]
+pub fn Location::of(Fvar, Array[(Int32, Int32)]) -> Self
+pub fn Location::set(Self, Fvar, Int32, Int32) -> Unit
+pub fn Location::set_axis(Self, Int32, Int32) -> Unit
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Region {
+  coordinates : Array[Int32]
+}
+pub fn Region::scalar(Self, Int32, Array[Int32]) -> Int32
+
+#derive(@debug.Debug)
+pub(all) struct Store {
+  data : BytesView
+  region_axis_count : Int32
+  regions : Array[Region]
+  items : Array[Int32]
+}
+pub fn Store::blend(Self, Int32, Array[Int32], Array[Int32]) -> Int32
+pub fn Store::delta(Self, Int32, Int32, Array[Int32]) -> Int32
+pub fn Store::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
+pub fn Store::region_count(Self, Int32) -> Int32
+
+// Type aliases
+
+// Traits

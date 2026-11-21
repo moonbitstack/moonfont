@@ -7,7 +7,7 @@ import {
 }
 
 // Values
-pub fn measure(Array[@model.GlyphId], @table.Hmtx, @model.FontMetrics, @model.Scale, @table.Kern, letter_spacing? : Int32) -> @model.TextMetrics
+pub fn measure(Array[@model.GlyphId], (Int32) -> Int32, @model.FontMetrics, @model.Scale, @table.Kern, letter_spacing? : Int32) -> @model.TextMetrics
 
 // Errors
 

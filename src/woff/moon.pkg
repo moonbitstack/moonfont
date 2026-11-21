@@ -1,0 +1,15 @@
+// Copyright 2026 Leo Cheng
+// SPDX-License-Identifier: Apache-2.0
+
+// The two compressed containers a web font arrives in. A WOFF file is an SFNT
+// with each table deflated; a WOFF2 file is one Brotli stream whose tables may
+// also be re-encoded. Both are turned back into the plain SFNT the rest of the
+// library reads, so exactly one reader understands table directories.
+//
+// Only the container is handled here: no table is interpreted beyond what the
+// WOFF2 transforms require to be put back the way the font declared it.
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonzip/zlib",
+  "moonbitstack/moonzip/brotli",
+}

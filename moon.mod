@@ -30,3 +30,7 @@ keywords = [
 description = "Font parsing and glyph rasterisation for MoonBit."
 
 source = "src"
+
+import {
+  "moonbitstack/moonzip@0.4.1",
+}

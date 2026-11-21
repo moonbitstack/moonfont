@@ -4,10 +4,11 @@ package "moonbitstack/moonfont/outline"
 import {
   "moonbitstack/moonfont/model",
   "moonbitstack/moonfont/table",
+  "moonbitstack/moonfont/variations",
 }
 
 // Values
-pub fn simple_outline(@table.SimpleGlyph) -> @model.Outline
+pub fn simple_outline(@table.SimpleGlyph, deltas? : Array[(Int32, Int32)]) -> @model.Outline
 
 // Errors
 
@@ -17,8 +18,12 @@ pub(all) struct GlyphSource {
   loca : @table.Loca
   limits : @model.Limits
 }
+pub fn GlyphSource::coordinates(Self, @model.GlyphId) -> Array[(Int32, Int32)] raise @model.Refused
+pub fn GlyphSource::ends(Self, @model.GlyphId) -> Array[Int32] raise @model.Refused
 pub fn GlyphSource::of(BytesView, @table.Loca, @model.Limits) -> Self
-pub fn GlyphSource::outline(Self, @model.GlyphId, depth? : Int32) -> @model.Outline raise @model.Refused
+pub fn GlyphSource::outline(Self, @model.GlyphId, depth? : Int32, variation? : @variations.Gvar, coords? : Array[Int32]) -> @model.Outline raise @model.Refused
+pub fn GlyphSource::phantom_deltas(Self, @model.GlyphId, @variations.Gvar, Array[Int32]) -> (Int32, Int32) raise @model.Refused
+pub fn GlyphSource::points(Self, @model.GlyphId) -> Int32 raise @model.Refused
 
 // Type aliases
 

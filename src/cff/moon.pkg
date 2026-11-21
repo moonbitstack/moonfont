@@ -1,0 +1,12 @@
+// Copyright 2026 Leo Cheng
+// SPDX-License-Identifier: Apache-2.0
+
+// PostScript outlines, as `CFF` and `CFF2` carry them: a table of indexes and
+// dictionaries that resolves to one charstring per glyph. Nothing here knows
+// about pixels; the result is the same path-command stream the TrueType reader
+// produces, so every consumer downstream sees one outline format.
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/wire",
+  "moonbitstack/moonfont/variations",
+}

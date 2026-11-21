@@ -9,15 +9,27 @@ import {
 // Values
 pub fn read(BytesView, @model.Limits) -> Array[Directory] raise @model.Refused
 
+pub fn tag_avar() -> Int32
+
+pub fn tag_cff() -> Int32
+
+pub fn tag_cff2() -> Int32
+
 pub fn tag_cmap() -> Int32
 
+pub fn tag_fvar() -> Int32
+
 pub fn tag_glyf() -> Int32
+
+pub fn tag_gvar() -> Int32
 
 pub fn tag_head() -> Int32
 
 pub fn tag_hhea() -> Int32
 
 pub fn tag_hmtx() -> Int32
+
+pub fn tag_hvar() -> Int32
 
 pub fn tag_kern() -> Int32
 

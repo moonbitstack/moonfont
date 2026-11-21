@@ -6,6 +6,9 @@ import {
 }
 
 // Values
+pub let limits : Limits
+
+pub let limits_strict : Limits
 
 // Errors
 #derive(Eq, @debug.Debug)
@@ -99,6 +102,7 @@ pub fn Limits::check_mask(Self, Int32, Int32) -> Unit raise Refused
 pub fn Limits::check_outline(Self, Int32, Int32) -> Unit raise Refused
 pub fn Limits::check_table(Self, Int32) -> Unit raise Refused
 pub fn Limits::default() -> Self
+pub fn Limits::new(file_bytes? : Int32, table_bytes? : Int32, glyphs? : Int32, points? : Int32, contours? : Int32, composites? : Int32, recursion? : Int32, mask_pixels? : Int32) -> Self
 pub fn Limits::strict() -> Self
 
 pub(all) struct Outline {

@@ -1,0 +1,62 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonfont/cff"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/variations",
+  "moonbitstack/moonfont/wire",
+}
+
+// Values
+pub let call_depth : Int32
+
+pub let ops_per_glyph : Int32
+
+// Errors
+
+// Types and methods
+pub struct Dict {
+  mut char_strings : Int32
+  mut charstring_type : Int32
+  mut private_size : Int32
+  mut private_offset : Int32
+  mut subrs : Int32
+  mut fd_array : Int32
+  mut fd_select : Int32
+  mut vstore : Int32
+  mut vsindex : Int32
+  mut matrix_scale : Int32
+  mut matrix_set : Bool
+  mut is_cid : Bool
+}
+
+pub struct Font {
+  data : BytesView
+  is_cff2 : Bool
+  top : Dict
+  char_strings : Index
+  gsubrs : Index
+  locals : Array[Index]
+  fds : Array[Int32]
+  matrix_scale : Int32
+  var_store : @variations.Store?
+  default_vsindex : Int32
+}
+pub fn Font::glyph_count(Self) -> Int32
+pub fn Font::is_variable(Self) -> Bool
+pub fn Font::outline(Self, Int32, Array[Int32]) -> @model.Outline raise @model.Refused
+pub fn Font::parse(@wire.Cursor, Bool, Int32, @model.Limits) -> Self raise @model.Refused
+
+#derive(@debug.Debug)
+pub(all) struct Index {
+  data : BytesView
+  starts : Array[Int32]
+}
+pub fn Index::count(Self) -> Int32
+pub fn Index::item(Self, Int32) -> BytesView
+pub fn Index::parse(@wire.Cursor, Bool, @model.Limits) -> Self raise @model.Refused
+
+// Type aliases
+
+// Traits

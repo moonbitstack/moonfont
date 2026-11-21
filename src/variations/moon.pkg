@@ -1,0 +1,8 @@
+// What a variable font varies: axes, named instances, deltas per glyph, and
+// the item-variation store the other tables share. It turns user coordinates
+// into the normalised F2Dot14 space every table speaks, and nothing here
+// knows what a glyph or a table directory looks like.
+import {
+  "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/wire",
+}

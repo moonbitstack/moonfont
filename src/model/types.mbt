@@ -159,8 +159,9 @@ pub(all) struct FontMetrics {
 
 ///|
 /// Eight-bit coverage of one glyph, top-down rows, left-to-right columns.
-/// `left` and `top` place the box relative to the pen in 26.6 pixels, so a
-/// caller can blit it into an atlas without recomputing the origin.
+/// `left` and `top` place the box relative to the pen in whole pixels, `top`
+/// counted upwards, so a caller can blit it into an atlas without recomputing
+/// the origin.
 pub(all) struct CoverageMask {
   width : Int32
   height : Int32

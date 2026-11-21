@@ -4,4 +4,5 @@
 import {
   "moonbitstack/moonfont/model",
   "moonbitstack/moonfont/table",
+  "moonbitstack/moonfont/variations",
 }

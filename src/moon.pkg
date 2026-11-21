@@ -9,6 +9,9 @@ import {
   "moonbitstack/moonfont/outline",
   "moonbitstack/moonfont/raster",
   "moonbitstack/moonfont/layout",
+  "moonbitstack/moonfont/cff",
+  "moonbitstack/moonfont/woff",
+  "moonbitstack/moonfont/variations",
 }
 
 import {

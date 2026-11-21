@@ -6,8 +6,9 @@
 // that only imports `moonfont` has the error, the limits, the metrics and the
 // masks in hand without knowing how many packages sit underneath.
 //
-// The re-export list above is closed for 0.1.x; later releases are additive
-// only. The inverse transform (encode, subset) is reserved for v0.3.0.
+// A face is one of two outline kinds — quadratic through `glyf`, cubic through
+// `CFF` or `CFF2` — and either may vary along `fvar` axes. A caller never
+// branches on which: `outline`, `metrics` and `rasterise` answer the same way.
 
 ///|
 pub using @model {
@@ -24,6 +25,15 @@ pub using @model {
   type Scale,
   type TextMetrics,
 }
+
+///|
+/// The desktop preset, re-exported so one import reaches every name a caller
+/// needs.
+pub let limits : @model.Limits = @model.limits
+
+///|
+/// The untrusted-input preset.
+pub let limits_strict : @model.Limits = @model.limits_strict
 
 ///|
 /// The version of the library.
@@ -43,7 +53,12 @@ pub struct Face {
   cmap : @table.Cmap
   kern : @table.Kern
   os2 : @table.Os2
-  source : @outline.GlyphSource
+  source : @outline.GlyphSource?
+  cff : @cff.Font?
+  fvar : @variations.Fvar?
+  avar : @variations.Avar?
+  gvar : @variations.Gvar?
+  hvar : @variations.Hvar?
   limits : @model.Limits
 }
 
@@ -69,12 +84,6 @@ fn build(
     hhea.number_of_h_metrics,
     limits,
   )
-  let loca = @table.Loca::parse(
-    directory.table(bytes, @sfnt.tag_loca(), limits),
-    maxp.num_glyphs,
-    head.index_to_loc_format,
-    limits,
-  )
   let cmap = @table.Cmap::parse(
     directory.table(bytes, @sfnt.tag_cmap(), limits),
     limits,
@@ -89,34 +98,123 @@ fn build(
   } else {
     @table.Os2::empty()
   }
-  let glyf = directory.table(bytes, @sfnt.tag_glyf(), limits).all()
-  let source = @outline.GlyphSource::of(glyf, loca, limits)
-  { head, hhea, maxp, hmtx, cmap, kern, os2, source, limits, }
+  let mut source : @outline.GlyphSource? = None
+  let mut cff : @cff.Font? = None
+  if directory.has(@sfnt.tag_glyf()) {
+    let loca = @table.Loca::parse(
+      directory.table(bytes, @sfnt.tag_loca(), limits),
+      maxp.num_glyphs,
+      head.index_to_loc_format,
+      limits,
+    )
+    let glyf = directory.table(bytes, @sfnt.tag_glyf(), limits).all()
+    source = Some(@outline.GlyphSource::of(glyf, loca, limits))
+  } else if directory.has(@sfnt.tag_cff2()) {
+    cff = Some(
+      @cff.Font::parse(
+        directory.table(bytes, @sfnt.tag_cff2(), limits),
+        true,
+        head.units_per_em,
+        limits,
+      ),
+    )
+  } else if directory.has(@sfnt.tag_cff()) {
+    cff = Some(
+      @cff.Font::parse(
+        directory.table(bytes, @sfnt.tag_cff(), limits),
+        false,
+        head.units_per_em,
+        limits,
+      ),
+    )
+  } else {
+    raise @model.MissingTable(tag="glyf or CFF")
+  }
+  let fvar = if directory.has(@sfnt.tag_fvar()) {
+    Some(
+      @variations.Fvar::parse(
+        directory.table(bytes, @sfnt.tag_fvar(), limits),
+        limits,
+      ),
+    )
+  } else {
+    None
+  }
+  let avar = match fvar {
+    Some(table) if directory.has(@sfnt.tag_avar()) =>
+      Some(
+        @variations.Avar::parse(
+          directory.table(bytes, @sfnt.tag_avar(), limits),
+          table.axes.length(),
+          limits,
+        ),
+      )
+    _ => None
+  }
+  let gvar = if directory.has(@sfnt.tag_gvar()) {
+    Some(
+      @variations.Gvar::parse(
+        directory.table(bytes, @sfnt.tag_gvar(), limits),
+        maxp.num_glyphs,
+        limits,
+      ),
+    )
+  } else {
+    None
+  }
+  let hvar = if directory.has(@sfnt.tag_hvar()) {
+    Some(
+      @variations.Hvar::parse(
+        directory.table(bytes, @sfnt.tag_hvar(), limits),
+        limits,
+      ),
+    )
+  } else {
+    None
+  }
+  {
+    head,
+    hhea,
+    maxp,
+    hmtx,
+    cmap,
+    kern,
+    os2,
+    source,
+    cff,
+    fvar,
+    avar,
+    gvar,
+    hvar,
+    limits,
+  }
 }
 
 ///|
 /// Read the first face of a font file. A TrueType collection also has a first
-/// face; `decode_all` is the entry point for the rest of them.
+/// face; `decode_all` is the entry point for the rest of them. A WOFF or WOFF2
+/// container is unpacked first, so a caller never chooses an entry point by
+/// file extension.
 pub fn decode(
   bytes : BytesView,
-  limits? : @model.Limits,
+  limits~ : @model.Limits = @model.limits,
 ) -> Face raise @model.Refused {
-  let limits = limits.unwrap_or(@model.Limits::default())
-  let faces = @sfnt.read(bytes, limits)
-  build(bytes, faces[0], limits)
+  let plain = @woff.unpack(bytes, limits)
+  let faces = @sfnt.read(plain, limits)
+  build(plain, faces[0], limits)
 }
 
 ///|
 /// Read every face in the file. A plain font yields exactly one.
 pub fn decode_all(
   bytes : BytesView,
-  limits? : @model.Limits,
+  limits~ : @model.Limits = @model.limits,
 ) -> Array[Face] raise @model.Refused {
-  let limits = limits.unwrap_or(@model.Limits::default())
-  let directories = @sfnt.read(bytes, limits)
+  let plain = @woff.unpack(bytes, limits)
+  let directories = @sfnt.read(plain, limits)
   let faces : Array[Face] = []
   for i in 0..<directories.length() {
-    faces.push(build(bytes, directories[i], limits))
+    faces.push(build(plain, directories[i], limits))
   }
   faces
 }
@@ -131,6 +229,61 @@ pub fn Face::num_glyphs(self : Face) -> Int32 {
 /// The units in which outlines and advances are measured.
 pub fn Face::units_per_em(self : Face) -> Int32 {
   self.head.units_per_em
+}
+
+///|
+/// Whether the outlines are PostScript (`CFF` or `CFF2`) rather than TrueType.
+pub fn Face::is_postscript(self : Face) -> Bool {
+  self.cff is Some(_)
+}
+
+///|
+/// Whether the font varies, and therefore whether an outline is a function of
+/// a location rather than a constant.
+pub fn Face::is_variable(self : Face) -> Bool {
+  self.fvar is Some(_)
+}
+
+///|
+/// The axes a caller may set. Empty for a font that does not vary.
+pub fn Face::axes(self : Face) -> Array[@variations.Axis] {
+  match self.fvar {
+    Some(table) => table.axes
+    None => []
+  }
+}
+
+///|
+/// The named instances the font offers, in `fvar` order.
+pub fn Face::instances(self : Face) -> Array[@variations.Instance] {
+  match self.fvar {
+    Some(table) => table.instances
+    None => []
+  }
+}
+
+///|
+/// The default instance: every axis at its default, which is where a font
+/// without variation tables sits.
+pub fn Face::location(self : Face) -> @variations.Location {
+  match self.fvar {
+    Some(table) => @variations.Location::default(table)
+    None => { coords: [], }
+  }
+}
+
+///|
+/// A location on this face, from user-space axis values in 16.16 fixed point.
+/// An axis the caller does not name keeps its default, and a font without axes
+/// ignores every one of them.
+pub fn Face::at(
+  self : Face,
+  values : Array[(Int32, Int32)],
+) -> @variations.Location {
+  match self.fvar {
+    Some(table) => @variations.Location::of(table, values)
+    None => { coords: [], }
+  }
 }
 
 ///|
@@ -170,13 +323,70 @@ pub fn Face::glyph_for(self : Face, character : Char) -> @model.GlyphId? {
 }
 
 ///|
+/// The normalised coordinates of a location. A location with fewer values than
+/// the font has axes keeps the rest at their default.
+fn Face::normalise(
+  self : Face,
+  location? : @variations.Location,
+) -> Array[Int32] {
+  match (self.fvar, location) {
+    (Some(table), Some(at)) =>
+      match self.avar {
+        Some(mapping) => at.normalise(table, avar=mapping)
+        None => at.normalise(table)
+      }
+    _ => []
+  }
+}
+
+///|
 /// The outline of one glyph, in font units, as path commands. Curves are kept
-/// as curves; flattening is the rasteriser's decision.
+/// as curves; flattening is the rasteriser's decision. At a location, the
+/// glyph is the instance the design describes there.
 pub fn Face::outline(
   self : Face,
   glyph : @model.GlyphId,
+  location? : @variations.Location,
 ) -> @model.Outline raise @model.Refused {
-  self.source.outline(glyph)
+  let coords = self.normalise(location?)
+  match self.cff {
+    Some(font) => font.outline(glyph.to_int(), coords)
+    None =>
+      match (self.source, self.gvar) {
+        (Some(source), Some(table)) if coords.length() > 0 =>
+          source.outline(glyph, variation=table, coords~)
+        (Some(source), _) => source.outline(glyph)
+        (None, _) => raise @model.MissingTable(tag="glyf or CFF")
+      }
+  }
+}
+
+///|
+/// The advance width of one glyph in font units, at a location.
+pub fn Face::advance(
+  self : Face,
+  glyph : @model.GlyphId,
+  location? : @variations.Location,
+) -> Int32 {
+  let index = glyph.to_int()
+  let (width, _) = self.hmtx.metrics(index)
+  let coords = self.normalise(location?)
+  if coords.length() == 0 {
+    return width
+  }
+  match self.hvar {
+    Some(table) => width + table.advance_delta(index, coords)
+    None =>
+      match (self.gvar, self.source) {
+        (Some(table), Some(source)) => {
+          let (_, delta) = source.phantom_deltas(glyph, table, coords) catch {
+            _ => (0, 0)
+          }
+          width + delta
+        }
+        _ => width
+      }
+  }
 }
 
 ///|
@@ -184,16 +394,32 @@ pub fn Face::outline(
 pub fn Face::metrics(
   self : Face,
   glyph : @model.GlyphId,
+  location? : @variations.Location,
 ) -> @model.GlyphMetrics raise @model.Refused {
   let index = glyph.to_int()
   if index < 0 || index >= self.maxp.num_glyphs {
     raise @model.MissingGlyph(glyph=index)
   }
-  let (advance, bearing) = self.hmtx.metrics(index)
-  let outline = self.outline(glyph)
+  let (_, bearing) = self.hmtx.metrics(index)
+  let coords = self.normalise(location?)
+  let mut offset = 0
+  if coords.length() > 0 {
+    match self.hvar {
+      Some(table) => offset = table.lsb_delta(index, coords)
+      None =>
+        match (self.gvar, self.source) {
+          (Some(table), Some(source)) =>
+            offset = (source.phantom_deltas(glyph, table, coords) catch {
+                _ => (0, 0)
+              }).0
+          _ => ()
+        }
+    }
+  }
+  let outline = self.outline(glyph, location?)
   let result : @model.GlyphMetrics = {
-    advance,
-    left_side_bearing: bearing,
+    advance: self.advance(glyph, location?),
+    left_side_bearing: bearing + offset,
     bounds: outline.bounds(),
   }
   result
@@ -206,8 +432,9 @@ pub fn Face::rasterise(
   self : Face,
   glyph : @model.GlyphId,
   pixels_per_em : Int32,
+  location? : @variations.Location,
 ) -> @model.CoverageMask raise @model.Refused {
-  let outline = self.outline(glyph)
+  let outline = self.outline(glyph, location?)
   @raster.rasterise(outline, self.scale(pixels_per_em), self.limits)
 }
 
@@ -230,6 +457,7 @@ pub fn Face::measure(
   text : String,
   pixels_per_em : Int32,
   letter_spacing? : Int32,
+  location? : @variations.Location,
 ) -> @model.TextMetrics {
   let glyphs : Array[@model.GlyphId] = []
   for character in text {
@@ -238,9 +466,15 @@ pub fn Face::measure(
       None => ()
     }
   }
+  let at = location
   @layout.measure(
     glyphs,
-    self.hmtx,
+    index => {
+      match at {
+        Some(point) => self.advance(@model.GlyphId::of(index), location=point)
+        None => self.advance(@model.GlyphId::of(index))
+      }
+    },
     self.font_metrics(),
     self.scale(pixels_per_em),
     self.kern,

@@ -10,10 +10,12 @@
 
 ///|
 /// The horizontal extent of a run of glyph ids, plus the font's vertical
-/// rhythm at the same size.
+/// rhythm at the same size. Advances come from a function rather than a table
+/// because a variable font's advance depends on the location, and a caller
+/// that has no variation injects the constant width of the default instance.
 pub fn measure(
   glyphs : Array[@model.GlyphId],
-  hmtx : @table.Hmtx,
+  advance_of : (Int32) -> Int32,
   font : @model.FontMetrics,
   scale : @model.Scale,
   kern : @table.Kern,
@@ -22,8 +24,7 @@ pub fn measure(
   let spacing = letter_spacing.unwrap_or(0)
   let mut advance = 0
   for i in 0..<glyphs.length() {
-    let (width, _) = hmtx.metrics(glyphs[i].to_int())
-    advance += scale.apply(width)
+    advance += scale.apply(advance_of(glyphs[i].to_int()))
     if i + 1 < glyphs.length() {
       let pair = kern.between(glyphs[i].to_int(), glyphs[i + 1].to_int())
       advance += scale.apply(pair)

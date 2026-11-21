@@ -68,6 +68,36 @@ pub fn tag_os2() -> Int32 {
 }
 
 ///|
+pub fn tag_cff() -> Int32 {
+  0x43464620
+}
+
+///|
+pub fn tag_cff2() -> Int32 {
+  0x43464632
+}
+
+///|
+pub fn tag_fvar() -> Int32 {
+  0x66766172
+}
+
+///|
+pub fn tag_avar() -> Int32 {
+  0x61766172
+}
+
+///|
+pub fn tag_gvar() -> Int32 {
+  0x67766172
+}
+
+///|
+pub fn tag_hvar() -> Int32 {
+  0x48564152
+}
+
+///|
 /// The four signatures a TrueType-flavoured container may open with.
 fn sfnt_true() -> Int32 {
   0x00010000
@@ -103,6 +133,12 @@ pub fn tag_string(tag : Int32) -> String {
     0x6E616D65 => "name"
     0x706F7374 => "post"
     0x4F532F32 => "OS/2"
+    0x43464620 => "CFF "
+    0x43464632 => "CFF2"
+    0x66766172 => "fvar"
+    0x61766172 => "avar"
+    0x67766172 => "gvar"
+    0x48564152 => "HVAR"
     _ => "an unknown table"
   }
 }
