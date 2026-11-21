@@ -8,6 +8,7 @@
 // files, rasterise glyphs to coverage masks, read SVG outlines, and extrude
 // glyphs in WebGL. Nothing is uploaded and nothing is fetched from a network.
 
+import { startCollisionTray } from "./collision.js";
 import {
   decodeBytes,
   numGlyphs,
@@ -692,3 +693,12 @@ function init() {
 }
 
 init();
+
+// The tray runs its own small physics; this only hands it the element and the
+// page's motion preference.
+const tray = document.getElementById("tray");
+if (tray) {
+  startCollisionTray(tray, {
+    reduceMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  });
+}

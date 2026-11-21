@@ -154,6 +154,24 @@
       </header>
       <canvas id="lab3dCanvas" class="lab3d__canvas"></canvas>
     </section>
+    <!-- TRAY -->
+    <section id="tray" class="block">
+      <header class="block__head">
+        <p class="block__index">05 — Sort</p>
+        <h2 class="block__title">A tray of castings</h2>
+        <p class="block__lede">
+          Every shape below is a glyph this page decoded. Drag one, throw it, and
+          it falls, turns and stacks against its neighbours. The collision shape
+          is the coverage mask the rasteriser produced, sampled into a handful of
+          circles; the outline drawn on top is the same path the engine handed
+          out. Nothing here is a webfont.
+        </p>
+        <div class="field">
+          <button class="btn" data-refill type="button">Drop another</button>
+        </div>
+      </header>
+      <canvas class="tray__canvas" aria-label="Glyphs fall and stack in a tray"></canvas>
+    </section>
   </main>
 
   <footer class="footer">

@@ -6,24 +6,27 @@ One import, one door: hand over font bytes and get a face. No I/O, no platform
 font discovery, no C binding, no floating point. The same bytes produce the same
 coverage mask on wasm, wasm-gc, js and native.
 
-## What 0.1.0 reads
+## What it reads
 
-| In | Out, deliberately |
+| In | Out |
 | :-- | :-- |
-| SFNT, TrueType `glyf`, TrueType collections | CFF and CFF2 outlines |
-| `cmap` 0, 4, 6, 12 | GSUB and GPOS shaping |
-| `head`, `hhea`, `maxp`, `hmtx`, `loca`, `OS/2`, legacy `kern` | Bidi, line break, hyphenation |
-| Simple and composite glyphs | Point-matching composite components |
-| Quadratic and cubic path commands | WOFF and WOFF2 containers |
-| Eight-bit coverage masks, non-zero winding | Hinting, LCD subpixel, SDF |
+| SFNT, TrueType collections, WOFF, WOFF2 | every table a face needs, unpacked |
+| TrueType `glyf`, simple and composite | `MoveTo`, `LineTo`, `QuadTo`, `CubicTo`, `Close` |
+| `CFF` and `CFF2`, Type 2 charstrings | the same command stream, cubic curves kept cubic |
+| `fvar`, `avar`, `gvar`, `HVAR` | one outline per location, advances included |
+| `cmap` 0, 4, 6, 12 | a glyph id, or nothing |
+| `head`, `hhea`, `maxp`, `hmtx`, `loca`, `OS/2`, legacy `kern` | metrics in font units |
+| Eight-bit coverage, non-zero winding, 26.6 fixed point | a mask with its own origin |
 
-Each exclusion is a separate concern with its own owner, not a gap to paper over.
+Not read, by design: `GSUB` and `GPOS` shaping, bidirectional text and line
+breaking. Those belong to a text layout library that consumes this one; the
+positions it computes are the positions a rasteriser fills.
 
 ## From bytes to a mask
 
 ```moonbit
 fn draw_a(font_bytes : Bytes) -> Unit raise {
-  let face = @moonfont.decode(font_bytes, limits=@moonfont.Limits::strict())
+  let face = @moonfont.decode(font_bytes, limits=@moonfont.limits)
   guard face.glyph_index(65) is Some(glyph) else { return }
   let outline = face.outline(glyph)
   let mask = face.rasterise(glyph, 16)
@@ -32,8 +35,32 @@ fn draw_a(font_bytes : Bytes) -> Unit raise {
 }
 ```
 
-`decode_all` reads every face in a collection. `Face::metrics` gives advance and
-bearing in font units; `Face::scale` is shared by measurement and rasterisation.
+`decode` reads a plain font, a collection, a WOFF file or a WOFF2 file without
+being told which. `decode_all` returns every face in a collection.
+
+A face is either quadratic (through `glyf`) or cubic (through `CFF` or `CFF2`),
+and `is_postscript` says which without making a caller branch on it.
+
+## A variable font
+
+```moonbit
+fn heavy(font_bytes : Bytes) -> Unit raise {
+  let face = @moonfont.decode(font_bytes)
+  if face.is_variable() {
+    let at = face.at([(0x77676874, 700 * 65_536)])
+    let glyph = @moonfont.GlyphId::of(1)
+    let outline = face.outline(glyph, location=at)
+    let metrics = face.metrics(glyph, location=at)
+    ignore((outline, metrics))
+  }
+}
+```
+
+`face.at` takes axis values in 16.16 fixed point, keyed by the four-character
+tag. `face.axes()` lists what a font offers and `face.location()` is the default
+instance. The deltas are interpolated in integers, and the points a tuple does
+not name are inferred from their neighbours inside the same contour, so a sparse
+delta set still moves a smooth outline.
 
 ## Why integers
 
@@ -42,13 +69,33 @@ pixel row, exact horizontal area between non-zero-winding crossings, then an
 integer scale to 0..255. A `Float` rasteriser would disagree across backends;
 integer arithmetic makes the mask a pure function of the input.
 
+The same holds for interpolation: a normalised coordinate is F2Dot14, a
+variation scalar is 16.16, and a point is a whole font unit. Coverage is
+therefore identical on every target, which is what lets a differential test say
+what the right answer is.
+
 ## Defensive reading
 
 Every declared length is checked against `Limits` before the allocation it
 guards. A damaged or hostile file ends in one `Refused`, naming the byte offset:
 `Unknown`, `Unexpected`, `Unsupported`, `Truncated`, `OverLimit`, `Malformed`,
-`MissingTable`, `MissingGlyph`, `Recursion`. `Limits::strict()` is for untrusted
-uploads; `Limits::default()` is for an app's own assets.
+`MissingTable`, `MissingGlyph`, `Recursion`.
+
+```moonbit
+fn refuse_gently(font_bytes : Bytes) -> Int {
+  let outcome = try {
+    let face = @moonfont.decode(font_bytes, limits=@moonfont.limits_strict)
+    face.num_glyphs()
+  } catch {
+    _ => 0
+  }
+  outcome
+}
+```
+
+`limits_strict` is for bytes from somewhere else: a sixteenth of the file
+ceiling and an eighth of the points. `limits` is for an application's own
+assets. `Limits::new` changes one ceiling and keeps the rest at their defaults.
 
 ## Development
 
@@ -59,11 +106,12 @@ moon fmt
 moon info --target all
 ```
 
-The library is pure computation; it runs on wasm, wasm-gc, js and native.
+The chores that need a script are in `scripts/dev.py`: `api` regenerates the
+reference page from the interfaces, `embed` rebuilds the corpus literals, and
+`formats` rebuilds the differential fixtures and the test that replays them.
 
-Differential fixtures are produced offline by C, C++, C#, Python, Rust and Go
-oracles in `scripts/difftest/` and replayed by the MoonBit tests; no third-party
-MoonBit module is ever a dependency.
+Differential fixtures are produced offline by fontTools and FreeType and
+replayed by the MoonBit tests; no third-party MoonBit module is a dependency.
 
 ## Licence
 

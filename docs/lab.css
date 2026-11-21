@@ -391,3 +391,22 @@ code {
   html { scroll-behavior: auto; }
   .scrollcue span { animation: none; }
 }
+
+/* The tray: a glyph stack whose bodies are the rasteriser's own masks. The
+   canvas takes the pointer, so nothing inside it may be selected. */
+.tray__canvas {
+  display: block;
+  width: 100%;
+  height: min(58vh, 460px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 70%),
+    var(--bg-panel);
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.tray__canvas:active { cursor: grabbing; }
+#tray [data-refill] { user-select: none; }

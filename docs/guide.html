@@ -48,6 +48,7 @@
           <li class="case-index-item"><a class="case-index-link" href="#step-4"><span class="case-index-name">Rasterise at a size</span></a></li>
           <li class="case-index-item"><a class="case-index-link" href="#step-5"><span class="case-index-name">Measure a run</span></a></li>
           <li class="case-index-item"><a class="case-index-link" href="#step-6"><span class="case-index-name">Limits and refusals</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#step-7"><span class="case-index-name">Other formats, other instances</span></a></li>
         </ol>
       </nav>
       <div class="case-body">
@@ -160,6 +161,21 @@ MissingTable(tag~)                     required table absent
 MissingGlyph(glyph~)                   id outside maxp
 Recursion(depth~)                      composite nested too deep</code>
             <p><code>Refused::name()</code> returns the variant as a stable string, which is what a differential test records rather than the rendered prose. No public function panics, loops without a bound, or returns a partial value.</p>
+          </li>
+          <li id="step-7">
+            <h3>Other formats, other instances</h3>
+            <p>A face is not always quadratic and not always plain. <code>decode</code> accepts a TrueType collection, a WOFF file and a WOFF2 file without being told which; the compressed ones are unpacked to an ordinary SFNT in memory and read the same way. <code>is_postscript</code> says whether the outlines come from <code>glyf</code> or from <code>CFF</code>/<code>CFF2</code>; the command stream is the same either way, so a consumer never branches.</p>
+            <code class="sig">is_postscript()      false for glyf, true for CFF and CFF2
+decode_all(bytes)    one Face per face in a collection
+decode(woff2_bytes)  the same Face as the plain file</code>
+            <p>A variable font is the same face with a location. Axis values are 16.16 fixed point under the four-character tag, and the axes a font offers are data:</p>
+            <code class="sig">let face = @moonfont.decode(vf_bytes)
+face.is_variable()            true
+face.axes()                   [wght 400..900 default 400, wdth 75..100 default 100]
+let at = face.at([(0x77676874, 700 * 65536)])
+let outline = face.outline(gid, location=at)
+face.advance(gid, location=at)</code>
+            <p>Every point is a whole font unit and every scalar is 16.16, so two runs at the same location give the same outline on every backend. A font without axes ignores a location rather than refusing it, which keeps a caller from branching on <code>is_variable</code> at every call site.</p>
           </li>
         </ol>
 

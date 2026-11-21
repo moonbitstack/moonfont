@@ -108,3 +108,10 @@ jobs:
 
       - name: the embedded corpus is current
         run: python3 scripts/difftest/embed_corpus.py --check
+
+      # The format fixtures are generated offline too: fontTools and FreeType
+      # produce the expected outlines and ink, and the MoonBit test replays
+      # them. Regenerating needs both libraries, so CI only proves the fonts on
+      # disk are the ones the test carries.
+      - name: the format fixtures are current
+        run: python3 scripts/difftest/make_formats.py --check
