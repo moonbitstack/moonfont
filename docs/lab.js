@@ -107,7 +107,9 @@ function paintOutline(svgEl, path, units) {
   if (!path) return;
   const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
   p.setAttribute("d", path);
-  p.setAttribute("transform", `translate(0 ${units}) scale(1 -1)`);
+  // The engine emits the path with y already pointing down, in font units, so
+  // the pen origin is at the top of the viewBox: translate, do not flip.
+  p.setAttribute("transform", `translate(0 ${units})`);
   p.setAttribute("fill", "none");
   p.setAttribute("stroke", "#ededf0");
   p.setAttribute("stroke-width", String(units * 0.012));
