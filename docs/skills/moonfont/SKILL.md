@@ -45,9 +45,30 @@ Axis values are 16.16 fixed point under the four-character tag, so `700` is
 default instance, and a font without axes ignores a location entirely. Ask
 `face.is_variable()` before showing a user any controls.
 
+## Vertical text and the face's own measurements
+
+```moonbit
+fn column(font_bytes : Bytes) -> Unit raise {
+  let face = @moonfont.decode(font_bytes)
+  let at = face.at([(0x77676874, 900 * 65_536)])
+  let glyph = @moonfont.GlyphId::of(1)
+  let column_ascent = face.vertical_metrics(location=at).ascent
+  let step = face.advance_height(glyph, location=at)
+  let bearings = face.top_side_bearing(glyph, location=at)
+  let wide = face.font_metrics(location=at).ascent
+  ignore((column_ascent, step, bearings, wide))
+}
+```
+
+`vhea` and `vmtx` are read when a font has them; without them the vertical calls
+report the horizontal measurements and the advance height is the em, so a vertical
+layout never branches. `MVAR` moves the face's own measurements at a location, and
+`face.cvt()` reads the control values a hinting program would snap to, with `cvar`
+applied.
+
 ## Rules that catch people out
 
 - A font from outside the program is decoded with limits_strict; `limits` is for the program's own assets. A damaged or hostile file ends in one `Refused` that names the byte offset.
 - Outlines are `glyf` (quadratic) or `CFF`/`CFF2` (cubic), and `is_postscript` says which. Shaping (GSUB, GPOS), bidi and line breaking are out of scope: this library measures and fills, it does not reorder.
 - Masks are eight-bit coverage under the non-zero winding rule, computed in 26.6 fixed point, and `left`/`top` are whole pixels. Do not convert to `Float` to post-process a mask and expect the same bytes on every backend.
-- `decode` allocates: a WOFF or WOFF2 file is unpacked to a plain SFNT in memory before any table is read. Pass the bytes of one font once and keep the face.
+- `decode` allocates: the tables of a WOFF or WOFF2 file are decompressed into one buffer before any table is read, and a collection's faces share that buffer. Pass the bytes of one font once and keep the face.

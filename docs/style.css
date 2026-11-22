@@ -160,7 +160,6 @@
 html {
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
-  scrollbar-color: var(--rule) var(--stock);
   background: var(--stock);
 }
 
@@ -183,12 +182,48 @@ body {
 
 :where(input, textarea, [contenteditable]) { caret-color: var(--mark); }
 
-::-webkit-scrollbar { width: 12px; height: 12px; }
-::-webkit-scrollbar-track { background: var(--stock-deep); }
-::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--rule) 82%, var(--ink-faint));
-  border: 3px solid var(--stock-deep);
+/* The scrollbar is drawn, not inherited. The two standard properties live
+   only in the branch that has no ::-webkit-scrollbar, because setting either of
+   them makes Chrome drop the pseudo-element rules above. The track keeps its
+   width at the top of the page and only the thumb fades, so the layout does not
+   jump when it appears. */
+@supports selector(::-webkit-scrollbar) {
+  html::-webkit-scrollbar { width: 12px; height: 12px; }
+  html::-webkit-scrollbar-track { background: var(--stock-deep); }
+  html::-webkit-scrollbar-thumb {
+    border-radius: 99px;
+    border: 3px solid var(--stock-deep);
+    background-clip: content-box;
+    background-color: color-mix(in srgb, var(--ink) 26%, transparent);
+  }
+  html.at-top::-webkit-scrollbar-thumb { background-color: transparent; }
+  pre::-webkit-scrollbar, .table-wrap::-webkit-scrollbar,
+  .case-index::-webkit-scrollbar { width: 8px; height: 8px; }
+  pre::-webkit-scrollbar-track, .table-wrap::-webkit-scrollbar-track,
+  .case-index::-webkit-scrollbar-track { background: transparent; }
+  pre::-webkit-scrollbar-thumb, .table-wrap::-webkit-scrollbar-thumb,
+  .case-index::-webkit-scrollbar-thumb {
+    border-radius: 99px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    background-color: color-mix(in srgb, var(--ink) 14%, transparent);
+  }
+  pre:hover::-webkit-scrollbar-thumb, .table-wrap:hover::-webkit-scrollbar-thumb,
+  .case-index:hover::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--ink) 32%, transparent);
+  }
 }
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--ink) 26%, transparent) transparent;
+  }
+  html.at-top { scrollbar-color: transparent transparent; }
+}
+
+/* Code keeps the characters the reader has to type: no ligatures that turn
+   `>=` into a single glyph. Form controls do not inherit, so they are named. */
+html, button, input, textarea, select { font-variant-ligatures: no-contextual; }
 
 :where(a, button, input, select, [tabindex]):focus-visible {
   outline: 2px solid var(--focus);
@@ -308,6 +343,18 @@ code, .sig, .case-index-count, .field-name, .field-type, .tok-num {
   color: var(--mark-strong);
   border-bottom-color: var(--mark);
 }
+
+.github {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--ink-soft);
+}
+.github:hover { color: var(--mark-strong); background: var(--stock-deep); }
+.github svg { width: 19px; height: 19px; pointer-events: none; }
 
 .theme-toggle {
   display: inline-grid;

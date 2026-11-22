@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>moonfont — a font engine in your browser</title>
   <meta name="description" content="moonfont is a MoonBit font parser and rasteriser. This page runs it entirely in your browser: decode, rasterise, outline and extrude real font files, with no server." />
+  <meta name="color-scheme" content="light dark" />
+  <script>
+    (() => {
+      let chosen = null;
+      try { chosen = sessionStorage.getItem("moonfont-theme"); } catch (e) {}
+      const theme = chosen === "light" || chosen === "dark"
+        ? chosen
+        : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
   <link rel="icon" href="favicon.svg" />
   <link rel="stylesheet" href="lab.css" />
 </head>
@@ -12,7 +23,28 @@
   <div class="grain" aria-hidden="true"></div>
 
   <header class="topbar">
-    <a class="wordmark" href="#hero">moonfont</a>
+    <a class="wordmark" href="index.html">moonfont</a>
+    <nav class="topbar__nav" aria-label="Sections">
+      <a href="index.html" aria-current="page">Specimen</a>
+      <a href="guide.html">Guide</a>
+      <a href="api.html">Reference</a>
+      <a href="difftest.html">Comparison</a>
+      <a href="showcase.html">Measure</a>
+    </nav>
+    <div class="topbar__tools">
+      <a class="tool" href="https://github.com/moonbitstack/moonfont"
+         aria-label="moonfont on GitHub" title="Source on GitHub">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+        </svg>
+      </a>
+      <button class="tool theme-toggle" type="button" aria-label="Use the daylight proof" aria-pressed="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <g class="face"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M5 5l1.8 1.8M17.2 17.2 19 19M19 5l-1.8 1.8M6.8 17.2 5 19" stroke="currentColor" stroke-width="1.4"/></g>
+          <g class="foot"><path d="M15.5 16.5A6.5 6.5 0 0 1 7.5 6a6.5 6.5 0 1 0 8 10.5Z" fill="none" stroke="currentColor" stroke-width="1.4"/></g>
+        </svg>
+      </button>
+    </div>
   </header>
 
   <main>
@@ -34,6 +66,12 @@
                  autocomplete="off" spellcheck="false" />
         </div>
       </div>
+      <ul class="figures" aria-label="What the library covers">
+        <li><b data-count="packages">11</b><span>packages</span></li>
+        <li><b data-count="tables">42</b><span>table tags</span></li>
+        <li><b data-count="containers">3</b><span>containers</span></li>
+        <li><b data-count="public_functions">223</b><span>public functions</span></li>
+      </ul>
       <div class="scrollcue" aria-hidden="true"><span></span></div>
     </section>
 
@@ -161,16 +199,22 @@
         <h2 class="block__title">A tray of castings</h2>
         <p class="block__lede">
           Every shape below is a glyph this page decoded. Drag one, throw it, and
-          it falls, turns and stacks against its neighbours. The collision shape
-          is the coverage mask the rasteriser produced, sampled into a handful of
-          circles; the outline drawn on top is the same path the engine handed
-          out. Nothing here is a webfont.
+          it falls, turns and stacks against its neighbours and against the page
+          itself: the button and the caption in the tray are solid, so letters
+          settle on them. The collision shape is the coverage mask the rasteriser
+          produced, sampled into a handful of circles; the outline drawn over it
+          is the path the engine handed out. Nothing here is a webfont.
         </p>
-        <div class="field">
-          <button class="btn" data-refill type="button">Drop another</button>
-        </div>
       </header>
-      <canvas class="tray__canvas" aria-label="Glyphs fall and stack in a tray"></canvas>
+      <div class="tray__stage">
+        <canvas class="tray__canvas" aria-label="Glyphs fall, stack and are thrown around a tray"></canvas>
+        <p class="tray__note" data-collide>
+          The button and this line are solids: letters rest on them.
+        </p>
+        <button class="btn tray__button" data-refill type="button" data-collide>
+          Drop another
+        </button>
+      </div>
     </section>
   </main>
 
@@ -202,6 +246,7 @@
     <code>file://</code>, so the engine can load.
   </div>
 
+  <script src="theme.js" defer></script>
   <script type="module" src="lab.js"></script>
 </body>
 </html>

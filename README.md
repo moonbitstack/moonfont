@@ -1,3 +1,10 @@
+<p align="center">
+  <a href="https://moonbitstack.github.io/moonfont/">Specimen</a> ·
+  <a href="https://moonbitstack.github.io/moonfont/guide.html">Guide</a> ·
+  <a href="https://moonbitstack.github.io/moonfont/api.html">Reference</a> ·
+  <a href="https://mooncakes.io/docs/moonbitstack/moonfont">mooncakes</a>
+</p>
+
 # moonfont
 
 Font parsing and glyph rasterisation for MoonBit.
@@ -10,13 +17,19 @@ coverage mask on wasm, wasm-gc, js and native.
 
 | In | Out |
 | :-- | :-- |
-| SFNT, TrueType collections, WOFF, WOFF2 | every table a face needs, unpacked |
+| SFNT, TrueType collections, WOFF, WOFF2 (single or collection) | one face per font, over one buffer |
 | TrueType `glyf`, simple and composite | `MoveTo`, `LineTo`, `QuadTo`, `CubicTo`, `Close` |
 | `CFF` and `CFF2`, Type 2 charstrings | the same command stream, cubic curves kept cubic |
-| `fvar`, `avar`, `gvar`, `HVAR` | one outline per location, advances included |
+| `fvar`, `avar`, `gvar`, `HVAR`, `VVAR` | one outline and one advance per location |
+| `MVAR`, `cvar` over `cvt ` | the face's own measurements and control values at a location |
 | `cmap` 0, 4, 6, 12 | a glyph id, or nothing |
-| `head`, `hhea`, `maxp`, `hmtx`, `loca`, `OS/2`, legacy `kern` | metrics in font units |
+| `head`, `hhea`, `vhea`, `maxp`, `hmtx`, `vmtx`, `loca`, `OS/2`, legacy `kern` | metrics in font units, horizontal and vertical |
 | Eight-bit coverage, non-zero winding, 26.6 fixed point | a mask with its own origin |
+
+A container is an interface, not a branch: `Container` claims a signature and
+returns the faces it finds, and `TableSource` is a face seen as named byte ranges.
+`decode_from` builds a face from any table source — a memory map, a file handle, a
+fetch that returns one table at a time.
 
 Not read, by design: `GSUB` and `GPOS` shaping, bidirectional text and line
 breaking. Those belong to a text layout library that consumes this one; the

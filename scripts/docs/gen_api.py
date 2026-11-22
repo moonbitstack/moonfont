@@ -207,7 +207,10 @@ class Decl:
 
 
 BODY_RE = re.compile(
-    r"pub(?:\(all\))? (struct|enum|suberror|trait) ([A-Za-z_][A-Za-z0-9_]*) \{"
+    # `pub`, `pub(all)` and `pub(open)` all introduce a body; the visibility
+    # marker only says whether a caller outside the package may build or extend
+    # the type, which the reference states in prose.
+    r"pub(?:\([a-z]+\))? (struct|enum|suberror|trait) ([A-Za-z_][A-Za-z0-9_]*) \{"
 )
 FN_RE = re.compile(r"pub fn ([A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)*)\(")
 CONST_RE = re.compile(r"pub (?:let|const) ([A-Za-z_][A-Za-z0-9_]*)")

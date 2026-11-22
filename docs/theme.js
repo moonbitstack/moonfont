@@ -6,13 +6,16 @@
   "use strict";
 
   const KEY = "moonfont-theme";
+  // Session storage, not local: a manual choice holds for the visit and the
+  // next one starts from the system preference again.
+  const store = window.sessionStorage;
   const root = document.documentElement;
   const toggle = document.querySelector(".theme-toggle");
   const scheme = window.matchMedia("(prefers-color-scheme: dark)");
 
   const storedChoice = () => {
     try {
-      const value = localStorage.getItem(KEY);
+      const value = store.getItem(KEY);
       return value === "light" || value === "dark" ? value : null;
     } catch (e) {
       return null;
@@ -38,7 +41,7 @@
     toggle.addEventListener("click", () => {
       const next = root.dataset.theme === "dark" ? "light" : "dark";
       try {
-        localStorage.setItem(KEY, next);
+        store.setItem(KEY, next);
       } catch (e) {
         /* A file:// page may refuse storage; the choice still holds for this page. */
       }

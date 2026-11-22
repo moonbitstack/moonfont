@@ -10,6 +10,11 @@
 // solved by sequential impulses with friction and restitution, and a spring for
 // the pointer. Nothing here draws type with a webfont — every outline is a path
 // string the engine produced.
+//
+// The stage holds real controls: the button and the caption are elements of the
+// page, measured on every resize and treated as solids. A letter that lands on
+// the button rests on it, and a reader can still click the button afterwards,
+// because the pointer only starts a drag when it is over a letter.
 
 import {
   decodeBytes,
@@ -18,9 +23,9 @@ import {
   unitsPerEm,
   rasterise,
   outlineSvg,
-} from "./vendor/moonfont/moonfont.js";
+} from "./engine/moonfont.js";
 
-const DEMO_URL = "./vendor/moonfont/demo.ttf";
+const DEMO_URL = "./fonts/demo.ttf";
 const GLYPH_CAPACITY = 14;
 
 export function startCollisionTray(root, options = {}) {
@@ -37,9 +42,38 @@ export function startCollisionTray(root, options = {}) {
     running: false,
     frame: 0,
     scale: 1,
+    // The controls the letters land on, in canvas coordinates.
+    solids: [],
   };
 
-  const ink = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim() || "#ededf0";
+  const paper = () =>
+    getComputedStyle(document.documentElement).getPropertyValue("--ink").trim() ||
+    "#ededf0";
+  let ink = paper();
+
+  // Canvas takes a colour, not a CSS function, so the hairline's transparency
+  // is worked out here. Called whenever the theme changes, not per frame.
+  function fade(colour, alpha) {
+    const hex = colour.startsWith("#") ? colour : "#ededf0";
+    const full =
+      hex.length === 4
+        ? "#" + hex.slice(1).split("").map((c) => c + c).join("")
+        : hex;
+    const r = parseInt(full.slice(1, 3), 16);
+    const g = parseInt(full.slice(3, 5), 16);
+    const b = parseInt(full.slice(5, 7), 16);
+    return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+  }
+
+  let shelf = fade(ink, 0.22);
+  new MutationObserver(() => {
+    ink = paper();
+    shelf = fade(ink, 0.22);
+    if (!state.running) draw();
+  }).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -48,6 +82,25 @@ export function startCollisionTray(root, options = {}) {
     canvas.height = Math.max(1, Math.round(box.height * dpr));
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     state.scale = dpr;
+    measureSolids();
+  }
+
+  // The stage's own controls, as boxes the letters collide with. Their size is
+  // the page's, not this module's: a change of type size moves them.
+  function measureSolids() {
+    const field = canvas.getBoundingClientRect();
+    const solids = [];
+    for (const element of root.querySelectorAll("[data-collide]")) {
+      const box = element.getBoundingClientRect();
+      if (box.width < 2 || box.height < 2) continue;
+      solids.push({
+        x: box.left - field.left,
+        y: box.top - field.top,
+        w: box.width,
+        h: box.height,
+      });
+    }
+    state.solids = solids;
   }
 
   // A body at the size the page wants, from one glyph.
@@ -138,7 +191,7 @@ export function startCollisionTray(root, options = {}) {
       const codepoint = 0x41 + Math.floor(Math.random() * 26);
       const chosen = glyphIndex(state.face, codepoint);
       const gid = chosen >= 0 ? chosen : glyph;
-      const body = makeBody(gid, 60 + Math.random() * (canvas.clientWidth - 120), -120 - Math.random() * 80);
+      const body = makeBody(gid, 40 + Math.random() * (canvas.clientWidth - 80), -140 - Math.random() * 90);
       if (body) {
         body.angle = (Math.random() - 0.5) * 0.6;
         body.omega = (Math.random() - 0.5) * 2;
@@ -168,6 +221,56 @@ export function startCollisionTray(root, options = {}) {
       if (left > 0) list.push({ i, nx: 1, ny: 0, depth: left, wx, wy });
       const right = s.r - (canvas.clientWidth - wx);
       if (right > 0) list.push({ i, nx: -1, ny: 0, depth: right, wx, wy });
+    }
+    return list;
+  }
+
+  // A circle against an axis-aligned box: the nearest point on the box decides
+  // the normal, and a circle whose centre is inside escapes through the nearest
+  // face. Boxes are static, so only the letter moves.
+  function solidContacts(body) {
+    const list = [];
+    for (const solid of state.solids) {
+      const cos = Math.cos(body.angle);
+      const sin = Math.sin(body.angle);
+      for (let i = 0; i < body.spheres.length; i++) {
+        const sphere = body.spheres[i];
+        const wx = body.x + sphere.x * cos - sphere.y * sin;
+        const wy = body.y + sphere.x * sin + sphere.y * cos;
+        const nx0 = Math.min(Math.max(wx, solid.x), solid.x + solid.w);
+        const ny0 = Math.min(Math.max(wy, solid.y), solid.y + solid.h);
+        const dx = wx - nx0;
+        const dy = wy - ny0;
+        const distance = Math.hypot(dx, dy);
+        if (distance > 0.0001) {
+          if (distance < sphere.r) {
+            list.push({
+              i,
+              nx: dx / distance,
+              ny: dy / distance,
+              depth: sphere.r - distance,
+              wx,
+              wy,
+            });
+          }
+        } else {
+          const faces = [
+            { d: wx - solid.x, nx: -1, ny: 0 },
+            { d: solid.x + solid.w - wx, nx: 1, ny: 0 },
+            { d: wy - solid.y, nx: 0, ny: -1 },
+            { d: solid.y + solid.h - wy, nx: 0, ny: 1 },
+          ].sort((a, b) => a.d - b.d);
+          const nearest = faces[0];
+          list.push({
+            i,
+            nx: nearest.nx,
+            ny: nearest.ny,
+            depth: nearest.d + sphere.r,
+            wx,
+            wy,
+          });
+        }
+      }
     }
     return list;
   }
@@ -252,7 +355,7 @@ export function startCollisionTray(root, options = {}) {
       }
       for (let i = 0; i < state.bodies.length; i++) {
         const body = state.bodies[i];
-        for (const contact of contactsOf(body, floor, ceiling)) {
+        for (const contact of contactsOf(body, floor, ceiling).concat(solidContacts(body))) {
           const va = pointVelocity(body, contact.wx, contact.wy);
           const along = va.x * contact.nx + va.y * contact.ny;
           const rax = contact.wx - body.x;
@@ -353,6 +456,18 @@ export function startCollisionTray(root, options = {}) {
 
   function draw() {
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    // The top edge of each control, drawn as a hairline: the shelf the letters
+    // come to rest on, in the same weight as the page's own rules.
+    ctx.save();
+    ctx.strokeStyle = shelf;
+    ctx.lineWidth = 1;
+    for (const solid of state.solids) {
+      ctx.beginPath();
+      ctx.moveTo(solid.x, solid.y + 0.5);
+      ctx.lineTo(solid.x + solid.w, solid.y + 0.5);
+      ctx.stroke();
+    }
+    ctx.restore();
     ctx.fillStyle = ink;
     for (const body of state.bodies) {
       ctx.save();
@@ -416,6 +531,7 @@ export function startCollisionTray(root, options = {}) {
     }
   }
 
+  window.addEventListener("resize", resize);
   canvas.addEventListener("pointerdown", pointerDown);
   canvas.addEventListener("pointermove", pointerMove);
   canvas.addEventListener("pointerup", pointerUp);
@@ -444,6 +560,7 @@ export function startCollisionTray(root, options = {}) {
     state.running = false;
     cancelAnimationFrame(state.frame);
     observer.disconnect();
+    window.removeEventListener("resize", resize);
     canvas.removeEventListener("pointerdown", pointerDown);
     canvas.removeEventListener("pointermove", pointerMove);
     canvas.removeEventListener("pointerup", pointerUp);

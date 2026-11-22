@@ -3,7 +3,7 @@
 
 // moonfont interactive lab.
 //
-// Loads the compiled engine (./vendor/moonfont/moonfont.js, which wraps the
+// Loads the compiled engine (./engine/moonfont.js, which wraps the
 // MoonBit JS backend output) and drives it live in the browser: decode font
 // files, rasterise glyphs to coverage masks, read SVG outlines, and extrude
 // glyphs in WebGL. Nothing is uploaded and nothing is fetched from a network.
@@ -17,9 +17,9 @@ import {
   rasterise,
   fontMetrics,
   outlineSvg,
-} from "./vendor/moonfont/moonfont.js";
+} from "./engine/moonfont.js";
 
-const DEMO_URL = "./vendor/moonfont/demo.ttf";
+const DEMO_URL = "./fonts/demo.ttf";
 
 const state = {
   face: null,
@@ -704,3 +704,30 @@ if (tray) {
     reduceMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   });
 }
+
+// The figures in the hero are read from the source by scripts/build_site.py and
+// written to numbers.json. The markup carries a fallback so the first paint is
+// never empty; the file only corrects it.
+async function loadFigures() {
+  try {
+    const response = await fetch("./numbers.json", { cache: "no-cache" });
+    if (!response.ok) return;
+    const numbers = await response.json();
+    for (const node of document.querySelectorAll("[data-count]")) {
+      const key = node.dataset.count;
+      if (Object.prototype.hasOwnProperty.call(numbers, key)) {
+        node.textContent = String(numbers[key]);
+      }
+    }
+  } catch (error) {
+    /* A page opened from file:// cannot fetch; the fallbacks stand. */
+  }
+}
+loadFigures();
+
+// The scrollbar's thumb is only drawn once the page has moved, so the first
+// screen is unmarked and the reader sees it appear when they start reading.
+const pageRoot = document.documentElement;
+const markTop = () => pageRoot.classList.toggle("at-top", window.scrollY === 0);
+addEventListener("scroll", markTop, { passive: true });
+markTop();

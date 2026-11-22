@@ -9,7 +9,7 @@
 <script>
   (() => {
     let chosen = null;
-    try { chosen = localStorage.getItem("moonfont-theme"); } catch (e) {}
+    try { chosen = sessionStorage.getItem("moonfont-theme"); } catch (e) {}
     const theme = chosen === "light" || chosen === "dark"
       ? chosen
       : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -29,6 +29,9 @@
     <a class="link" href="api.html">Reference</a>
     <a class="link" href="difftest.html">Comparison</a>
     <a class="link" href="showcase.html">Measure</a>
+    <a class="github" href="https://github.com/moonbitstack/moonfont" aria-label="moonfont on GitHub" title="Source on GitHub">
+      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    </a>
     <button class="theme-toggle" type="button" aria-label="Use the dark case" aria-pressed="false">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <g class="face"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.4"/></g>
@@ -59,12 +62,12 @@
           <div>
             <h2 id="pipeline">From bytes to a line</h2>
             <p>One import and one door. <code>decode</code> borrows the bytes and returns a <code>Face</code>; every other operation is a method on that face. Outlines stay lazy until a glyph is asked for.</p>
-            <code class="sig"><span class="tok-kw">pub fn</span> <span class="tok-fn">decode</span>(<span class="tok-fn">bytes</span> : <span class="tok-ty">BytesView</span>, <span class="tok-fn">limits</span>? : <span class="tok-ty">Limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Face</span> <span class="tok-kw">raise</span> <span class="tok-ty">Refused</span></code>
-            <p>A caller that imports only the façade has <code>Bounds</code>, <code>CoverageMask</code>, <code>FontMetrics</code>, <code>GlyphId</code>, <code>GlyphMetrics</code>, <code>Limits</code>, <code>Outline</code>, <code>PathCommand</code>, <code>Point</code>, <code>Refused</code>, <code>Scale</code> and <code>TextMetrics</code> in hand.</p>
+            <code class="sig"><span class="tok-kw">pub fn</span> <span class="tok-fn">decode</span>(<span class="tok-fn">bytes</span> : <span class="tok-ty">BytesView</span>, <span class="tok-fn">limits</span>~ : <span class="tok-ty">Limits</span> = <span class="tok-fn">limits</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Face</span> <span class="tok-kw">raise</span> <span class="tok-ty">Refused</span></code>
+            <p>A caller that imports only the façade has <code>Bounds</code>, <code>CoverageMask</code>, <code>FontMetrics</code>, <code>GlyphId</code>, <code>GlyphMetrics</code>, <code>Limits</code>, <code>Outline</code>, <code>PathCommand</code>, <code>Point</code>, <code>Refused</code>, <code>Scale</code>, <code>TextMetrics</code> and <code>VerticalMetrics</code> in hand, plus the two presets.</p>
           </div>
           <div>
             <h3>The line it produced</h3>
-            <code class="sig">let face = @moonfont.decode(bytes, limits=@moonfont.Limits::strict())
+            <code class="sig">let face = @moonfont.decode(bytes, limits=@moonfont.limits_strict)
 let gid = face.glyph_index(0x41).unwrap()
 let outline = face.outline(gid)
 let mask = face.rasterise(gid, 16)
@@ -80,12 +83,12 @@ measure("ABa", 16)   advance 1586  glyphs 3</code>
         <ol class="stick" aria-label="Setting the line in six steps">
           <li id="step-1">
             <h3>Decode the bytes</h3>
-            <p>Hand over a complete font held by the caller. The bytes must stay alive and unchanged for the face's life. <code>decode</code> reads the table directory and nine small tables only; outlines remain lazy. <code>decode_all</code> returns one <code>Face</code> per face of a TrueType collection, and raises <code>Malformed</code> on an empty one.</p>
-            <code class="sig">let face = @moonfont.decode(font_bytes, limits=@moonfont.Limits::strict())
+            <p>Hand over a complete font held by the caller: a plain font, a collection, a WOFF file or a WOFF2 file. <code>decode</code> reads the table directory and the small tables the face needs to describe itself; glyph outlines and their deltas stay lazy. <code>decode_all</code> returns one <code>Face</code> per face of a collection, and raises <code>Malformed</code> on an empty one.</p>
+            <code class="sig">let face = @moonfont.decode(font_bytes, limits=@moonfont.limits_strict)
 let faces = @moonfont.decode_all(collection_bytes)
 let upem = face.units_per_em()   // 1000
 let count = face.num_glyphs()    // 6</code>
-            <p>Scaler words <code>0x00010000</code>, <code>0x4F54544F</code> and <code>0x74727565</code> are accepted at the container layer. A CFF face under <code>OTTO</code> has no <code>glyf</code> table, so <code>decode</code> correctly ends in <code>MissingTable</code>.</p>
+            <p>Scaler words <code>0x00010000</code>, <code>0x4F54544F</code> and <code>0x74727565</code> are accepted at the container layer, and <code>ttcf</code> opens a collection. A CFF face under <code>OTTO</code> has no <code>glyf</code> table and is read through its charstrings instead; <code>MissingTable</code> is for a face with neither kind of outline.</p>
             <code class="sig">units_per_em() -&gt; 1000
 num_glyphs()   -&gt; 6</code>
           </li>
@@ -142,14 +145,16 @@ ascent   819   descent -204   line_gap 0   glyphs 3</code>
 
           <li id="step-6">
             <h3>Limits and refusals</h3>
-            <p>Every length in a font is declared by the font. <code>Limits</code> checks each declaration before the allocation it guards. <code>Limits::strict()</code> is the preset for untrusted uploads; <code>Limits::default()</code> is for an application reading its own assets. Both are finite at every ceiling.</p>
-            <code class="sig">Limits::default()  file_bytes 268435456  table_bytes 268435456
-                   glyphs 65536  points 65536  contours 8192
-                   composites 1024  recursion 16  mask_pixels 67108864
+            <p>Every length in a font is declared by the font. <code>Limits</code> checks each declaration before the allocation it guards. <code>limits</code> is the preset for an application reading its own assets; <code>limits_strict</code> is for bytes from somewhere else. Both are finite at every ceiling, and a record built by hand is honoured as given.</p>
+            <code class="sig">@moonfont.limits         file_bytes 268435456  table_bytes 268435456
+                         glyphs 65536  points 65536  contours 8192
+                         composites 1024  recursion 16  mask_pixels 67108864
 
-Limits::strict()   file_bytes 16777216   table_bytes 16777216
-                   glyphs 65536  points 8192   contours 1024
-                   composites 256   recursion 8   mask_pixels 4194304</code>
+@moonfont.limits_strict  file_bytes 16777216   table_bytes 16777216
+                         glyphs 65536  points 8192   contours 1024
+                         composites 256   recursion 8   mask_pixels 4194304
+
+Limits::new(points=16384)   one ceiling raised, the rest from the preset</code>
             <p>One <code>Refused</code> suberror covers the whole library, so a caller needs exactly one <code>try</code>/<code>raise</code> handler. Each variant names a byte offset or the two values that disagreed.</p>
             <code class="sig">Unknown(at~, got~)                     not a font this library reads
 Unexpected(at~, got~, want~)           a field is wrong
@@ -164,10 +169,14 @@ Recursion(depth~)                      composite nested too deep</code>
           </li>
           <li id="step-7">
             <h3>Other formats, other instances</h3>
-            <p>A face is not always quadratic and not always plain. <code>decode</code> accepts a TrueType collection, a WOFF file and a WOFF2 file without being told which; the compressed ones are unpacked to an ordinary SFNT in memory and read the same way. <code>is_postscript</code> says whether the outlines come from <code>glyf</code> or from <code>CFF</code>/<code>CFF2</code>; the command stream is the same either way, so a consumer never branches.</p>
+            <p>A face is not always quadratic and not always plain. <code>decode</code> accepts a plain font, a TrueType collection, a WOFF file and a WOFF2 file without being told which. <code>is_postscript</code> says whether the outlines come from <code>glyf</code> or from <code>CFF</code>/<code>CFF2</code>; the command stream is the same either way, so a consumer never branches.</p>
             <code class="sig">is_postscript()      false for glyf, true for CFF and CFF2
 decode_all(bytes)    one Face per face in a collection
 decode(woff2_bytes)  the same Face as the plain file</code>
+            <p>Containers are an interface rather than a chain of branches. A <code>Container</code> claims a signature and returns the faces it finds; a <code>TableSource</code> is a face seen as named byte ranges. Three containers are registered — plain sfnt, WOFF and WOFF2 — and the readers above them only ever ask a source for a tag:</p>
+            <code class="sig">@moonfont.decode_from(source)   a Face from any TableSource
+@cff.Font                       reads a CFF table the same way, from bytes</code>
+            <p>A WOFF2 collection is where that pays: one table directory for the whole file, one buffer, and a <code>TableSource</code> per face that shares what the faces have in common. A transformed <code>glyf</code> is rebuilt once even when two faces name it, and <code>loca</code> and <code>hmtx</code> are derived from the <code>glyf</code> each face actually names.</p>
             <p>A variable font is the same face with a location. Axis values are 16.16 fixed point under the four-character tag, and the axes a font offers are data:</p>
             <code class="sig">let face = @moonfont.decode(vf_bytes)
 face.is_variable()            true
@@ -176,6 +185,14 @@ let at = face.at([(0x77676874, 700 * 65536)])
 let outline = face.outline(gid, location=at)
 face.advance(gid, location=at)</code>
             <p>Every point is a whole font unit and every scalar is 16.16, so two runs at the same location give the same outline on every backend. A font without axes ignores a location rather than refusing it, which keeps a caller from branching on <code>is_variable</code> at every call site.</p>
+            <p>Outlines are not the only thing a location moves. <code>MVAR</code> carries the face's own measurements, <code>VVAR</code> the vertical advances, and <code>cvar</code> the control values a hinting program snaps to. All three are read, and all three answer at the same location as the glyphs:</p>
+            <code class="sig">let at = face.at([(0x77676874, 900 * 65536)])   // wght 900
+face.font_metrics(location=at).ascent          840    (800 at the default)
+face.vertical_metrics(location=at).ascent      560    (500 at the default)
+face.advance_height(gid, location=at)          1080   (1000 at the default)
+face.cvt(location=at)                          [160, 230, 360, 60]
+                                               ([140, 200, 320, 60] at the default)</code>
+            <p>Vertical metrics come from <code>vhea</code> and <code>vmtx</code>, which have the same layout as <code>hhea</code> and <code>hmtx</code> and are read by the same code. A font without them reports the horizontal measurements from these calls and advances by its em, so a vertical layout never has to ask whether the pair exists.</p>
           </li>
         </ol>
 

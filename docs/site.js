@@ -7,6 +7,17 @@
 
   var SVG_NS = "http://www.w3.org/2000/svg";
 
+  /* The scrollbar's thumb appears once the page has moved. Pure presentation:
+     the class only changes a colour. */
+  (function markTop() {
+    var root = document.documentElement;
+    var mark = function () {
+      root.classList.toggle("at-top", window.scrollY === 0);
+    };
+    window.addEventListener("scroll", mark, { passive: true });
+    mark();
+  })();
+
   /* Font-wide readings from head and hhea, plus cap height and x-height
      measured from the drawn sorts. The synthetic face carries no OS/2 table,
      so those two heights come from the outlines, not from a metrics table. */
