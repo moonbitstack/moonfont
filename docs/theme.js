@@ -60,4 +60,10 @@
   } else if (typeof scheme.addListener === "function") {
     scheme.addListener(followOs);
   }
+
+  // The scrollbar's thumb is drawn once the page has moved, so the first screen
+  // is unmarked and the reader sees it appear when they start reading.
+  const markTop = () => root.classList.toggle("at-top", scrollY === 0);
+  addEventListener("scroll", markTop, { passive: true });
+  markTop();
 })();

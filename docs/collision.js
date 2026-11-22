@@ -105,22 +105,23 @@ export function startCollisionTray(root, options = {}) {
 
   // A body at the size the page wants, from one glyph.
   function makeBody(glyph, x, y) {
-    const ppem = 96;
+    const ppem = 84;
     const mask = rasterise(state.face, glyph, ppem);
     if (!mask || !mask.ok) return null;
     const value = mask.value;
     const path = outlineSvg(state.face, glyph);
     if (!path || !path.ok) return null;
 
-    const px = 1 / 64; // the mask origin and glyph space are both in 26.6
     // A mask pixel is one 96th of an em, so a font unit is this many pixels.
+    // The mask's origin is in whole canvas pixels: `left` is the pen's x and
+    // `top` is the box's top edge, negative above the baseline. A cell's
+    // position is therefore `top + row` and `left + col`.
     const s = ppem / state.units;
     const width = value.width || 1;
     const height = value.height || 1;
     // One circle per filled cell, sampled sparsely enough that a letter is a
     // few dozen circles rather than a thousand.
     const stride = Math.max(1, Math.round(Math.min(width, height) / 9));
-    const radius = (stride * px) / 2;
     const spheres = [];
     for (let row = 0; row < height; row += stride) {
       for (let col = 0; col < width; col += stride) {
@@ -132,11 +133,14 @@ export function startCollisionTray(root, options = {}) {
             cells++;
           }
         }
-        if (cells && cover / (cells * 255) > 0.5) {
+        if (cells && cover / (cells * 255) > 0.35) {
+          // The circles overlap a quarter of their spacing, so a letter is a
+          // closed hull rather than a row of touching beads: two glyphs cannot
+          // slip between the samples of each other.
           spheres.push({
-            x: (col + stride / 2) * px + value.left,
-            y: -(row + stride / 2) * px + value.top,
-            r: radius,
+            x: col + stride / 2 + value.left,
+            y: value.top + row + stride / 2,
+            r: stride * 0.62,
           });
         }
       }
@@ -166,9 +170,10 @@ export function startCollisionTray(root, options = {}) {
     return {
       glyph,
       path: path2d,
-      // The outline is in font units and the body in mask pixels.
+      // The outline is in font units; the body's centre is in mask pixels, and
+      // the path's origin is the pen, so the drawing shifts by the difference.
       scale: s,
-      pathBox: { x: cx / s, y: cy / s },
+      pathBox: { x: (cx - value.left) / s, y: (cy - value.top) / s },
       spheres,
       x,
       y,
@@ -217,9 +222,11 @@ export function startCollisionTray(root, options = {}) {
       const wy = body.y + s.x * sin + s.y * cos;
       if (wy + s.r > floor) list.push({ i, nx: 0, ny: -1, depth: wy + s.r - floor, wx, wy });
       if (wy - s.r < ceiling) list.push({ i, nx: 0, ny: 1, depth: ceiling - (wy - s.r), wx, wy });
-      const left = s.r - (wx - 0);
+      // The side walls are inset like the floor, so a letter resting against
+      // one is not sliced by the frame.
+      const left = s.r - (wx - 18);
       if (left > 0) list.push({ i, nx: 1, ny: 0, depth: left, wx, wy });
-      const right = s.r - (canvas.clientWidth - wx);
+      const right = s.r - (canvas.clientWidth - 18 - wx);
       if (right > 0) list.push({ i, nx: -1, ny: 0, depth: right, wx, wy });
     }
     return list;
@@ -328,7 +335,9 @@ export function startCollisionTray(root, options = {}) {
   }
 
   function step(dt) {
-    const floor = canvas.clientHeight - 6;
+    // The floor sits a little above the frame, so a pile reads as resting in
+    // the tray rather than being cut off by its bottom edge.
+    const floor = canvas.clientHeight - 34;
     const ceiling = 6;
 
     for (const body of state.bodies) {
@@ -521,7 +530,8 @@ export function startCollisionTray(root, options = {}) {
       state.units = unitsPerEm(state.face) || 1000;
       for (let i = 0; i < 7; i++) addGlyph();
       if (reduce) {
-        draw();
+        // Reduced motion still gets the pile: it is dropped once and held.
+        settle();
       } else {
         state.running = true;
         state.frame = requestAnimationFrame(frame);

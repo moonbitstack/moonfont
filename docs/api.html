@@ -51,7 +51,7 @@
           <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fsfnt"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>sfnt</span><span class="case-index-count">58</span></a></li>
           <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2ftable"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>table</span><span class="case-index-count">34</span></a></li>
           <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fvariations"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>variations</span><span class="case-index-count">46</span></a></li>
-          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fweb"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>web</span><span class="case-index-count">7</span></a></li>
+          <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fweb"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>web</span><span class="case-index-count">9</span></a></li>
           <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fwire"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>wire</span><span class="case-index-count">37</span></a></li>
           <li class="case-index-item"><a class="case-index-link" href="#p--moonbitstack-2fmoonfont-2fwoff"><span class="case-index-name">moonbitstack/<wbr>moonfont/<wbr>woff</span><span class="case-index-count">10</span></a></li>
         </ol>
@@ -950,7 +950,7 @@
                 <li class="entry-field"><b class="field-name">units_per_em</b><span class="field-type">Int32</span></li>
               </ul>
               <div class="entry-doc">
-                <p>A size in 26.6 fixed point. The whole library computes with integers: a rasteriser that used floating point would produce different coverage on wasm, js and native for the same bytes, and a differential test could not say what the right answer is. Variable fonts (fvar/gvar/HVAR) are out of scope for 0.1.x; the default instance is used and a variation seam is reserved for v0.2.0.</p>
+                <p>A size in 26.6 fixed point. The whole library computes with integers: a rasteriser that used floating point would produce different coverage on wasm, js and native for the same bytes, and a differential test could not say what the right answer is. The same scale serves measurement and rasterisation, so the two never disagree about where the pen stands, and a variable font's instance is resolved before a scale is applied.</p>
               </div>
             </article>
             <article class="entry" id="d--moonbitstack-2fmoonfont-2fmodel--textmetrics--type">
@@ -2959,6 +2959,16 @@
                 <p>The glyph id for a Unicode codepoint, or -1 when the font has no glyph.</p>
               </div>
             </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--metrics--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">metrics</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">metrics</span>(<span class="tok-fn">face</span> <span class="tok-op">:</span> <span class="tok-ty">@moonfont.Face</span>, <span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@moonfont.GlyphMetrics</span> <span class="tok-kw">raise</span> <span class="tok-ty">@moonfont.Refused</span></code>
+              <div class="entry-doc">
+                <p>One glyph's advance and left side bearing, in font units, plus the box of its ink. Raises on a glyph id the face does not have.</p>
+              </div>
+            </article>
             <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--num-5fglyphs--fn">
               <div class="entry-head">
                 <span class="entry-kind">fn</span>
@@ -2987,6 +2997,16 @@
               <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">rasterise</span>(<span class="tok-fn">face</span> <span class="tok-op">:</span> <span class="tok-ty">@moonfont.Face</span>, <span class="tok-fn">glyph</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">pixels_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">@moonfont.CoverageMask</span> <span class="tok-kw">raise</span> <span class="tok-ty">@moonfont.Refused</span></code>
               <div class="entry-doc">
                 <p>Eight-bit coverage of one glyph at a pixel size. <code>samples</code> is a Uint8Array of length <code>width * height</code>, row-major and top-down, values 0..255.</p>
+              </div>
+            </article>
+            <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--scale-5fvalue--fn">
+              <div class="entry-head">
+                <span class="entry-kind">fn</span>
+                <h3 class="entry-name">scale_value</h3>
+              </div>
+              <code class="sig"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">scale_value</span>(<span class="tok-fn">face</span> <span class="tok-op">:</span> <span class="tok-ty">@moonfont.Face</span>, <span class="tok-fn">value</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>, <span class="tok-fn">pixels_per_em</span> <span class="tok-op">:</span> <span class="tok-ty">Int32</span>) <span class="tok-op">-&gt;</span> <span class="tok-ty">Int32</span></code>
+              <div class="entry-doc">
+                <p>One font unit in 26.6 pixels at a size: exactly what <code>Scale::apply</code> returns, so a page can print the same fixed-point number the library works in.</p>
               </div>
             </article>
             <article class="entry" id="d--moonbitstack-2fmoonfont-2fweb--units-5fper-5fem--fn">

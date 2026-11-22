@@ -50,6 +50,14 @@ export function fontMetrics(face) {
   return mf.font_metrics(face)
 }
 
+export function metrics(face, glyph) {
+  return unwrap(mf.metrics(face, glyph))
+}
+
+export function scaleValue(face, value, ppem) {
+  return mf.scale_value(face, value, ppem)
+}
+
 export function outlineSvg(face, glyph) {
   return unwrap(mf.outline_svg(face, glyph))
 }

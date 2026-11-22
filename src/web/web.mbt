@@ -65,6 +65,29 @@ pub fn font_metrics(face : @moonfont.Face) -> @moonfont.FontMetrics {
 }
 
 ///|
+/// One glyph's advance and left side bearing, in font units, plus the box of its
+/// ink. Raises on a glyph id the face does not have.
+#export_name("metrics")
+pub fn metrics(
+  face : @moonfont.Face,
+  glyph : Int32,
+) -> @moonfont.GlyphMetrics raise @moonfont.Refused {
+  face.metrics(@moonfont.GlyphId::of(glyph))
+}
+
+///|
+/// One font unit in 26.6 pixels at a size: exactly what `Scale::apply` returns,
+/// so a page can print the same fixed-point number the library works in.
+#export_name("scale_value")
+pub fn scale_value(
+  face : @moonfont.Face,
+  value : Int32,
+  pixels_per_em : Int32,
+) -> Int32 {
+  face.scale(pixels_per_em).apply(value)
+}
+
+///|
 /// One glyph's outline as an SVG path in font units, with y flipped so it draws
 /// correctly in SVG space. Used for vector display and for 3D extrusion.
 #export_name("outline_svg")

@@ -64,7 +64,8 @@
   </div>
 
   <div class="wrap">
-    <table class="case-table">
+    <div class="table-wrap">
+        <table class="case-table">
       <caption>Cross-language oracle assignment. Versions are the pins recorded in <code>contracts/DIFFTEST.md</code>, section 5; a version bump is a one-way door that invalidates every committed golden.</caption>
       <thead>
         <tr>
@@ -89,6 +90,7 @@
         <tr><th scope="row">moonfont.stdlib.reference</th><td>Python stdlib</td><td>1.0.0</td><td>six committed fixture categories</td><td>8x8 uniform-grid supersampling, non-zero winding</td></tr>
       </tbody>
     </table>
+        </div>
   </div>
 
   <div class="wrap">
@@ -96,6 +98,7 @@
       <div>
         <h2 id="rules">Pre-registered tolerances</h2>
         <p>Thresholds are fixed before any parity fixture is generated and may not be relaxed to make a failing test pass. Variant names and field labels are compared exactly before values; a missing field is a failure, never a default.</p>
+        <div class="table-wrap">
         <table class="case-table">
           <caption>Per-category rules from <code>contracts/DIFFTEST.md</code>, section 6.</caption>
           <thead>
@@ -115,6 +118,7 @@
             <tr><th scope="row">error variants</th><td>exact</td></tr>
           </tbody>
         </table>
+        </div>
         <p><code>fixed_1</code> allows one unit of 1/64 pixel per scalar. <code>coverage_8</code> fixes width, height, left and top exactly, admits a per-sample difference of at most 32 for 99 per cent of samples, holds ink mass within 2 per cent, allows the ink box to differ by 1 pixel, and requires non-zero winding at sizes 8, 12, 16, 24, 32, 48 or 96.</p>
         <p>The committed fixture toolchain adds three rules of its own: scaled bounds within 1 pixel, outline command streams exact after canonicalisation, and ink coverage within 5 per cent. Anti-aliasing is not bit-identical across rasterisers, so hinted glyphs are excluded entirely.</p>
       </div>
@@ -140,7 +144,8 @@
 
         <h2 id="formats">Containers, outlines and instances</h2>
         <p>The second fixture set covers the formats a font arrives in and the tables that move it. Every expectation comes from fontTools, and every outline is cross-checked against FreeType before either is written down: the two must describe the same points, or generation stops.</p>
-        <table class="grid">
+        <div class="table-wrap">
+        <table class="fixture-table">
           <caption>Format fixtures and what each one is for</caption>
           <thead>
             <tr><th scope="col">Fixture</th><th scope="col">What it exercises</th><th scope="col">Oracle</th></tr>
@@ -155,6 +160,7 @@
             <tr><th scope="row">metric variations</th><td><code>MVAR</code>, <code>VVAR</code>, <code>cvar</code> over <code>vhea</code>, <code>vmtx</code> and <code>cvt </code></td><td>fontTools' instancer at three locations</td></tr>
           </tbody>
         </table>
+        </div>
       </div>
     </section>
   </div>
@@ -178,6 +184,5 @@
   </div>
 </footer>
 <script src="theme.js" defer></script>
-<script src="site.js" defer></script>
 </body>
 </html>

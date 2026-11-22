@@ -13,11 +13,15 @@ pub fn font_metrics(@moonfont.Face) -> @model.FontMetrics
 
 pub fn glyph_index(@moonfont.Face, Int32) -> Int32
 
+pub fn metrics(@moonfont.Face, Int32) -> @model.GlyphMetrics raise @model.Refused
+
 pub fn num_glyphs(@moonfont.Face) -> Int32
 
 pub fn outline_svg(@moonfont.Face, Int32) -> String raise @model.Refused
 
 pub fn rasterise(@moonfont.Face, Int32, Int32) -> @model.CoverageMask raise @model.Refused
+
+pub fn scale_value(@moonfont.Face, Int32, Int32) -> Int32
 
 pub fn units_per_em(@moonfont.Face) -> Int32
 

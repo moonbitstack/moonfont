@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>moonfont — Measure</title>
-<meta name="description" content="Set a sort at a chosen point size and read its 26.6 measurements, drawn live from the committed outline commands.">
+<meta name="description" content="Set a sort at a chosen point size and read its 26.6 measurements, drawn and measured by the library compiled into this page.">
 <script>
   (() => {
     let chosen = null;
@@ -44,7 +44,7 @@
   <section class="band" aria-labelledby="gauge">
     <div class="wrap">
       <h1 id="gauge">The point-size ruler and the em square, live.</h1>
-      <p>Choose a size and a character. The sort is drawn from the outline commands parsed out of <code>synthetic.ttf</code>, and every reading is recomputed with the library's own 26.6 integer arithmetic.</p>
+      <p>Choose a size and a character. The sort is the path the engine returned from <code>synthetic.ttf</code>, and every reading on this page is a call into the engine compiled into it: <code>outline_svg</code> for the drawing, <code>metrics</code> for the advance and the bearing, <code>scale_value</code> for the 26.6 column.</p>
       <figure class="rule-figure">
         <svg id="stage-svg" viewBox="-20 -860 1500 1120" role="img" aria-label="The em square with five measurement rules and the chosen sort">
           <g fill="none" stroke="currentColor">
@@ -73,19 +73,19 @@
     <section class="measure" aria-labelledby="controls">
       <div>
         <h2 id="controls">Set the gauge</h2>
-        <p>The slider sets <code>pixels_per_em</code>. <code>Scale::of</code> shifts it left by six bits; <code>Scale::apply</code> multiplies in 64 bits and truncates toward zero, exactly as the MoonBit implementation does. Move the slider and the case table below changes with it.</p>
+        <p>The slider sets <code>pixels_per_em</code>. <code>Scale::of</code> shifts it left by six bits; <code>Scale::apply</code> multiplies in 64 bits and truncates toward zero. The page asks the engine for that number rather than repeating the arithmetic, so the column below is the library's own answer.</p>
         <label for="size-slider">Point size in pixels per em</label>
         <input type="range" id="size-slider" min="8" max="96" step="1" value="16">
         <output id="size-reading" for="size-slider">16</output>
         <label for="glyph-select">Sort</label>
         <select id="glyph-select">
           <option value="">Choose a character to set a sort.</option>
-          <option value="0">0 .notdef</option>
-          <option value="1">1 U+0020 space</option>
-          <option value="2">2 U+0041 A</option>
-          <option value="3">3 U+0042 B</option>
-          <option value="4">4 U+0061 a</option>
-          <option value="5">5 U+00C1 composite</option>
+          <option value="0" data-codepoint="0">0 .notdef</option>
+          <option value="1" data-codepoint="32">1 U+0020 space</option>
+          <option value="2" data-codepoint="65">2 U+0041 A</option>
+          <option value="3" data-codepoint="66">3 U+0042 B</option>
+          <option value="4" data-codepoint="97">4 U+0061 a</option>
+          <option value="5" data-codepoint="193">5 U+00C1 composite</option>
         </select>
         <p><button type="button" id="probe-sort">Probe an absent sort</button> <button type="button" id="show-notdef" hidden>Show the .notdef box</button></p>
         <p id="stage-note" hidden></p>
@@ -119,6 +119,13 @@
         <tr><th scope="row">x_height</th><td>500</td><td>512</td><td>8.00</td></tr>
       </tbody>
     </table>
+    <p class="note" id="table-note">
+      This face carries no <code>OS/2</code> table, so <code>font_metrics</code>
+      reports a cap height and an x-height of zero. The two figures above are
+      therefore the ink box of <code>A</code> and of <code>a</code>, as
+      <code>metrics</code> reports them: a measurement of the sorts, not a table
+      the font does not have.
+    </p>
   </div>
 
   <div class="wrap">
@@ -140,6 +147,6 @@
   </div>
 </footer>
 <script src="theme.js" defer></script>
-<script src="site.js" defer></script>
+<script type="module" src="gauge.js"></script>
 </body>
 </html>

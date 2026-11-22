@@ -89,10 +89,13 @@ function paintMask(canvas, mask, opts = {}) {
     ctx.shadowColor = color;
     ctx.shadowBlur = glow * dpr;
   }
+  // A glyph that sits behind reading matter is drawn lighter and off centre,
+  // so the copy over it keeps its contrast.
+  ctx.globalAlpha = opts.alpha === undefined ? 1 : opts.alpha;
   const scale = Math.min(canvas.width / mask.width, canvas.height / mask.height) * 0.84;
   const dw = mask.width * scale;
   const dh = mask.height * scale;
-  const dx = (canvas.width - dw) / 2;
+  const dx = (canvas.width - dw) / 2 + (opts.shiftX || 0) * canvas.width;
   const dy = (canvas.height - dh) / 2;
   ctx.drawImage(off, 0, 0, mask.width, mask.height, dx, dy, dw, dh);
   ctx.shadowBlur = 0;
@@ -465,7 +468,15 @@ function renderHero() {
     return;
   }
   const mask = getMask(gi, 220);
-  paintMask(canvas, mask, { color: "#ffffff", glow: 26, smooth: true });
+  // The glyph is the backdrop for the title, so it is drawn at just over half
+  // strength and shifted right: the heading has to stay crisp over it.
+  paintMask(canvas, mask, {
+    color: "#ffffff",
+    glow: 26,
+    smooth: true,
+    alpha: 0.42,
+    shiftX: 0.13,
+  });
 }
 
 function renderAnatomy() {
@@ -725,9 +736,3 @@ async function loadFigures() {
 }
 loadFigures();
 
-// The scrollbar's thumb is only drawn once the page has moved, so the first
-// screen is unmarked and the reader sees it appear when they start reading.
-const pageRoot = document.documentElement;
-const markTop = () => pageRoot.classList.toggle("at-top", window.scrollY === 0);
-addEventListener("scroll", markTop, { passive: true });
-markTop();
