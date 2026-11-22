@@ -9,7 +9,7 @@
 ///|
 fn refusal_name(bytes : Bytes) -> String {
   try {
-    let face = @moonfont.decode(bytes, limits=@moonfont.Limits::strict())
+    let face = @moonfont.decode(bytes, limits=@moonfont.limits_strict)
     for i in 0..<face.num_glyphs() {
       let _ = face.outline(@moonfont.GlyphId::of(i))
     }

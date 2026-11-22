@@ -76,7 +76,7 @@ pub fn Avar::map_axis(self : Avar, axis : Int32, value : Int32) -> Int32 {
         return to
       }
       let step = (value - before_from).to_int64() * (to - before_to).to_int64()
-      return before_to + div_round(step, (from - before_from).to_int64())
+      return before_to + @wire.div_round(step, (from - before_from).to_int64())
     }
   }
   value

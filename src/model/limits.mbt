@@ -59,19 +59,6 @@ pub let limits_strict : Limits = {
 }
 
 ///|
-/// The desktop preset as a function, for a caller that reads a preset where a
-/// value is expected rather than in a parameter default.
-pub fn Limits::default() -> Limits {
-  limits
-}
-
-///|
-/// The untrusted-input preset as a function.
-pub fn Limits::strict() -> Limits {
-  limits_strict
-}
-
-///|
 /// Limits by name, every knob defaulted from the preset. Use this rather than a
 /// record literal when only one ceiling changes: a later field added to the
 /// record then keeps its default instead of failing to compile.

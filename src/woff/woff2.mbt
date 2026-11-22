@@ -171,14 +171,31 @@ fn read_255(stream : Stream) -> Int32 raise @model.Refused {
 }
 
 ///|
-pub fn unpack_woff2(
+/// One face of a collection, as the collection directory describes it: the
+/// flavor it reports and the table-directory entries it is built from.
+priv struct FaceEntry {
+  flavor : Int32
+  indexes : Array[Int32]
+}
+
+///|
+/// The tables of one transformed `glyf`, rebuilt together with the `loca` and
+/// the left edge of every glyph that the other transforms are derived from.
+priv struct GlyphRebuild {
+  glyf : Bytes
+  loca : Bytes
+  x_mins : Array[Int32]
+}
+
+///|
+/// Every face a WOFF2 file holds: one for a single font, one per font for a
+/// collection.
+pub fn open_woff2(
   input : BytesView,
   limits : @model.Limits,
-) -> BytesView raise @model.Refused {
+) -> Array[@sfnt.TableSet] raise @model.Refused {
   let flavor = word_at(input, 4)
-  if flavor == 0x74746366 {
-    raise @model.Unsupported(at=4, got="a WOFF 2 collection")
-  }
+  let is_collection = flavor == collection_flavor
   let count = short_at(input, 12)
   if count <= 0 {
     raise @model.Malformed(at=12, got="a WOFF 2 file with no tables")
@@ -221,6 +238,45 @@ pub fn unpack_woff2(
       data: input.clamped_view(start=0, end=0),
     })
   }
+  // A collection names the tables each of its fonts is built from; a single
+  // font is a collection of one whose directory is implicit.
+  let faces : Array[FaceEntry] = []
+  if is_collection {
+    let version = directory.u32()
+    if version != 0x00010000 && version != 0x00020000 {
+      raise @model.Unsupported(
+        at=directory.pos - 4,
+        got="TTC version \{version}",
+      )
+    }
+    let num_fonts = read_255(directory)
+    if num_fonts <= 0 {
+      raise @model.Malformed(at=directory.pos, got="an empty collection")
+    }
+    limits.check_glyphs(num_fonts)
+    for _ in 0..<num_fonts {
+      let num_tables = read_255(directory)
+      let face_flavor = directory.u32()
+      let indexes : Array[Int32] = []
+      for _ in 0..<num_tables {
+        let index = read_255(directory)
+        if index < 0 || index >= pieces.length() {
+          raise @model.Malformed(
+            at=directory.pos,
+            got="a collection entry naming table \{index}",
+          )
+        }
+        indexes.push(index)
+      }
+      faces.push({ flavor: face_flavor, indexes, })
+    }
+  } else {
+    let indexes : Array[Int32] = []
+    for i in 0..<pieces.length() {
+      indexes.push(i)
+    }
+    faces.push({ flavor, indexes, })
+  }
   let compressed_at = directory.pos
   if compressed_at + compressed_length > input.length() {
     raise @model.Truncated(at=compressed_at, want=compressed_length)
@@ -249,7 +305,90 @@ pub fn unpack_woff2(
       data,
     })
   }
-  reassemble(filled, flavor, limits)
+  // A transformed `glyf` is rebuilt once even when several faces share it: the
+  // bytes it produces are the same for all of them.
+  let rebuilds : Array[GlyphRebuild?] = []
+  for piece in filled {
+    if piece.tag == tag_glyf && piece.transformed {
+      let (glyf, loca, x_mins) = rebuild_glyf(piece.data, limits)
+      rebuilds.push(Some({ glyf, loca, x_mins, }))
+    } else {
+      rebuilds.push(None)
+    }
+  }
+  if is_collection {
+    let groups : Array[Array[(Int32, BytesView)]] = []
+    for face in faces {
+      groups.push(face_tables(filled, rebuilds, face.indexes, limits))
+    }
+    @sfnt.assemble_collection(flavor, groups, limits)
+  } else {
+    [
+      @sfnt.assemble(
+        faces[0].flavor,
+        face_tables(filled, rebuilds, faces[0].indexes, limits),
+        limits,
+      ),
+    ]
+  }
+}
+
+///|
+/// Put one face's tables back in their declared form. The transforms are per
+/// table, so two faces that share a table share the work: `glyf` and its `loca`
+/// come from the rebuild, and an `hmtx` comes back from the left edge of the
+/// glyphs in the `glyf` this face names.
+fn face_tables(
+  pieces : Array[Piece],
+  rebuilds : Array[GlyphRebuild?],
+  indexes : Array[Int32],
+  limits : @model.Limits,
+) -> Array[(Int32, BytesView)] raise @model.Refused {
+  let mut glyf_at = -1
+  let mut loca_at = -1
+  let mut number_of_h_metrics = 0
+  for index in indexes {
+    let piece = pieces[index]
+    if piece.tag == tag_glyf {
+      glyf_at = index
+    } else if piece.tag == tag_loca {
+      loca_at = index
+    } else if piece.tag == tag_hhea && piece.data.length() >= 36 {
+      number_of_h_metrics = short_at(piece.data, 34)
+    }
+  }
+  if glyf_at >= 0 && pieces[glyf_at].transformed && loca_at < 0 {
+    raise @model.MissingTable(tag="loca")
+  }
+  let rebuild = if glyf_at >= 0 { rebuilds[glyf_at] } else { None }
+  let x_mins = match rebuild {
+    Some(data) => data.x_mins
+    None => []
+  }
+  let tables : Array[(Int32, BytesView)] = []
+  for index in indexes {
+    let piece = pieces[index]
+    if piece.tag == tag_glyf && piece.transformed {
+      match rebuild {
+        Some(data) => tables.push((piece.tag, data.glyf[:]))
+        None =>
+          raise @model.Malformed(at=0, got="a transformed glyf with no rebuild")
+      }
+    } else if piece.tag == tag_loca && piece.transformed {
+      match rebuild {
+        Some(data) => tables.push((piece.tag, data.loca[:]))
+        None =>
+          raise @model.Malformed(at=0, got="a transformed loca with no glyf")
+      }
+    } else if piece.tag == tag_hmtx && piece.transformed {
+      let rebuilt = rebuild_hmtx(piece.data, number_of_h_metrics, x_mins)
+      limits.check_table(rebuilt.length())
+      tables.push((piece.tag, rebuilt[:]))
+    } else {
+      tables.push((piece.tag, piece.data))
+    }
+  }
+  tables
 }
 
 ///|
@@ -278,126 +417,4 @@ fn decompress(
     Err(_) =>
       raise @model.Malformed(at=0, got="a Brotli stream that will not expand")
   }
-}
-
-///|
-/// Put every table back and write the SFNT. `glyf` is rebuilt first because the
-/// `loca` and `hmtx` transforms are derived from it.
-fn reassemble(
-  pieces : Array[Piece],
-  flavor : Int32,
-  limits : @model.Limits,
-) -> Bytes raise @model.Refused {
-  let mut glyph_body : Bytes? = None
-  let mut x_mins : Array[Int32] = []
-  let mut glyf_index = -1
-  let mut loca_index = -1
-  for i in 0..<pieces.length() {
-    if pieces[i].tag == tag_glyf {
-      glyf_index = i
-    } else if pieces[i].tag == tag_loca {
-      loca_index = i
-    }
-  }
-  let mut loca_body : Bytes? = None
-  if glyf_index >= 0 && pieces[glyf_index].transformed {
-    let (glyf, loca, mins) = rebuild_glyf(pieces[glyf_index].data, limits)
-    glyph_body = Some(glyf)
-    loca_body = Some(loca)
-    x_mins = mins
-  }
-  let number_of_h_metrics = {
-    let mut value = 0
-    for piece in pieces {
-      if piece.tag == tag_hhea && piece.data.length() >= 36 {
-        value = short_at(piece.data, 34)
-      }
-    }
-    value
-  }
-  let outputs : Array[Piece] = []
-  for piece in pieces {
-    if piece.tag == tag_glyf && glyph_body is Some(_) {
-      outputs.push({
-        tag: piece.tag,
-        orig_length: glyph_body.unwrap().length(),
-        stored_length: glyph_body.unwrap().length(),
-        transformed: false,
-        data: glyph_body.unwrap()[:],
-      })
-    } else if piece.tag == tag_loca && loca_body is Some(_) {
-      outputs.push({
-        tag: piece.tag,
-        orig_length: loca_body.unwrap().length(),
-        stored_length: loca_body.unwrap().length(),
-        transformed: false,
-        data: loca_body.unwrap()[:],
-      })
-    } else if piece.tag == tag_hmtx && piece.transformed {
-      let rebuilt = rebuild_hmtx(piece.data, number_of_h_metrics, x_mins)
-      outputs.push({
-        tag: piece.tag,
-        orig_length: rebuilt.length(),
-        stored_length: rebuilt.length(),
-        transformed: false,
-        data: rebuilt[:],
-      })
-    } else {
-      outputs.push(piece)
-    }
-  }
-  if glyf_index >= 0 && loca_index < 0 {
-    raise @model.MissingTable(tag="loca")
-  }
-  write_sfnt(outputs, flavor)
-}
-
-///|
-/// Write the tables into one SFNT, sorted by tag, each starting on a
-/// four-byte boundary.
-fn write_sfnt(pieces : Array[Piece], flavor : Int32) -> Bytes {
-  let order : Array[Int32] = []
-  for i in 0..<pieces.length() {
-    order.push(i)
-  }
-  for i in 1..<order.length() {
-    let key = order[i]
-    let mut j = i - 1
-    while j >= 0 && pieces[order[j]].tag > pieces[key].tag {
-      order[j + 1] = order[j]
-      j -= 1
-    }
-    order[j + 1] = key
-  }
-  let count = pieces.length()
-  let writer = Writer::new()
-  let mut power = 1
-  let mut selector = 0
-  while power * 2 <= count {
-    power *= 2
-    selector += 1
-  }
-  writer.u32(flavor)
-  writer.u16(count)
-  writer.u16(power * 16)
-  writer.u16(selector)
-  writer.u16(count * 16 - power * 16)
-  let mut data_at = 12 + count * 16
-  let starts : Array[Int32] = []
-  for k in 0..<count {
-    let piece = pieces[order[k]]
-    writer.tag(piece.tag)
-    writer.u32(checksum(piece.data))
-    writer.u32(data_at)
-    writer.u32(piece.data.length())
-    starts.push(data_at)
-    data_at += (piece.data.length() + 3) / 4 * 4
-  }
-  for k in 0..<count {
-    let piece = pieces[order[k]]
-    writer.align(4)
-    writer.bytes(piece.data)
-    writer.align(4)
-  }
-  writer.to_bytes()
 }

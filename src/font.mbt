@@ -24,6 +24,7 @@ pub using @model {
   type Refused,
   type Scale,
   type TextMetrics,
+  type VerticalMetrics,
 }
 
 ///|
@@ -49,7 +50,9 @@ pub struct Face {
   head : @table.Head
   hhea : @table.Hhea
   maxp : @table.Maxp
-  hmtx : @table.Hmtx
+  hmtx : @table.Metrics
+  vhea : @table.Vhea?
+  vmtx : @table.Metrics?
   cmap : @table.Cmap
   kern : @table.Kern
   os2 : @table.Os2
@@ -58,70 +61,102 @@ pub struct Face {
   fvar : @variations.Fvar?
   avar : @variations.Avar?
   gvar : @variations.Gvar?
-  hvar : @variations.Hvar?
+  hvar : @variations.MetricDeltas?
+  vvar : @variations.MetricDeltas?
+  mvar : @variations.Mvar?
+  cvar : @variations.Cvar?
+  cvt : @table.Cvt?
   limits : @model.Limits
 }
 
 ///|
 fn build(
-  bytes : BytesView,
-  directory : @sfnt.Directory,
+  source : &@sfnt.TableSource,
   limits : @model.Limits,
 ) -> Face raise @model.Refused {
   let head = @table.Head::parse(
-    directory.table(bytes, @sfnt.tag_head(), limits),
+    @sfnt.table_cursor(source, @sfnt.tag_head(), limits),
   )
   let maxp = @table.Maxp::parse(
-    directory.table(bytes, @sfnt.tag_maxp(), limits),
+    @sfnt.table_cursor(source, @sfnt.tag_maxp(), limits),
     limits,
   )
   let hhea = @table.Hhea::parse(
-    directory.table(bytes, @sfnt.tag_hhea(), limits),
+    @sfnt.table_cursor(source, @sfnt.tag_hhea(), limits),
   )
-  let hmtx = @table.Hmtx::parse(
-    directory.table(bytes, @sfnt.tag_hmtx(), limits),
+  let hmtx = @table.Metrics::parse(
+    @sfnt.table_cursor(source, @sfnt.tag_hmtx(), limits),
     maxp.num_glyphs,
     hhea.number_of_h_metrics,
     limits,
   )
+  // A vertical pair is read only when the header exists: `vmtx` without `vhea`
+  // has no count to read it against, and a font that sets text horizontally
+  // usually has neither.
+  let vhea = if source.has(@sfnt.tag_vhea()) {
+    Some(
+      @table.Vhea::parse(@sfnt.table_cursor(source, @sfnt.tag_vhea(), limits)),
+    )
+  } else {
+    None
+  }
+  let vmtx = match vhea {
+    Some(header) =>
+      if source.has(@sfnt.tag_vmtx()) {
+        Some(
+          @table.Metrics::parse(
+            @sfnt.table_cursor(source, @sfnt.tag_vmtx(), limits),
+            maxp.num_glyphs,
+            header.number_of_long_metrics,
+            limits,
+          ),
+        )
+      } else {
+        None
+      }
+    None => None
+  }
   let cmap = @table.Cmap::parse(
-    directory.table(bytes, @sfnt.tag_cmap(), limits),
+    @sfnt.table_cursor(source, @sfnt.tag_cmap(), limits),
     limits,
   )
-  let kern = if directory.has(@sfnt.tag_kern()) {
-    @table.Kern::parse(directory.table(bytes, @sfnt.tag_kern(), limits), limits)
+  let kern = if source.has(@sfnt.tag_kern()) {
+    @table.Kern::parse(
+      @sfnt.table_cursor(source, @sfnt.tag_kern(), limits),
+      limits,
+    )
   } else {
     @table.Kern::empty()
   }
-  let os2 = if directory.has(@sfnt.tag_os2()) {
-    @table.Os2::parse(directory.table(bytes, @sfnt.tag_os2(), limits))
+  let os2 = if source.has(@sfnt.tag_os2()) {
+    @table.Os2::parse(@sfnt.table_cursor(source, @sfnt.tag_os2(), limits))
   } else {
     @table.Os2::empty()
   }
-  let mut source : @outline.GlyphSource? = None
+  let mut source_glyphs : @outline.GlyphSource? = None
   let mut cff : @cff.Font? = None
-  if directory.has(@sfnt.tag_glyf()) {
+  if source.has(@sfnt.tag_glyf()) {
     let loca = @table.Loca::parse(
-      directory.table(bytes, @sfnt.tag_loca(), limits),
+      @sfnt.table_cursor(source, @sfnt.tag_loca(), limits),
       maxp.num_glyphs,
       head.index_to_loc_format,
       limits,
     )
-    let glyf = directory.table(bytes, @sfnt.tag_glyf(), limits).all()
-    source = Some(@outline.GlyphSource::of(glyf, loca, limits))
-  } else if directory.has(@sfnt.tag_cff2()) {
+    let glyf = source.table_bytes(@sfnt.tag_glyf(), limits)
+    source_glyphs = Some(@outline.GlyphSource::of(glyf, loca, limits))
+  } else if source.has(@sfnt.tag_cff2()) {
     cff = Some(
       @cff.Font::parse(
-        directory.table(bytes, @sfnt.tag_cff2(), limits),
+        @sfnt.table_cursor(source, @sfnt.tag_cff2(), limits),
         true,
         head.units_per_em,
         limits,
       ),
     )
-  } else if directory.has(@sfnt.tag_cff()) {
+  } else if source.has(@sfnt.tag_cff()) {
     cff = Some(
       @cff.Font::parse(
-        directory.table(bytes, @sfnt.tag_cff(), limits),
+        @sfnt.table_cursor(source, @sfnt.tag_cff(), limits),
         false,
         head.units_per_em,
         limits,
@@ -130,10 +165,10 @@ fn build(
   } else {
     raise @model.MissingTable(tag="glyf or CFF")
   }
-  let fvar = if directory.has(@sfnt.tag_fvar()) {
+  let fvar = if source.has(@sfnt.tag_fvar()) {
     Some(
       @variations.Fvar::parse(
-        directory.table(bytes, @sfnt.tag_fvar(), limits),
+        @sfnt.table_cursor(source, @sfnt.tag_fvar(), limits),
         limits,
       ),
     )
@@ -141,20 +176,20 @@ fn build(
     None
   }
   let avar = match fvar {
-    Some(table) if directory.has(@sfnt.tag_avar()) =>
+    Some(table) if source.has(@sfnt.tag_avar()) =>
       Some(
         @variations.Avar::parse(
-          directory.table(bytes, @sfnt.tag_avar(), limits),
+          @sfnt.table_cursor(source, @sfnt.tag_avar(), limits),
           table.axes.length(),
           limits,
         ),
       )
     _ => None
   }
-  let gvar = if directory.has(@sfnt.tag_gvar()) {
+  let gvar = if source.has(@sfnt.tag_gvar()) {
     Some(
       @variations.Gvar::parse(
-        directory.table(bytes, @sfnt.tag_gvar(), limits),
+        @sfnt.table_cursor(source, @sfnt.tag_gvar(), limits),
         maxp.num_glyphs,
         limits,
       ),
@@ -162,46 +197,127 @@ fn build(
   } else {
     None
   }
-  let hvar = if directory.has(@sfnt.tag_hvar()) {
+  let hvar = if source.has(@sfnt.tag_hvar()) {
     Some(
-      @variations.Hvar::parse(
-        directory.table(bytes, @sfnt.tag_hvar(), limits),
+      @variations.MetricDeltas::parse(
+        @sfnt.table_cursor(source, @sfnt.tag_hvar(), limits),
         limits,
       ),
     )
   } else {
     None
   }
+  let vvar = if source.has(@sfnt.tag_vvar()) {
+    Some(
+      @variations.MetricDeltas::parse(
+        @sfnt.table_cursor(source, @sfnt.tag_vvar(), limits),
+        limits,
+      ),
+    )
+  } else {
+    None
+  }
+  let mvar = if source.has(@sfnt.tag_mvar()) {
+    Some(
+      @variations.Mvar::parse(
+        @sfnt.table_cursor(source, @sfnt.tag_mvar(), limits),
+        limits,
+      ),
+    )
+  } else {
+    None
+  }
+  let cvt = if source.has(@sfnt.tag_cvt()) {
+    Some(
+      @table.Cvt::parse(
+        @sfnt.table_cursor(source, @sfnt.tag_cvt(), limits),
+        limits,
+      ),
+    )
+  } else {
+    None
+  }
+  let cvar = match (cvt, fvar) {
+    (Some(_), Some(table)) =>
+      if source.has(@sfnt.tag_cvar()) {
+        Some(
+          @variations.Cvar::parse(
+            @sfnt.table_cursor(source, @sfnt.tag_cvar(), limits),
+            table.axes.length(),
+            limits,
+          ),
+        )
+      } else {
+        None
+      }
+    _ => None
+  }
   {
     head,
     hhea,
     maxp,
     hmtx,
+    vhea,
+    vmtx,
     cmap,
     kern,
     os2,
-    source,
+    source: source_glyphs,
     cff,
     fvar,
     avar,
     gvar,
     hvar,
+    vvar,
+    mvar,
+    cvar,
+    cvt,
     limits,
   }
 }
 
 ///|
-/// Read the first face of a font file. A TrueType collection also has a first
-/// face; `decode_all` is the entry point for the rest of them. A WOFF or WOFF2
-/// container is unpacked first, so a caller never chooses an entry point by
-/// file extension.
+/// The containers this library opens, in the order they are tried. A new
+/// container format is one entry here and one package under `src/`: the
+/// façade, the table layer and every reader above it stay as they are.
+let containers : Array[&@sfnt.Container] = [
+  @sfnt.Sfnt::new(),
+  @woff.Woff1::new(),
+  @woff.Woff2::new(),
+]
+
+///|
+/// Every face in a file, whatever container it arrived in.
+fn faces_of(
+  bytes : BytesView,
+  limits : @model.Limits,
+) -> Array[@sfnt.TableSet] raise @model.Refused {
+  limits.check_file(bytes.length())
+  if bytes.length() < 4 {
+    raise @model.Truncated(at=0, want=4)
+  }
+  let magic = (bytes[0].to_int() << 24) |
+    (bytes[1].to_int() << 16) |
+    (bytes[2].to_int() << 8) |
+    bytes[3].to_int()
+  for container in containers {
+    if container.claims(magic) {
+      return container.open(bytes, limits)
+    }
+  }
+  raise @model.Unknown(at=0, got="a file that opens with \{magic}")
+}
+
+///|
+/// Read the first face of a font file. A collection, a WOFF file and a WOFF2
+/// file all have a first face; `decode_all` is the entry point for the rest. A
+/// caller never chooses an entry point by file extension.
 pub fn decode(
   bytes : BytesView,
   limits~ : @model.Limits = @model.limits,
 ) -> Face raise @model.Refused {
-  let plain = @woff.unpack(bytes, limits)
-  let faces = @sfnt.read(plain, limits)
-  build(plain, faces[0], limits)
+  let faces = faces_of(bytes, limits)
+  build(faces[0], limits)
 }
 
 ///|
@@ -210,13 +326,24 @@ pub fn decode_all(
   bytes : BytesView,
   limits~ : @model.Limits = @model.limits,
 ) -> Array[Face] raise @model.Refused {
-  let plain = @woff.unpack(bytes, limits)
-  let directories = @sfnt.read(plain, limits)
-  let faces : Array[Face] = []
-  for i in 0..<directories.length() {
-    faces.push(build(plain, directories[i], limits))
+  let faces = faces_of(bytes, limits)
+  let built : Array[Face] = []
+  for face in faces {
+    built.push(build(face, limits))
   }
-  faces
+  built
+}
+
+///|
+/// Build a face from a table source rather than from a file: the entry point
+/// for a caller whose tables come from somewhere this library does not read,
+/// such as a memory map, a file handle or a fetch that returns one table at a
+/// time. `decode` is this function over the faces a container finds.
+pub fn decode_from(
+  source : &@sfnt.TableSource,
+  limits~ : @model.Limits = @model.limits,
+) -> Face raise @model.Refused {
+  build(source, limits)
 }
 
 ///|
@@ -287,19 +414,163 @@ pub fn Face::at(
 }
 
 ///|
-/// Font-wide metrics, in font units.
-pub fn Face::font_metrics(self : Face) -> @model.FontMetrics {
+/// Font-wide metrics, in font units. At a location, `MVAR` moves the vertical
+/// extent and the one-off heights: a face whose bold master is taller reports
+/// that height here rather than at the default instance only.
+pub fn Face::font_metrics(
+  self : Face,
+  location? : @variations.Location,
+) -> @model.FontMetrics {
+  let coords = self.normalise(location?)
+  let mvar = self.mvar
+  let shift = fn(tag : Int32) -> Int32 {
+    if coords.length() == 0 {
+      return 0
+    }
+    match mvar {
+      Some(table) => table.delta(tag, coords)
+      None => 0
+    }
+  }
   let result : @model.FontMetrics = {
     units_per_em: self.head.units_per_em,
-    ascent: self.hhea.ascender,
-    descent: self.hhea.descender,
-    line_gap: self.hhea.line_gap,
-    cap_height: self.os2.cap_height,
-    x_height: self.os2.x_height,
+    ascent: self.hhea.ascender + shift(@sfnt.tag_hasc()),
+    descent: self.hhea.descender + shift(@sfnt.tag_hdsc()),
+    line_gap: self.hhea.line_gap + shift(@sfnt.tag_hlgp()),
+    cap_height: self.os2.cap_height + shift(@sfnt.tag_cpht()),
+    x_height: self.os2.x_height + shift(@sfnt.tag_xhgt()),
     num_glyphs: self.maxp.num_glyphs,
     bounding_box: self.head.bounding_box,
   }
   result
+}
+
+///|
+/// The measurements of a column, in font units. A font without `vhea` gets the
+/// horizontal ones, so a caller that sets text vertically never has to ask
+/// whether the vertical pair exists.
+pub fn Face::vertical_metrics(
+  self : Face,
+  location? : @variations.Location,
+) -> @model.VerticalMetrics {
+  let coords = self.normalise(location?)
+  let shift = fn(tag : Int32) -> Int32 {
+    if coords.length() == 0 {
+      return 0
+    }
+    match self.mvar {
+      Some(table) => table.delta(tag, coords)
+      None => 0
+    }
+  }
+  match self.vhea {
+    Some(header) =>
+      {
+        ascent: header.ascender + shift(@sfnt.tag_vasc()),
+        descent: header.descender + shift(@sfnt.tag_vdsc()),
+        line_gap: header.line_gap + shift(@sfnt.tag_vlgp()),
+      }
+    None =>
+      {
+        ascent: self.hhea.ascender,
+        descent: self.hhea.descender,
+        line_gap: self.hhea.line_gap,
+      }
+  }
+}
+
+///|
+/// Whether the font carries vertical metrics of its own.
+pub fn Face::has_vertical_metrics(self : Face) -> Bool {
+  self.vhea is Some(_)
+}
+
+///|
+/// The advance height of one glyph in font units, at a location: the step from
+/// one glyph to the next in a column. A font without `vmtx` advances by its em,
+/// which is what a vertical layout does with a font that only describes
+/// horizontal text.
+pub fn Face::advance_height(
+  self : Face,
+  glyph : @model.GlyphId,
+  location? : @variations.Location,
+) -> Int32 {
+  let index = glyph.to_int()
+  let base = match self.vmtx {
+    Some(table) => table.metrics(index).0
+    None => self.head.units_per_em
+  }
+  let coords = self.normalise(location?)
+  if coords.length() == 0 {
+    return base
+  }
+  match self.vvar {
+    Some(table) => base + table.advance_delta(index, coords)
+    None => base
+  }
+}
+
+///|
+/// The top side bearing of one glyph, in font units: the distance from the top
+/// of a column to the ink.
+pub fn Face::top_side_bearing(
+  self : Face,
+  glyph : @model.GlyphId,
+  location? : @variations.Location,
+) -> Int32 {
+  let index = glyph.to_int()
+  let (_, bearing) = match self.vmtx {
+    Some(table) => table.metrics(index)
+    None => (0, 0)
+  }
+  let coords = self.normalise(location?)
+  if coords.length() == 0 {
+    return bearing
+  }
+  match self.vvar {
+    Some(table) => bearing + table.bearing_delta(index, coords)
+    None => bearing
+  }
+}
+
+///|
+/// The control values of the font, in font units, moved to a location by
+/// `cvar`. Empty for a font without a `cvt ` table. A caller that hints reads
+/// these as the distances its programs snap to.
+pub fn Face::cvt(self : Face, location? : @variations.Location) -> Array[Int32] {
+  let values = match self.cvt {
+    Some(table) => table.values.copy()
+    None => []
+  }
+  if values.length() == 0 {
+    return values
+  }
+  let coords = self.normalise(location?)
+  if coords.length() == 0 {
+    return values
+  }
+  match self.cvar {
+    Some(table) => {
+      let deltas = table.deltas(values.length(), coords) catch { _ => [] }
+      for i in 0..<values.length() {
+        if i < deltas.length() {
+          values[i] += deltas[i]
+        }
+      }
+      values
+    }
+    None => values
+  }
+}
+
+///|
+/// The `MVAR` value tags this face varies: empty for a font without the table,
+/// otherwise the tags as four-character words.
+pub fn Face::metric_tags(self : Face) -> Array[Int32] {
+  match self.mvar {
+    Some(table) => table.tags()
+    None => []
+  }
 }
 
 ///|
@@ -405,7 +676,7 @@ pub fn Face::metrics(
   let mut offset = 0
   if coords.length() > 0 {
     match self.hvar {
-      Some(table) => offset = table.lsb_delta(index, coords)
+      Some(table) => offset = table.bearing_delta(index, coords)
       None =>
         match (self.gvar, self.source) {
           (Some(table), Some(source)) =>

@@ -8,8 +8,6 @@ import {
 }
 
 // Values
-pub fn div_round(Int64, Int64) -> Int32
-
 pub fn scale_f2dot14(Int32, Int32) -> Int32
 
 pub fn scale_fixed(Int32, Int32) -> Int32
@@ -40,6 +38,26 @@ pub(all) struct Axis {
 pub fn Axis::is_hidden(Self) -> Bool
 pub fn Axis::tag_name(Self) -> String
 
+pub(all) struct Cvar {
+  data : BytesView
+  axis_count : Int32
+  tuple_count : Int32
+  data_at : Int32
+  shared_points : Bool
+}
+pub fn Cvar::deltas(Self, Int32, Array[Int32]) -> Array[Int32] raise @model.Refused
+pub fn Cvar::parse(@wire.Cursor, Int32, @model.Limits) -> Self raise @model.Refused
+
+pub(all) struct DeltaMap {
+  data : BytesView
+  entries_at : Int32
+  count : Int32
+  entry_size : Int32
+  inner_bits : Int32
+}
+pub fn DeltaMap::parse(BytesView, Int32, @model.Limits) -> Self? raise @model.Refused
+pub fn DeltaMap::resolve(Self, Int32) -> (Int32, Int32)
+
 #derive(Eq, @debug.Debug)
 pub(all) struct Fvar {
   axes : Array[Axis]
@@ -47,28 +65,17 @@ pub(all) struct Fvar {
 }
 pub fn Fvar::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
 
-#derive(@debug.Debug)
-pub(all) struct Gvar {
+pub struct Gvar {
   data : BytesView
   axis_count : Int32
-  shared_tuples : Int32
+  shared_at : Int32
+  shared_count : Int32
   glyph_count : Int32
   offsets : Array[Int32]
   offset_to_data : Int32
 }
 pub fn Gvar::deltas(Self, Int32, Int32, Array[Int32], Array[(Int32, Int32)], Array[Int32]) -> Array[(Int32, Int32)] raise @model.Refused
 pub fn Gvar::parse(@wire.Cursor, Int32, @model.Limits) -> Self raise @model.Refused
-
-#derive(@debug.Debug)
-pub(all) struct Hvar {
-  store : Store
-  advance_map : Int32
-  lsb_map : Int32
-  data : BytesView
-}
-pub fn Hvar::advance_delta(Self, Int32, Array[Int32]) -> Int32
-pub fn Hvar::lsb_delta(Self, Int32, Array[Int32]) -> Int32
-pub fn Hvar::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
 
 #derive(Eq, @debug.Debug)
 pub(all) struct Instance {
@@ -87,6 +94,25 @@ pub fn Location::normalise(Self, Fvar, avar? : Avar) -> Array[Int32]
 pub fn Location::of(Fvar, Array[(Int32, Int32)]) -> Self
 pub fn Location::set(Self, Fvar, Int32, Int32) -> Unit
 pub fn Location::set_axis(Self, Int32, Int32) -> Unit
+
+pub(all) struct MetricDeltas {
+  store : Store
+  advance : DeltaMap?
+  bearing : DeltaMap?
+  side : DeltaMap?
+}
+pub fn MetricDeltas::advance_delta(Self, Int32, Array[Int32]) -> Int32
+pub fn MetricDeltas::bearing_delta(Self, Int32, Array[Int32]) -> Int32
+pub fn MetricDeltas::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
+pub fn MetricDeltas::side_delta(Self, Int32, Array[Int32]) -> Int32
+
+pub(all) struct Mvar {
+  store : Store
+  records : Array[(Int32, Int32, Int32)]
+}
+pub fn Mvar::delta(Self, Int32, Array[Int32]) -> Int32
+pub fn Mvar::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
+pub fn Mvar::tags(Self) -> Array[Int32]
 
 #derive(Eq, @debug.Debug)
 pub(all) struct Region {

@@ -7,31 +7,16 @@
 // what the file says, not what a float happened to round to.
 
 ///|
-/// Divide rounding to nearest, halves away from zero. A denominator of zero is
-/// a caller's bug rather than bad input, so it yields zero instead of trapping;
-/// every caller has already checked the axis range.
-pub fn div_round(numerator : Int64, denominator : Int64) -> Int32 {
-  if denominator == 0 {
-    return 0
-  }
-  let negative = (numerator < 0) != (denominator < 0)
-  let magnitude = if numerator < 0 { -numerator } else { numerator }
-  let unit = if denominator < 0 { -denominator } else { denominator }
-  let quotient = (magnitude * 2 + unit) / (unit * 2)
-  (if negative { -quotient } else { quotient }).to_int()
-}
-
-///|
 /// Multiply by an F2Dot14 factor, rounding to nearest. Used for the scalar of
 /// one variation tuple applied to one delta.
 pub fn scale_f2dot14(value : Int32, factor : Int32) -> Int32 {
-  div_round(value.to_int64() * factor.to_int64(), 16384)
+  @wire.div_round(value.to_int64() * factor.to_int64(), 16384)
 }
 
 ///|
 /// Multiply by a 16.16 factor, rounding to nearest.
 pub fn scale_fixed(value : Int32, factor : Int32) -> Int32 {
-  div_round(value.to_int64() * factor.to_int64(), 65536)
+  @wire.div_round(value.to_int64() * factor.to_int64(), 65536)
 }
 
 ///|

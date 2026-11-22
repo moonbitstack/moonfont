@@ -5,6 +5,7 @@ import {
   "moonbitstack/moonfont/cff",
   "moonbitstack/moonfont/model",
   "moonbitstack/moonfont/outline",
+  "moonbitstack/moonfont/sfnt",
   "moonbitstack/moonfont/table",
   "moonbitstack/moonfont/variations",
 }
@@ -13,6 +14,8 @@ import {
 pub fn decode(BytesView, limits? : @model.Limits) -> Face raise @model.Refused
 
 pub fn decode_all(BytesView, limits? : @model.Limits) -> Array[Face] raise @model.Refused
+
+pub fn decode_from(&@sfnt.TableSource, limits? : @model.Limits) -> Face raise @model.Refused
 
 pub let limits : @model.Limits
 
@@ -27,7 +30,9 @@ pub struct Face {
   head : @table.Head
   hhea : @table.Hhea
   maxp : @table.Maxp
-  hmtx : @table.Hmtx
+  hmtx : @table.Metrics
+  vhea : @table.Vhea?
+  vmtx : @table.Metrics?
   cmap : @table.Cmap
   kern : @table.Kern
   os2 : @table.Os2
@@ -36,27 +41,37 @@ pub struct Face {
   fvar : @variations.Fvar?
   avar : @variations.Avar?
   gvar : @variations.Gvar?
-  hvar : @variations.Hvar?
+  hvar : @variations.MetricDeltas?
+  vvar : @variations.MetricDeltas?
+  mvar : @variations.Mvar?
+  cvar : @variations.Cvar?
+  cvt : @table.Cvt?
   limits : @model.Limits
 }
 pub fn Face::advance(Self, @model.GlyphId, location? : @variations.Location) -> Int32
+pub fn Face::advance_height(Self, @model.GlyphId, location? : @variations.Location) -> Int32
 pub fn Face::at(Self, Array[(Int32, Int32)]) -> @variations.Location
 pub fn Face::axes(Self) -> Array[@variations.Axis]
-pub fn Face::font_metrics(Self) -> @model.FontMetrics
+pub fn Face::cvt(Self, location? : @variations.Location) -> Array[Int32]
+pub fn Face::font_metrics(Self, location? : @variations.Location) -> @model.FontMetrics
 pub fn Face::glyph_for(Self, Char) -> @model.GlyphId?
 pub fn Face::glyph_index(Self, Int32) -> @model.GlyphId?
+pub fn Face::has_vertical_metrics(Self) -> Bool
 pub fn Face::instances(Self) -> Array[@variations.Instance]
 pub fn Face::is_postscript(Self) -> Bool
 pub fn Face::is_variable(Self) -> Bool
 pub fn Face::kern_between(Self, @model.GlyphId, @model.GlyphId) -> Int32
 pub fn Face::location(Self) -> @variations.Location
 pub fn Face::measure(Self, String, Int32, letter_spacing? : Int32, location? : @variations.Location) -> @model.TextMetrics
+pub fn Face::metric_tags(Self) -> Array[Int32]
 pub fn Face::metrics(Self, @model.GlyphId, location? : @variations.Location) -> @model.GlyphMetrics raise @model.Refused
 pub fn Face::num_glyphs(Self) -> Int32
 pub fn Face::outline(Self, @model.GlyphId, location? : @variations.Location) -> @model.Outline raise @model.Refused
 pub fn Face::rasterise(Self, @model.GlyphId, Int32, location? : @variations.Location) -> @model.CoverageMask raise @model.Refused
 pub fn Face::scale(Self, Int32) -> @model.Scale
+pub fn Face::top_side_bearing(Self, @model.GlyphId, location? : @variations.Location) -> Int32
 pub fn Face::units_per_em(Self) -> Int32
+pub fn Face::vertical_metrics(Self, location? : @variations.Location) -> @model.VerticalMetrics
 
 // Type aliases
 pub using @model {type Bounds}
@@ -82,5 +97,7 @@ pub using @model {type Refused}
 pub using @model {type Scale}
 
 pub using @model {type TextMetrics}
+
+pub using @model {type VerticalMetrics}
 
 // Traits

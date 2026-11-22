@@ -230,7 +230,7 @@ fn rebuild_glyf(
     }
   }
   let boxes = resolve_boxes(decoded, num_glyphs)
-  let glyph_writer = Writer::new()
+  let glyph_writer = @wire.Writer::new()
   let offsets : Array[Int32] = []
   let x_mins : Array[Int32] = []
   for glyph in 0..<num_glyphs {
@@ -245,7 +245,7 @@ fn rebuild_glyf(
     glyph_writer.align(4)
   }
   offsets.push(glyph_writer.length())
-  let loca_writer = Writer::new()
+  let loca_writer = @wire.Writer::new()
   if index_format == 0 {
     for offset in offsets {
       loca_writer.u16(offset / 2)
@@ -388,13 +388,13 @@ fn place(child : Array[Int32], component : Component) -> Array[Int32] {
   let mut first = true
   for corner in corners {
     let (x, y) = corner
-    let nx = div_round(
+    let nx = @wire.div_round(
         x.to_int64() * component.a.to_int64() +
         y.to_int64() * component.c.to_int64(),
         16384,
       ) +
       component.dx
-    let ny = div_round(
+    let ny = @wire.div_round(
         x.to_int64() * component.b.to_int64() +
         y.to_int64() * component.d.to_int64(),
         16384,
@@ -454,7 +454,11 @@ fn unite(a : Array[Int32], b : Array[Int32]) -> Array[Int32] {
 /// One glyph record: the header, the contour ends, the instructions, then flags
 /// and 16-bit coordinate deltas. That is a legal encoding of any point set, and
 /// the reader does not care that the writer did not try to shorten it.
-fn write_simple(writer : Writer, simple : Simple, box : Array[Int32]) -> Unit {
+fn write_simple(
+  writer : @wire.Writer,
+  simple : Simple,
+  box : Array[Int32],
+) -> Unit {
   writer.i16(simple.contours.length())
   writer.i16(box[0])
   writer.i16(box[1])
@@ -482,7 +486,7 @@ fn write_simple(writer : Writer, simple : Simple, box : Array[Int32]) -> Unit {
 
 ///|
 fn write_composite(
-  writer : Writer,
+  writer : @wire.Writer,
   composite : Composite,
   box : Array[Int32],
 ) -> Unit {
@@ -608,7 +612,7 @@ fn rebuild_hmtx(
       },
     )
   }
-  let writer = Writer::new()
+  let writer = @wire.Writer::new()
   for i in 0..<metrics {
     writer.u16(if i < advances.length() { advances[i] } else { 0 })
     writer.i16(if i < side_bearings.length() { side_bearings[i] } else { 0 })

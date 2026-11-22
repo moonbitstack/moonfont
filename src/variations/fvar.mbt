@@ -217,12 +217,12 @@ pub fn Location::normalise(
     let mut normalised = if value == axis.default_value {
       0
     } else if value < axis.default_value {
-      div_round(
+      @wire.div_round(
         (value - axis.default_value).to_int64() * 16384,
         (axis.default_value - axis.min).to_int64(),
       )
     } else {
-      div_round(
+      @wire.div_round(
         (value - axis.default_value).to_int64() * 16384,
         (axis.max - axis.default_value).to_int64(),
       )

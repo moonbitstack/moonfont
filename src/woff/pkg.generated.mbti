@@ -3,40 +3,30 @@ package "moonbitstack/moonfont/woff"
 
 import {
   "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/sfnt",
 }
 
 // Values
-pub fn checksum(BytesView) -> Int32
+pub fn open_woff1(BytesView, @model.Limits) -> Array[@sfnt.TableSet] raise @model.Refused
 
-pub fn div_round(Int64, Int64) -> Int32
+pub fn open_woff2(BytesView, @model.Limits) -> Array[@sfnt.TableSet] raise @model.Refused
 
 pub fn short_at(BytesView, Int32) -> Int32 raise @model.Refused
-
-pub fn unpack(BytesView, @model.Limits) -> BytesView raise @model.Refused
-
-pub fn unpack_woff1(BytesView, @model.Limits) -> BytesView raise @model.Refused
-
-pub fn unpack_woff2(BytesView, @model.Limits) -> BytesView raise @model.Refused
 
 pub fn word_at(BytesView, Int32) -> Int32 raise @model.Refused
 
 // Errors
 
 // Types and methods
-pub struct Writer {
-  data : Array[Byte]
+pub struct Woff1 {
 }
-pub fn Writer::align(Self, Int32) -> Unit
-pub fn Writer::byte(Self, Int32) -> Unit
-pub fn Writer::bytes(Self, BytesView) -> Unit
-pub fn Writer::i16(Self, Int32) -> Unit
-pub fn Writer::length(Self) -> Int32
-pub fn Writer::new() -> Self
-pub fn Writer::tag(Self, Int32) -> Unit
-pub fn Writer::to_bytes(Self) -> Bytes
-pub fn Writer::u16(Self, Int32) -> Unit
-pub fn Writer::u32(Self, Int32) -> Unit
-pub fn Writer::zeros(Self, Int32) -> Unit
+pub fn Woff1::new() -> Self
+pub impl @sfnt.Container for Woff1
+
+pub struct Woff2 {
+}
+pub fn Woff2::new() -> Self
+pub impl @sfnt.Container for Woff2
 
 // Type aliases
 

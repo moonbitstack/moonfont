@@ -119,27 +119,26 @@ pub fn Maxp::parse(
 }
 
 ///|
-/// `hmtx`: advances and left side bearings. The tail of the table holds only
-/// bearings for glyphs whose advance is the last long metric's, which is why a
-/// glyph's metrics are a lookup rather than a fixed stride.
-pub(all) struct Hmtx {
+/// `hmtx` and `vmtx`: one advance and one side bearing per glyph, with the tail
+/// glyphs repeating the last advance the table stores. The two tables have the
+/// same layout, so one reader serves both; which side a bearing is on depends
+/// on the table, and the caller knows that.
+pub(all) struct Metrics {
   advances : Array[Int32]
   bearings : Array[Int32]
 }
 
 ///|
-pub fn Hmtx::parse(
+/// Read an `hmtx` or `vmtx` table. `long_metrics` is the count the header of the
+/// matching `hhea` or `vhea` declares.
+pub fn Metrics::parse(
   cursor : @wire.Cursor,
   num_glyphs : Int32,
-  number_of_h_metrics : Int32,
+  long_metrics : Int32,
   limits : @model.Limits,
-) -> Hmtx raise @model.Refused {
+) -> Metrics raise @model.Refused {
   limits.check_glyphs(num_glyphs)
-  let count = if number_of_h_metrics > num_glyphs {
-    num_glyphs
-  } else {
-    number_of_h_metrics
-  }
+  let count = if long_metrics > num_glyphs { num_glyphs } else { long_metrics }
   let advances : Array[Int32] = []
   let bearings : Array[Int32] = []
   for _ in 0..<count {
@@ -154,7 +153,7 @@ pub fn Hmtx::parse(
 }
 
 ///|
-pub fn Hmtx::metrics(self : Hmtx, glyph : Int32) -> (Int32, Int32) {
+pub fn Metrics::metrics(self : Metrics, glyph : Int32) -> (Int32, Int32) {
   if glyph < 0 || glyph >= self.advances.length() {
     (0, 0)
   } else {

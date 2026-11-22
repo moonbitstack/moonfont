@@ -158,6 +158,16 @@ pub(all) struct FontMetrics {
 }
 
 ///|
+/// The measurements of a column, in font units, for a font that sets text
+/// vertically. A font without `vhea` reports the horizontal metrics here, so a
+/// caller never branches on whether the vertical tables exist.
+pub(all) struct VerticalMetrics {
+  ascent : Int32
+  descent : Int32
+  line_gap : Int32
+}
+
+///|
 /// Eight-bit coverage of one glyph, top-down rows, left-to-right columns.
 /// `left` and `top` place the box relative to the pen in whole pixels, `top`
 /// counted upwards, so a caller can blit it into an atlas without recomputing

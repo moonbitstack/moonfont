@@ -1,40 +1,76 @@
 // Copyright 2026 Leo Cheng
 // SPDX-License-Identifier: Apache-2.0
 
-// One container entry point. Every format this library reads arrives as bytes
-// from somewhere else: a plain SFNT, a TrueType collection, a WOFF file or a
-// WOFF2 file. The first three are already the layout the table reader wants,
-// so only the compressed two are unpacked, and only when their signature says
-// so.
+// The two compressed containers a web font arrives in, as `Container`
+// implementations. A WOFF file is an SFNT with each table deflated; a WOFF2
+// file is one Brotli stream whose tables may also be re-encoded. Both hand back
+// `TableSet`s, so exactly one reader understands table directories and nothing
+// above this layer knows a font arrived compressed.
 
 ///|
+/// The WOFF signature.
 let woff1_magic : Int32 = 0x774F4646
 
 ///|
+/// The WOFF 2 signature.
 let woff2_magic : Int32 = 0x774F4632
 
 ///|
-/// The plain SFNT a container holds. A file that is not a WOFF container is
-/// returned as it came, so a caller never has to branch on the format.
-pub fn unpack(
-  input : BytesView,
-  limits : @model.Limits,
-) -> BytesView raise @model.Refused {
-  limits.check_file(input.length())
-  if input.length() < 4 {
-    raise @model.Truncated(at=0, want=4)
-  }
-  let magic = (input[0].to_int() << 24) |
-    (input[1].to_int() << 16) |
-    (input[2].to_int() << 8) |
-    input[3].to_int()
-  if magic == woff1_magic {
-    unpack_woff1(input, limits)
-  } else if magic == woff2_magic {
-    unpack_woff2(input, limits)
-  } else {
-    input
-  }
+/// The flavor a font collection declares.
+let collection_flavor : Int32 = 0x74746366
+
+///|
+/// WOFF 1.0.
+pub struct Woff1 {}
+
+///|
+pub fn Woff1::new() -> Woff1 {
+  Woff1::{ }
+}
+
+///|
+pub impl @sfnt.Container for Woff1 with fn name(self) {
+  let _ = self
+  "WOFF"
+}
+
+///|
+pub impl @sfnt.Container for Woff1 with fn claims(self, magic) {
+  let _ = self
+  magic == woff1_magic
+}
+
+///|
+pub impl @sfnt.Container for Woff1 with fn open(self, bytes, limits) {
+  let _ = self
+  open_woff1(bytes, limits)
+}
+
+///|
+/// WOFF 2.0, including the collections the format added.
+pub struct Woff2 {}
+
+///|
+pub fn Woff2::new() -> Woff2 {
+  Woff2::{ }
+}
+
+///|
+pub impl @sfnt.Container for Woff2 with fn name(self) {
+  let _ = self
+  "WOFF2"
+}
+
+///|
+pub impl @sfnt.Container for Woff2 with fn claims(self, magic) {
+  let _ = self
+  magic == woff2_magic
+}
+
+///|
+pub impl @sfnt.Container for Woff2 with fn open(self, bytes, limits) {
+  let _ = self
+  open_woff2(bytes, limits)
 }
 
 ///|

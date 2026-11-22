@@ -49,8 +49,8 @@ test "bounds, limits and the strict preset" {
   assert_eq(box.width(), 10)
   assert_eq(box.height(), 20)
   assert_eq(box.is_empty(), false)
-  let normal = @moonfont.Limits::default()
-  let strict = @moonfont.Limits::strict()
+  let normal = @moonfont.limits
+  let strict = @moonfont.limits_strict
   assert_eq(strict.mask_pixels < normal.mask_pixels, true)
   assert_eq(strict.recursion < normal.recursion, true)
 }
@@ -66,7 +66,7 @@ test "a square outline fills its interior" {
   ]
   let outline = @model.Outline::of(commands, @model.Bounds::empty())
   let scale = @moonfont.Scale::of(16, 100)
-  let mask = @raster.rasterise(outline, scale, @moonfont.Limits::default())
+  let mask = @raster.rasterise(outline, scale, @moonfont.limits)
   assert_eq(mask.width, 16)
   assert_eq(mask.height, 16)
   assert_eq(mask.at(8, 8), 255)
@@ -80,7 +80,7 @@ test "an empty outline produces an empty mask" {
   let mask = @raster.rasterise(
     outline,
     @moonfont.Scale::of(16, 1000),
-    @moonfont.Limits::default(),
+    @moonfont.limits,
   )
   assert_eq(mask.width, 0)
   assert_eq(mask.height, 0)
@@ -118,7 +118,7 @@ test "the embedded font decodes from bytes to a mask" {
 /// this over the whole corpus is also the no-trap check.
 fn refused_by(bytes : Bytes) -> Bool {
   let refused = try {
-    let face = @moonfont.decode(bytes, limits=@moonfont.Limits::strict())
+    let face = @moonfont.decode(bytes, limits=@moonfont.limits_strict)
     for i in 0..<face.num_glyphs() {
       let _ = face.outline(@moonfont.GlyphId::of(i))
     }

@@ -97,12 +97,12 @@ pub fn Region::scalar(
       } else if value <= lower || upper <= value {
         factor = 0
       } else if value < peak {
-        factor = div_round(
+        factor = @wire.div_round(
           (value - lower).to_int64() * 16384,
           (peak - lower).to_int64(),
         ).to_int64()
       } else if value > peak {
-        factor = div_round(
+        factor = @wire.div_round(
           (value - upper).to_int64() * 16384,
           (peak - upper).to_int64(),
         ).to_int64()

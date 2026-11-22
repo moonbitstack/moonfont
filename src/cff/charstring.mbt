@@ -195,9 +195,9 @@ fn Interp::point(self : Interp) -> @model.Point {
 fn Interp::scale(self : Interp, value : Int32) -> Int32 {
   let matrix = self.font.matrix_scale
   if matrix == 65536 {
-    @variations.div_round(value.to_int64(), 65536)
+    @wire.div_round(value.to_int64(), 65536)
   } else {
-    @variations.div_round(value.to_int64() * matrix.to_int64(), 65536 * 65536)
+    @wire.div_round(value.to_int64() * matrix.to_int64(), 65536 * 65536)
   }
 }
 
@@ -458,7 +458,7 @@ fn Interp::run(
         }
         10 | 29 => {
           let raw = self.pop()
-          let index = @variations.div_round(raw.to_int64(), 65536)
+          let index = @wire.div_round(raw.to_int64(), 65536)
           let target = if b0 == 10 { self.lsubrs } else { self.gsubrs }
           let count = target.count()
           if count <= 0 {
@@ -491,7 +491,7 @@ fn Interp::run(
             raise @model.Unsupported(at~, got="a vsindex operator in CFF 1")
           }
           let raw = self.pop()
-          self.vsindex = @variations.div_round(raw.to_int64(), 65536)
+          self.vsindex = @wire.div_round(raw.to_int64(), 65536)
           self.clear()
         }
         16 => {
@@ -578,7 +578,7 @@ fn Interp::escape(
       if b == 0 {
         raise @model.Malformed(at~, got="a division by zero in a charstring")
       }
-      self.push(@variations.div_round(a.to_int64() * 65536, b.to_int64()))
+      self.push(@wire.div_round(a.to_int64() * 65536, b.to_int64()))
     }
     14 => {
       let a = self.pop()
@@ -587,7 +587,7 @@ fn Interp::escape(
     24 => {
       let b = self.pop()
       let a = self.pop()
-      self.push(@variations.div_round(a.to_int64() * b.to_int64(), 65536))
+      self.push(@wire.div_round(a.to_int64() * b.to_int64(), 65536))
     }
     18 => {
       let _ = self.pop()
@@ -633,7 +633,7 @@ fn Interp::flex(
 /// delta per region of the store, then `n` itself.
 fn Interp::blend(self : Interp, at : Int32) -> Unit raise @model.Refused {
   let raw = self.pop()
-  let count = @variations.div_round(raw.to_int64(), 65536)
+  let count = @wire.div_round(raw.to_int64(), 65536)
   let store = match self.font.var_store {
     Some(store) => store
     None => raise @model.Malformed(at~, got="a blend with no variation store")

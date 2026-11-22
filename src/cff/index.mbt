@@ -226,7 +226,7 @@ fn parse_dict(
           } else {
             0
           }
-          let scaled = @variations.div_round(
+          let scaled = @wire.div_round(
             a.to_int64() * units_per_em.to_int64(),
             65536,
           )

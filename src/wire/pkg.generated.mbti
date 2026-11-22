@@ -6,6 +6,9 @@ import {
 }
 
 // Values
+pub fn checksum(BytesView) -> Int32
+
+pub fn div_round(Int64, Int64) -> Int32
 
 // Errors
 
@@ -36,6 +39,21 @@ pub fn Cursor::u32(Self) -> Int32 raise @model.Refused
 pub fn Cursor::u32_at(Self, Int32) -> Int32 raise @model.Refused
 pub fn Cursor::u8(Self) -> Int32 raise @model.Refused
 pub fn Cursor::window(Self, Int32, Int32) -> Self raise @model.Refused
+
+pub struct Writer {
+  data : Array[Byte]
+}
+pub fn Writer::align(Self, Int32) -> Unit
+pub fn Writer::byte(Self, Int32) -> Unit
+pub fn Writer::bytes(Self, BytesView) -> Unit
+pub fn Writer::i16(Self, Int32) -> Unit
+pub fn Writer::length(Self) -> Int32
+pub fn Writer::new() -> Self
+pub fn Writer::tag(Self, Int32) -> Unit
+pub fn Writer::to_bytes(Self) -> Bytes
+pub fn Writer::u16(Self, Int32) -> Unit
+pub fn Writer::u32(Self, Int32) -> Unit
+pub fn Writer::zeros(Self, Int32) -> Unit
 
 // Type aliases
 

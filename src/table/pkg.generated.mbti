@@ -35,6 +35,11 @@ pub(all) struct CompositeGlyph {
   bounds : @model.Bounds
 }
 
+pub(all) struct Cvt {
+  values : Array[Int32]
+}
+pub fn Cvt::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
+
 pub(all) enum GlyphData {
   Empty
   Simple(SimpleGlyph)
@@ -58,13 +63,6 @@ pub(all) struct Hhea {
   number_of_h_metrics : Int32
 }
 pub fn Hhea::parse(@wire.Cursor) -> Self raise @model.Refused
-
-pub(all) struct Hmtx {
-  advances : Array[Int32]
-  bearings : Array[Int32]
-}
-pub fn Hmtx::metrics(Self, Int32) -> (Int32, Int32)
-pub fn Hmtx::parse(@wire.Cursor, Int32, Int32, @model.Limits) -> Self raise @model.Refused
 
 pub(all) struct Kern {
   pairs : Array[(Int32, Int32, Int32)]
@@ -90,6 +88,13 @@ pub(all) struct Maxp {
 }
 pub fn Maxp::parse(@wire.Cursor, @model.Limits) -> Self raise @model.Refused
 
+pub(all) struct Metrics {
+  advances : Array[Int32]
+  bearings : Array[Int32]
+}
+pub fn Metrics::metrics(Self, Int32) -> (Int32, Int32)
+pub fn Metrics::parse(@wire.Cursor, Int32, Int32, @model.Limits) -> Self raise @model.Refused
+
 pub(all) struct Os2 {
   weight_class : Int32
   width_class : Int32
@@ -108,6 +113,18 @@ pub(all) struct SimpleGlyph {
   on_curve : Array[Bool]
   bounds : @model.Bounds
 }
+
+pub(all) struct Vhea {
+  ascender : Int32
+  descender : Int32
+  line_gap : Int32
+  advance_height_max : Int32
+  caret_slope_rise : Int32
+  caret_slope_run : Int32
+  caret_offset : Int32
+  number_of_long_metrics : Int32
+}
+pub fn Vhea::parse(@wire.Cursor) -> Self raise @model.Refused
 
 // Type aliases
 

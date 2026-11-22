@@ -7,7 +7,15 @@ import {
 }
 
 // Values
-pub fn read(BytesView, @model.Limits) -> Array[Directory] raise @model.Refused
+pub fn assemble(Int32, Array[(Int32, BytesView)], @model.Limits) -> TableSet raise @model.Refused
+
+pub fn assemble_collection(Int32, Array[Array[(Int32, BytesView)]], @model.Limits) -> Array[TableSet] raise @model.Refused
+
+pub fn read(BytesView, @model.Limits) -> Array[TableSet] raise @model.Refused
+
+pub fn scaler_of(BytesView) -> Int32?
+
+pub fn table_cursor(&TableSource, Int32, @model.Limits) -> @wire.Cursor raise @model.Refused
 
 pub fn tag_avar() -> Int32
 
@@ -17,15 +25,37 @@ pub fn tag_cff2() -> Int32
 
 pub fn tag_cmap() -> Int32
 
+pub fn tag_cpht() -> Int32
+
+pub fn tag_cvar() -> Int32
+
+pub fn tag_cvt() -> Int32
+
 pub fn tag_fvar() -> Int32
 
 pub fn tag_glyf() -> Int32
 
 pub fn tag_gvar() -> Int32
 
+pub fn tag_hasc() -> Int32
+
+pub fn tag_hcla() -> Int32
+
+pub fn tag_hcld() -> Int32
+
+pub fn tag_hcof() -> Int32
+
+pub fn tag_hcrn() -> Int32
+
+pub fn tag_hcrs() -> Int32
+
+pub fn tag_hdsc() -> Int32
+
 pub fn tag_head() -> Int32
 
 pub fn tag_hhea() -> Int32
+
+pub fn tag_hlgp() -> Int32
 
 pub fn tag_hmtx() -> Int32
 
@@ -37,6 +67,8 @@ pub fn tag_loca() -> Int32
 
 pub fn tag_maxp() -> Int32
 
+pub fn tag_mvar() -> Int32
+
 pub fn tag_name() -> Int32
 
 pub fn tag_os2() -> Int32
@@ -45,25 +77,63 @@ pub fn tag_post() -> Int32
 
 pub fn tag_string(Int32) -> String
 
+pub fn tag_undo() -> Int32
+
+pub fn tag_unds() -> Int32
+
+pub fn tag_vasc() -> Int32
+
+pub fn tag_vcof() -> Int32
+
+pub fn tag_vcrn() -> Int32
+
+pub fn tag_vcrs() -> Int32
+
+pub fn tag_vdsc() -> Int32
+
+pub fn tag_vhea() -> Int32
+
+pub fn tag_vlgp() -> Int32
+
+pub fn tag_vmtx() -> Int32
+
+pub fn tag_vorg() -> Int32
+
+pub fn tag_vvar() -> Int32
+
+pub fn tag_xhgt() -> Int32
+
 // Errors
 
 // Types and methods
-pub(all) struct Directory {
-  scaler : Int32
-  records : Array[TableRecord]
+pub struct Sfnt {
 }
-pub fn Directory::find(Self, Int32) -> TableRecord?
-pub fn Directory::has(Self, Int32) -> Bool
-pub fn Directory::require(Self, Int32) -> TableRecord raise @model.Refused
-pub fn Directory::table(Self, BytesView, Int32, @model.Limits) -> @wire.Cursor raise @model.Refused
+pub fn Sfnt::new() -> Self
+pub impl Container for Sfnt
 
-pub(all) struct TableRecord {
-  tag : Int32
-  checksum : Int32
-  offset : Int32
-  length : Int32
+pub(all) struct TableSet {
+  scaler : Int32
+  bytes : BytesView
+  tags : Array[Int32]
+  offsets : Array[Int32]
+  lengths : Array[Int32]
 }
+pub fn TableSet::has(Self, Int32) -> Bool
+pub fn TableSet::table_bytes(Self, Int32, @model.Limits) -> BytesView raise @model.Refused
+pub fn TableSet::tags(Self) -> Array[Int32]
+pub impl TableSource for TableSet
 
 // Type aliases
 
 // Traits
+pub(open) trait Container {
+  fn name(Self) -> String
+  fn claims(Self, Int32) -> Bool
+  fn open(Self, BytesView, @model.Limits) -> Array[TableSet] raise @model.Refused
+}
+
+pub(open) trait TableSource {
+  fn scaler(Self) -> Int32
+  fn has(Self, Int32) -> Bool
+  fn table_bytes(Self, Int32, @model.Limits) -> BytesView raise @model.Refused
+}

@@ -10,6 +10,8 @@
 // WOFF2 transforms require to be put back the way the font declared it.
 import {
   "moonbitstack/moonfont/model",
+  "moonbitstack/moonfont/sfnt",
+  "moonbitstack/moonfont/wire",
   "moonbitstack/moonzip/zlib",
   "moonbitstack/moonzip/brotli",
 }
