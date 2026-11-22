@@ -1077,18 +1077,41 @@ class Tray {
     }
 }
 // --- mount ------------------------------------------------------------------
-function mount() {
+/**
+ * matter-js is a classic script, and a module does not wait for one: the order
+ * two deferred files execute in is not the order they are written. So the tray
+ * fetches the library itself and starts when it has it, from beside this file.
+ */
+function loadMatter() {
+    if (window.Matter)
+        return Promise.resolve(window.Matter);
+    return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = new URL("../vendor/matter.min.js", import.meta.url).href;
+        script.onload = () => {
+            if (window.Matter)
+                resolve(window.Matter);
+            else
+                reject(new Error("matter-js loaded without Matter"));
+        };
+        script.onerror = () => reject(new Error("matter-js did not load"));
+        document.head.append(script);
+    });
+}
+async function mount() {
     const root = document.getElementById("tray");
-    const M = window.Matter;
-    if (!root || !M)
+    if (!root)
         return;
+    let M;
+    try {
+        M = await loadMatter();
+    }
+    catch {
+        root.dataset.state = "unavailable";
+        return;
+    }
     const tray = new Tray(root, M);
     void tray.start();
 }
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", mount, { once: true });
-}
-else {
-    mount();
-}
+void mount();
 export {};
