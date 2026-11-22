@@ -66,7 +66,9 @@ pub fn Cvar::deltas(
   if point_count <= 0 || self.tuple_count <= 0 {
     return out
   }
-  let header = Packed::new(self.data, 4)
+  // The table's own header is eight bytes, so the first tuple header follows
+  // it; the serialised data starts where `offsetToData` says.
+  let header = Packed::new(self.data, 8)
   let body = Packed::new(self.data, self.data_at)
   let shared = if self.shared_points {
     Some(read_points(body, point_count))

@@ -21,6 +21,7 @@ Usage:
 
 from __future__ import annotations
 
+import array
 import hashlib
 import struct
 import sys
@@ -40,7 +41,13 @@ CMAP = {0x20: "space", 0x41: "A", 0x42: "axe", 0x6F: "o", 0x48: "hinted"}
 # ---------------------------------------------------------------------------
 
 
-def build_master(path: Path, weight_delta: int, width_delta: int) -> None:
+def build_master(
+    path: Path,
+    weight_delta: int,
+    width_delta: int,
+    style: str = "Regular",
+    cvt: list[int] | None = None,
+) -> None:
     from fontTools.fontBuilder import FontBuilder
     from fontTools.pens.ttGlyphPen import TTGlyphPen
 
@@ -98,6 +105,12 @@ def build_master(path: Path, weight_delta: int, width_delta: int) -> None:
     fb.setupNameTable({"familyName": "Moon Sample", "styleName": "Regular"})
     fb.setupOS2(sTypoAscender=800, sTypoDescender=-200, usWinAscent=900, usWinDescent=250)
     fb.setupPost()
+    if cvt is not None:
+        from fontTools.ttLib import newTable
+
+        table = newTable("cvt ")
+        table.values = array.array("h", cvt)
+        fb.font["cvt "] = table
     fb.save(str(path))
 
 
@@ -411,6 +424,332 @@ def build_cff2_font(path: Path, work: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# A collection, and the same collection inside WOFF 2
+# ---------------------------------------------------------------------------
+
+# The 63 tag codes a WOFF 2 directory may name by index, in order.
+KNOWN_TAGS = [
+    "cmap", "head", "hhea", "hmtx", "maxp", "name", "OS/2", "post", "cvt ",
+    "fpgm", "glyf", "loca", "prep", "CFF ", "VORG", "EBDT", "EBLC", "gasp",
+    "hdmx", "kern", "LTSH", "PCLT", "VDMX", "vhea", "vmtx", "BASE", "GDEF",
+    "GPOS", "GSUB", "EBSC", "JSTF", "MATH", "CBDT", "CBLC", "COLR", "CPAL",
+    "SVG ", "sbix", "acnt", "avar", "bdat", "bloc", "bsln", "cvar", "fdsc",
+    "feat", "fmtx", "fvar", "gvar", "hsty", "just", "lcar", "mort", "morx",
+    "opbd", "prop", "trak", "Zapf", "Silf", "Glat", "Gloc", "Feat", "Sill",
+]
+
+
+def pack255(value: int) -> bytes:
+    """WOFF 2's 255UInt16, the encoding the collection directory counts use."""
+    if value < 0 or value > 0xFFFF:
+        raise SystemExit(f"255UInt16 cannot hold {value}")
+    if value < 253:
+        return bytes([value])
+    if value < 506:
+        return bytes([255, value - 253])
+    if value < 762:
+        return bytes([254, value - 506])
+    return b"\xfd" + struct.pack(">H", value)
+
+
+def pack_base128(value: int) -> bytes:
+    """WOFF 2's UIntBase128, big-endian seven bits per byte."""
+    out = [value & 0x7F]
+    value >>= 7
+    while value:
+        out.append(0x80 | (value & 0x7F))
+        value >>= 7
+    return bytes(reversed(out))
+
+
+def woff2_of_collection(ttc: bytes) -> bytes:
+    """Re-encode a TrueType collection as a WOFF 2 collection.
+
+    The format keeps one table directory for the whole collection and gives each
+    face a list of indices into it, so a table two faces share is stored once.
+    `glyf` and `loca` go in untransformed: the transform is per table and the
+    single-font fixtures already cover it.
+    """
+    import brotli
+
+    if ttc[:4] != b"ttcf":
+        raise SystemExit("not a collection")
+    ttc_version, num_fonts = struct.unpack(">II", ttc[4:12])
+    faces = []
+    for i in range(num_fonts):
+        (offset,) = struct.unpack(">I", ttc[12 + 4 * i : 16 + 4 * i])
+        flavor, count = struct.unpack(">IH", ttc[offset : offset + 6])
+        records = []
+        for k in range(count):
+            at = offset + 12 + k * 16
+            tag = ttc[at : at + 4].decode("latin-1")
+            _, table_at, length = struct.unpack(">III", ttc[at + 4 : at + 16])
+            records.append((tag, table_at, length))
+        faces.append((flavor, records))
+
+    pool: dict[int, tuple[str, bytes]] = {}
+    for _, records in faces:
+        for tag, table_at, length in records:
+            pool.setdefault(table_at, (tag, ttc[table_at : table_at + length]))
+    ordered = sorted(pool.items(), key=lambda item: item[1][0])
+    position = {table_at: index for index, (table_at, _) in enumerate(ordered)}
+
+    directory = bytearray()
+    for index, (table_at, (tag, data)) in enumerate(ordered):
+        code = KNOWN_TAGS.index(tag) if tag in KNOWN_TAGS else 63
+        version = 3 if tag in ("glyf", "loca") else 0
+        directory.append((version << 6) | code)
+        if code == 63:
+            directory += tag.encode("latin-1")
+        directory += pack_base128(len(data))
+
+    collection = bytearray(struct.pack(">I", ttc_version))
+    collection += pack255(num_fonts)
+    for flavor, records in faces:
+        collection += pack255(len(records)) + struct.pack(">I", flavor)
+        for _, table_at, _ in records:
+            collection += pack255(position[table_at])
+
+    stream = b"".join(data for _, (_, data) in ordered)
+    compressed = brotli.compress(stream)
+    body = bytes(directory) + bytes(collection) + compressed
+    header = struct.pack(
+        ">IIIHHIIHHIIIII",
+        0x774F4632,  # 'wOF2'
+        0x74746366,  # 'ttcf'
+        48 + len(body),
+        len(ordered),
+        0,
+        len(ttc),
+        len(compressed),
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    )
+    return header + body
+
+
+def collection_of_single(woff2: bytes) -> bytes:
+    """Re-wrap a single WOFF 2 font as a one-face collection.
+
+    The table directory and the compressed stream are kept byte for byte, so the
+    transforms the font already carries — a transformed `glyf` with its
+    reconstructed `loca` — meet the collection path unchanged.
+    """
+    if woff2[:4] != b"wOF2":
+        raise SystemExit("not a WOFF 2 file")
+    (flavor,) = struct.unpack(">I", woff2[4:8])
+    (num_tables,) = struct.unpack(">H", woff2[12:14])
+    if flavor == 0x74746366:
+        raise SystemExit("already a collection")
+    at = 48
+    for _ in range(num_tables):
+        flags = woff2[at]
+        at += 1
+        code = flags & 0x3F
+        version = (flags >> 6) & 0x03
+        if code == 63:
+            tag = woff2[at : at + 4]
+            at += 4
+        else:
+            tag = KNOWN_TAGS[code].encode("latin-1")
+        for _ in range(5):
+            byte = woff2[at]
+            at += 1
+            if not byte & 0x80:
+                break
+        transformed = (version == 0) if tag in (b"glyf", b"loca") else version != 0
+        if transformed:
+            for _ in range(5):
+                byte = woff2[at]
+                at += 1
+                if not byte & 0x80:
+                    break
+    collection = (
+        struct.pack(">I", 0x00010000)
+        + pack255(1)
+        + pack255(num_tables)
+        + struct.pack(">I", flavor)
+        + b"".join(pack255(index) for index in range(num_tables))
+    )
+    body = woff2[48:at] + collection + woff2[at:]
+    header = struct.pack(
+        ">IIIHHIIHHIIIII",
+        0x774F4632,
+        0x74746366,
+        48 + len(body),
+        num_tables,
+        0,
+        struct.unpack(">I", woff2[16:20])[0],
+        struct.unpack(">I", woff2[20:24])[0],
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    )
+    return header + body
+
+
+def build_collection(work: Path) -> tuple[bytes, bytes]:
+    """Two faces of one family: a plain collection and the WOFF 2 version."""
+    from fontTools.ttLib import TTCollection, TTFont
+
+    build_master(work / "collection-regular.ttf", 0, 0, "Regular", [140, 200, 320])
+    build_master(work / "collection-bold.ttf", 120, 60, "Bold", [140, 200, 320])
+    collection = TTCollection()
+    collection.fonts = [
+        TTFont(str(work / "collection-regular.ttf")),
+        TTFont(str(work / "collection-bold.ttf")),
+    ]
+    ttc_path = work / "sample-collection.ttc"
+    collection.save(str(ttc_path))
+    ttc = ttc_path.read_bytes()
+    packed = woff2_of_collection(ttc)
+    # The fixture is only worth having if the faces share tables: check that.
+    faces = _collection_faces(ttc)
+    if len(faces) != 2:
+        raise SystemExit("the collection lost a face")
+    unique = len({record[1] for face in faces for record in face[1]})
+    total = sum(len(face[1]) for face in faces)
+    if unique >= total:
+        raise SystemExit("the collection shares no table")
+    return ttc, packed
+
+
+def _collection_faces(ttc: bytes):
+    _, num_fonts = struct.unpack(">II", ttc[4:12])
+    faces = []
+    for i in range(num_fonts):
+        (offset,) = struct.unpack(">I", ttc[12 + 4 * i : 16 + 4 * i])
+        flavor, count = struct.unpack(">IH", ttc[offset : offset + 6])
+        records = []
+        for k in range(count):
+            at = offset + 12 + k * 16
+            tag = ttc[at : at + 4].decode("latin-1")
+            _, table_at, length = struct.unpack(">III", ttc[at + 4 : at + 16])
+            records.append((tag, table_at, length))
+        faces.append((flavor, records))
+    return faces
+
+
+# ---------------------------------------------------------------------------
+# A variable font whose metrics move: MVAR, VVAR and cvar
+# ---------------------------------------------------------------------------
+
+
+def build_metrics_master(
+    path: Path,
+    *,
+    weight_delta: int,
+    ascent: int,
+    vertical_ascent: int,
+    vertical_advance: int,
+    cvt: list[int],
+) -> None:
+    """One master with a vertical pair and a control value table."""
+    from fontTools.fontBuilder import FontBuilder
+    from fontTools.pens.ttGlyphPen import TTGlyphPen
+    from fontTools.ttLib import newTable
+
+    fb = FontBuilder(1000, isTTF=True)
+    fb.setupGlyphOrder(GLYPHS)
+    fb.setupCharacterMap(CMAP)
+    glyphs = {}
+    p = TTGlyphPen(None)
+    p.moveTo((50, 0)); p.lineTo((50, 700)); p.lineTo((450, 700)); p.lineTo((450, 0)); p.closePath()
+    glyphs[".notdef"] = p.glyph()
+    glyphs["space"] = TTGlyphPen(None).glyph()
+    p = TTGlyphPen(None)
+    p.moveTo((0, 0)); p.lineTo((250, 700)); p.lineTo((500 + weight_delta, 700)); p.lineTo((750, 0)); p.closePath()
+    glyphs["A"] = p.glyph()
+    for name in ["axe", "subr", "hinted"]:
+        p = TTGlyphPen(None)
+        p.moveTo((0, 0)); p.lineTo((0, 300)); p.lineTo((200, 300)); p.lineTo((200, 0)); p.closePath()
+        glyphs[name] = p.glyph()
+    p = TTGlyphPen(None)
+    p.moveTo((100, 350)); p.qCurveTo((100, 700), (350, 700)); p.qCurveTo((600, 700), (600, 350))
+    p.qCurveTo((600, 0), (350, 0)); p.qCurveTo((100, 0), (100, 350)); p.closePath()
+    glyphs["o"] = p.glyph()
+    fb.setupGlyf(glyphs)
+    fb.setupHorizontalMetrics({name: (700, 50) for name in GLYPHS})
+    fb.setupHorizontalHeader(ascent=800 + ascent, descent=-200, lineGap=40)
+    fb.setupVerticalHeader(ascent=vertical_ascent, descent=-500, lineGap=10)
+    fb.setupVerticalMetrics(
+        {name: (vertical_advance, 120) for name in GLYPHS}
+    )
+    fb.setupNameTable({"familyName": "Moon Metrics", "styleName": "Regular"})
+    fb.setupOS2(
+        sTypoAscender=800 + ascent,
+        sTypoDescender=-200,
+        sTypoLineGap=40,
+        sxHeight=480,
+        sCapHeight=680,
+        usWinAscent=900,
+        usWinDescent=250,
+    )
+    fb.setupPost()
+    table = newTable("cvt ")
+    table.values = array.array("h", cvt)
+    fb.font["cvt "] = table
+    fb.save(str(path))
+
+
+def build_metrics_font(path: Path, work: Path) -> None:
+    from fontTools.designspaceLib import (
+        AxisDescriptor,
+        DesignSpaceDocument,
+        SourceDescriptor,
+    )
+    from fontTools.varLib import build as varlib_build
+
+    build_metrics_master(
+        work / "metrics-regular.ttf",
+        weight_delta=0,
+        ascent=0,
+        vertical_ascent=500,
+        vertical_advance=1000,
+        cvt=[140, 200, 320, 60],
+    )
+    build_metrics_master(
+        work / "metrics-heavy.ttf",
+        weight_delta=120,
+        ascent=40,
+        vertical_ascent=560,
+        vertical_advance=1080,
+        cvt=[160, 230, 360, 60],
+    )
+    doc = DesignSpaceDocument()
+    axis = AxisDescriptor()
+    axis.name, axis.tag = "Weight", "wght"
+    axis.minimum, axis.default, axis.maximum = 400, 400, 900
+    doc.addAxis(axis)
+    for source_path, location, copy in [
+        (work / "metrics-regular.ttf", {"Weight": 400}, True),
+        (work / "metrics-heavy.ttf", {"Weight": 900}, False),
+    ]:
+        source = SourceDescriptor()
+        source.path = str(source_path)
+        source.location = location
+        if copy:
+            source.copyLib = True
+            source.copyInfo = True
+            source.copyFeatures = True
+        doc.addSource(source)
+    variable, _, _ = varlib_build(doc)
+    for tag in ["MVAR", "VVAR", "cvar", "HVAR"]:
+        if tag not in variable:
+            raise SystemExit(f"varLib did not build {tag}")
+    variable.save(str(path))
+
+
+# ---------------------------------------------------------------------------
 # Oracle: outlines from fontTools, ink from FreeType
 # ---------------------------------------------------------------------------
 
@@ -659,6 +998,11 @@ def build() -> tuple[dict[str, bytes], str]:
             "sample_cff": (work / "sample-cff.otf").read_bytes(),
             "sample_cff2": (work / "sample-cff2.otf").read_bytes(),
             "sample_cff_woff2": (work / "sample-cff-woff2.woff2").read_bytes(),
+            # The same compressed font, wrapped as a one-face collection: the
+            # transformed `glyf` meets the collection path unchanged.
+            "sample_collection_transformed": collection_of_single(
+                (work / "sample-woff2.woff2").read_bytes()
+            ),
         }
 
         cases: list[tuple[str, str, int, list[tuple[int, int]], list[int], int, int, int]] = []
@@ -679,7 +1023,12 @@ def build() -> tuple[dict[str, bytes], str]:
                 advance, lsb = metrics_at(
                     work / "sample-var.ttf", order, location, name
                 )
-                for font_name in ["sample_var", "sample_woff", "sample_woff2"]:
+                for font_name in [
+                    "sample_var",
+                    "sample_woff",
+                    "sample_woff2",
+                    "sample_collection_transformed",
+                ]:
                     cases.append(
                         (
                             font_name,
@@ -760,10 +1109,90 @@ def build() -> tuple[dict[str, bytes], str]:
             check_outline(work / "sample-cff2.otf", name, None, 0)
             check_outline(work / "sample-cff2.otf", name, {"wght": 900}, 1)
 
-    return files, render(files, cases, inks)
+        # A collection, and the same collection inside WOFF 2. The expectations
+        # are the same for both: a container changes where the tables are, not
+        # what they say.
+        ttc_bytes, collection_woff2 = build_collection(work)
+        build_metrics_font(work / "sample-metrics.ttf", work)
+        files["sample_collection"] = ttc_bytes
+        files["sample_collection_woff2"] = collection_woff2
+        files["sample_metrics"] = (work / "sample-metrics.ttf").read_bytes()
+
+        collections = []
+        for face in range(2):
+            face_font = TTFont(str(work / "sample-collection.ttc"), fontNumber=face)
+            order = face_font.getGlyphOrder()
+            for name in ["A", "o"]:
+                gid = order.index(name)
+                ops = outline_ops(face_font, name)
+                advance, lsb = face_font["hmtx"][name]
+                for font_name in ["sample_collection", "sample_collection_woff2"]:
+                    collections.append(
+                        (font_name, face, f"face{face}/{name}", gid, ops, advance, lsb)
+                    )
+
+        # The metrics font: MVAR moves the face's own measurements, VVAR the
+        # advances in `vmtx`, and cvar the control values. The instancer is the
+        # oracle for all three.
+        from fontTools.varLib.instancer import instantiateVariableFont
+
+        metrics_path = work / "sample-metrics.ttf"
+        default = TTFont(str(metrics_path), lazy=True)
+        default_hhea = (
+            default["hhea"].ascender,
+            default["hhea"].descender,
+            default["hhea"].lineGap,
+        )
+        default_typo = (
+            default["OS/2"].sTypoAscender,
+            default["OS/2"].sTypoDescender,
+            default["OS/2"].sTypoLineGap,
+        )
+        order = default.getGlyphOrder()
+        glyph = order.index("A")
+        metrics = []
+        for label, location in [
+            ("default", None),
+            ("wght700", {"wght": 700}),
+            ("wght900", {"wght": 900}),
+        ]:
+            font = TTFont(str(metrics_path), lazy=True)
+            if location:
+                font = instantiateVariableFont(
+                    font, location, inplace=False, optimize=False
+                )
+            os2 = font["OS/2"]
+            hhea = font["hhea"]
+            vhea = font["vhea"]
+            vmtx = font["vmtx"]
+            # MVAR states a delta, and fontTools applies it to `OS/2` while this
+            # library reports the ascender of `hhea`; the two agree because the
+            # masters move both by the same amount, so the expectation is the
+            # default `hhea` value plus that delta.
+            metrics.append(
+                {
+                    "font": "sample_metrics",
+                    "label": label,
+                    "coords": coords_of(location),
+                    "ascent": default_hhea[0] + (os2.sTypoAscender - default_typo[0]),
+                    "descent": default_hhea[1] + (os2.sTypoDescender - default_typo[1]),
+                    "line_gap": default_hhea[2] + (os2.sTypoLineGap - default_typo[2]),
+                    "cap_height": os2.sCapHeight,
+                    "x_height": os2.sxHeight,
+                    "vertical_ascent": vhea.ascent,
+                    "vertical_descent": vhea.descent,
+                    "vertical_line_gap": vhea.lineGap,
+                    "glyph": glyph,
+                    "advance_height": vmtx["A"][0],
+                    "top_bearing": vmtx["A"][1],
+                    "cvt": [int(value) for value in font["cvt "].values],
+                }
+            )
+
+    return files, render(files, cases, inks, collections, metrics)
 
 
-def render(files: dict[str, bytes], cases, inks) -> str:
+def render(files: dict[str, bytes], cases, inks, collections, metrics) -> str:
     out = []
     out.append("// Copyright 2026 Leo Cheng")
     out.append("// SPDX-License-Identifier: Apache-2.0")
@@ -804,6 +1233,72 @@ def render(files: dict[str, bytes], cases, inks) -> str:
         out.append(f"    advance: {advance},")
         out.append(f"    lsb: {lsb},")
         out.append(f"    tolerance: {tolerance},")
+        out.append("  },")
+    out.append("]")
+    out.append("")
+    out.append("///|")
+    out.append("priv struct CollectionCase {")
+    out.append("  font : Bytes")
+    out.append("  face : Int32")
+    out.append("  label : String")
+    out.append("  glyph : Int32")
+    out.append("  ops : Array[Int32]")
+    out.append("  advance : Int32")
+    out.append("  lsb : Int32")
+    out.append("}")
+    out.append("")
+    out.append("///|")
+    out.append("let collection_cases : Array[CollectionCase] = [")
+    for font_name, face, label, glyph, ops, advance, lsb in collections:
+        out.append("  {")
+        out.append(f"    font: {font_name},")
+        out.append(f"    face: {face},")
+        out.append(f'    label: "{label}",')
+        out.append(f"    glyph: {glyph},")
+        out.append(f"    ops: {ints(ops)},")
+        out.append(f"    advance: {advance},")
+        out.append(f"    lsb: {lsb},")
+        out.append("  },")
+    out.append("]")
+    out.append("")
+    out.append("///|")
+    out.append("priv struct MetricCase {")
+    out.append("  font : Bytes")
+    out.append("  label : String")
+    out.append("  coords : Array[(Int32, Int32)]")
+    out.append("  ascent : Int32")
+    out.append("  descent : Int32")
+    out.append("  line_gap : Int32")
+    out.append("  cap_height : Int32")
+    out.append("  x_height : Int32")
+    out.append("  vertical_ascent : Int32")
+    out.append("  vertical_descent : Int32")
+    out.append("  vertical_line_gap : Int32")
+    out.append("  glyph : Int32")
+    out.append("  advance_height : Int32")
+    out.append("  top_bearing : Int32")
+    out.append("  cvt : Array[Int32]")
+    out.append("}")
+    out.append("")
+    out.append("///|")
+    out.append("let metric_cases : Array[MetricCase] = [")
+    for case in metrics:
+        out.append("  {")
+        out.append(f"    font: {case['font']},")
+        out.append(f'    label: "{case["label"]}",')
+        out.append(f"    coords: {coords_literal(case['coords'])},")
+        out.append(f"    ascent: {case['ascent']},")
+        out.append(f"    descent: {case['descent']},")
+        out.append(f"    line_gap: {case['line_gap']},")
+        out.append(f"    cap_height: {case['cap_height']},")
+        out.append(f"    x_height: {case['x_height']},")
+        out.append(f"    vertical_ascent: {case['vertical_ascent']},")
+        out.append(f"    vertical_descent: {case['vertical_descent']},")
+        out.append(f"    vertical_line_gap: {case['vertical_line_gap']},")
+        out.append(f"    glyph: {case['glyph']},")
+        out.append(f"    advance_height: {case['advance_height']},")
+        out.append(f"    top_bearing: {case['top_bearing']},")
+        out.append(f"    cvt: {ints(case['cvt'])},")
         out.append("  },")
     out.append("]")
     out.append("")
@@ -882,6 +1377,10 @@ def check() -> int:
         "sample_cff": "sample-cff.otf",
         "sample_cff2": "sample-cff2.otf",
         "sample_cff_woff2": "sample-cff-woff2.woff2",
+        "sample_collection": "sample-collection.ttc",
+        "sample_collection_woff2": "sample-collection.woff2",
+        "sample_metrics": "sample-metrics.ttf",
+        "sample_collection_transformed": "sample-collection-transformed.woff2",
     }
     digest = hashlib.sha256()
     for name in sorted(names):
@@ -917,19 +1416,11 @@ def main() -> int:
         "sample_cff": "sample-cff.otf",
         "sample_cff2": "sample-cff2.otf",
         "sample_cff_woff2": "sample-cff-woff2.woff2",
+        "sample_collection": "sample-collection.ttc",
+        "sample_collection_woff2": "sample-collection.woff2",
+        "sample_metrics": "sample-metrics.ttf",
+        "sample_collection_transformed": "sample-collection-transformed.woff2",
     }
-    if check:
-        current = OUT.read_text(encoding="utf-8") if OUT.exists() else ""
-        if current != text:
-            print("src/formats_test.mbt is stale; run make_formats.py", file=sys.stderr)
-            return 1
-        for name, filename in names.items():
-            on_disk = (FORMATS / filename).read_bytes() if (FORMATS / filename).exists() else b""
-            if on_disk != files[name]:
-                print(f"{filename} is stale; run make_formats.py", file=sys.stderr)
-                return 1
-        print("format fixtures are current")
-        return 0
     OUT.write_text(text, encoding="utf-8", newline="\n")
     for name, filename in names.items():
         (FORMATS / filename).write_bytes(files[name])

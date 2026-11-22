@@ -52,7 +52,7 @@ pub fn Face::advance(Self, @model.GlyphId, location? : @variations.Location) -> 
 pub fn Face::advance_height(Self, @model.GlyphId, location? : @variations.Location) -> Int32
 pub fn Face::at(Self, Array[(Int32, Int32)]) -> @variations.Location
 pub fn Face::axes(Self) -> Array[@variations.Axis]
-pub fn Face::cvt(Self, location? : @variations.Location) -> Array[Int32]
+pub fn Face::cvt(Self, location? : @variations.Location) -> Array[Int32] raise @model.Refused
 pub fn Face::font_metrics(Self, location? : @variations.Location) -> @model.FontMetrics
 pub fn Face::glyph_for(Self, Char) -> @model.GlyphId?
 pub fn Face::glyph_index(Self, Int32) -> @model.GlyphId?

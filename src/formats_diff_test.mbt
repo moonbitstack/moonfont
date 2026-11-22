@@ -222,3 +222,176 @@ test "the format fixtures replay their coverage" {
   }
   assert_eq(report, "")
 }
+
+///|
+/// One face of a collection, read through the container the case names.
+fn face_of_collection(expectation : CollectionCase) -> @moonfont.Face raise {
+  let faces = @moonfont.decode_all(expectation.font, limits=@moonfont.limits)
+  if faces.length() != 2 {
+    raise Failure::Failure("\{faces.length()} faces")
+  }
+  faces[expectation.face.to_int()]
+}
+
+///|
+test "a collection replays the same faces through either container" {
+  let mut report = ""
+  for expectation in collection_cases {
+    let face = face_of_collection(expectation) catch {
+      error => {
+        report = report +
+          "\{expectation.label}: the collection will not open: \{error}\n"
+        continue
+      }
+    }
+    let outline = face.outline(@moonfont.GlyphId::of(expectation.glyph)) catch {
+      error => {
+        report = report + "\{expectation.label}: outline refused: \{error}\n"
+        continue
+      }
+    }
+    let actual = flatten(outline)
+    if actual.length() != expectation.ops.length() {
+      let found = actual.length()
+      let wanted = expectation.ops.length()
+      report = report +
+        "\{expectation.label}: \{found} values, want \{wanted}\n"
+      continue
+    }
+    for i in 0..<actual.length() {
+      if actual[i] != expectation.ops[i] {
+        let found = actual[i]
+        let wanted = expectation.ops[i]
+        report = report +
+          "\{expectation.label}: value \{i} is \{found}, want \{wanted}\n"
+        break
+      }
+    }
+    let metrics = face.metrics(@moonfont.GlyphId::of(expectation.glyph)) catch {
+      error => {
+        report = report + "\{expectation.label}: metrics refused: \{error}\n"
+        continue
+      }
+    }
+    if metrics.advance != expectation.advance {
+      let found = metrics.advance
+      let wanted = expectation.advance
+      report = report +
+        "\{expectation.label}: advance is \{found}, want \{wanted}\n"
+    }
+    if metrics.left_side_bearing != expectation.lsb {
+      let found = metrics.left_side_bearing
+      let wanted = expectation.lsb
+      report = report +
+        "\{expectation.label}: bearing is \{found}, want \{wanted}\n"
+    }
+  }
+  assert_eq(report, "")
+}
+
+///|
+test "the metrics fixtures replay their variations" {
+  let mut report = ""
+  for expectation in metric_cases {
+    let face = @moonfont.decode(expectation.font, limits=@moonfont.limits) catch {
+      error => {
+        report = report + "\{expectation.label}: will not decode: \{error}\n"
+        continue
+      }
+    }
+    let at = face.at(expectation.coords)
+    let wide = if expectation.coords.length() == 0 {
+      face.font_metrics()
+    } else {
+      face.font_metrics(location=at)
+    }
+    let column = if expectation.coords.length() == 0 {
+      face.vertical_metrics()
+    } else {
+      face.vertical_metrics(location=at)
+    }
+    for
+      pair in [
+        ("ascent", wide.ascent, expectation.ascent),
+        ("descent", wide.descent, expectation.descent),
+        ("line gap", wide.line_gap, expectation.line_gap),
+        ("cap height", wide.cap_height, expectation.cap_height),
+        ("x height", wide.x_height, expectation.x_height),
+        ("vertical ascent", column.ascent, expectation.vertical_ascent),
+        ("vertical descent", column.descent, expectation.vertical_descent),
+        ("vertical line gap", column.line_gap, expectation.vertical_line_gap),
+      ] {
+      let (name, found, wanted) = pair
+      if found != wanted {
+        report = report +
+          "\{expectation.label}: \{name} is \{found}, want \{wanted}\n"
+      }
+    }
+    let glyph = @moonfont.GlyphId::of(expectation.glyph)
+    let advance = if expectation.coords.length() == 0 {
+      face.advance_height(glyph)
+    } else {
+      face.advance_height(glyph, location=at)
+    }
+    if advance != expectation.advance_height {
+      let found = advance
+      let wanted = expectation.advance_height
+      report = report +
+        "\{expectation.label}: advance height is \{found}, want \{wanted}\n"
+    }
+    let bearing = if expectation.coords.length() == 0 {
+      face.top_side_bearing(glyph)
+    } else {
+      face.top_side_bearing(glyph, location=at)
+    }
+    if bearing != expectation.top_bearing {
+      let found = bearing
+      let wanted = expectation.top_bearing
+      report = report +
+        "\{expectation.label}: top bearing is \{found}, want \{wanted}\n"
+    }
+    let values = try {
+      if expectation.coords.length() == 0 {
+        face.cvt()
+      } else {
+        face.cvt(location=at)
+      }
+    } catch {
+      error => {
+        report = report +
+          "\{expectation.label}: control values refused: \{error}\n"
+        continue
+      }
+    }
+    if values.length() != expectation.cvt.length() {
+      report = report +
+        "\{expectation.label}: \{values.length()} control values, want \{expectation.cvt.length()}\n"
+    } else {
+      for i in 0..<values.length() {
+        if values[i] != expectation.cvt[i] {
+          let found = values[i]
+          let wanted = expectation.cvt[i]
+          report = report +
+            "\{expectation.label}: control value \{i} is \{found}, want \{wanted}\n"
+        }
+      }
+    }
+  }
+  assert_eq(report, "")
+}
+
+///|
+test "a one-face collection is still a collection" {
+  let faces = @moonfont.decode_all(
+    sample_collection_transformed,
+    limits=@moonfont.limits,
+  ) catch {
+    error => abort("the wrapped collection will not open: \{error}")
+  }
+  assert_eq(faces.length(), 1)
+  // The outline cases already draw this face through `decode`; here the point
+  // is that asking for every face of the container returns one whose tables
+  // came out of the collection directory rather than the single-font path.
+  assert_eq(faces[0].num_glyphs(), 7)
+  assert_eq(faces[0].is_variable(), true)
+}

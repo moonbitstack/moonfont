@@ -34,7 +34,9 @@ pub fn Mvar::parse(
   let _ = cursor.u16()
   let record_size = cursor.u16()
   let record_count = cursor.u16()
-  let store_at = cursor.u32()
+  // The store's offset is 16 bits in this table, unlike the metric variation
+  // tables, whose three maps are 32-bit offsets.
+  let store_at = cursor.u16()
   if record_size < 8 {
     raise @model.Malformed(at=10, got="an MVAR record of \{record_size} bytes")
   }

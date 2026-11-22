@@ -156,15 +156,16 @@ fn read_base128(stream : Stream) -> Int32 raise @model.Refused {
 }
 
 ///|
-/// WOFF2's 255UInt16: one byte for the common range, two or three for the rest.
+/// WOFF2's 255UInt16: one byte below 253, then two forms that add a bias to a
+/// byte, then the escape that carries a whole word.
 fn read_255(stream : Stream) -> Int32 raise @model.Refused {
   let first = stream.u8()
   if first == 253 {
-    stream.u8()
+    stream.u16()
   } else if first == 254 {
     506 + stream.u8()
   } else if first == 255 {
-    253 + stream.u16()
+    253 + stream.u8()
   } else {
     first
   }

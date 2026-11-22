@@ -537,7 +537,10 @@ pub fn Face::top_side_bearing(
 /// The control values of the font, in font units, moved to a location by
 /// `cvar`. Empty for a font without a `cvt ` table. A caller that hints reads
 /// these as the distances its programs snap to.
-pub fn Face::cvt(self : Face, location? : @variations.Location) -> Array[Int32] {
+pub fn Face::cvt(
+  self : Face,
+  location? : @variations.Location,
+) -> Array[Int32] raise @model.Refused {
   let values = match self.cvt {
     Some(table) => table.values.copy()
     None => []
@@ -551,7 +554,7 @@ pub fn Face::cvt(self : Face, location? : @variations.Location) -> Array[Int32] 
   }
   match self.cvar {
     Some(table) => {
-      let deltas = table.deltas(values.length(), coords) catch { _ => [] }
+      let deltas = table.deltas(values.length(), coords)
       for i in 0..<values.length() {
         if i < deltas.length() {
           values[i] += deltas[i]
