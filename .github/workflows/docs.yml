@@ -50,9 +50,22 @@ jobs:
       - name: build the browser engine
         run: python3 scripts/build_site.py engine
 
+      # The tray is TypeScript compiled to a committed script, so the site can
+      # be served without a Node step. Its toolchain is installed only to hold
+      # that script to its source and to the matter-js version it pins.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: install the site tools
+        run: npm ci --prefix site
+
       # The counts on the homepage are read from the source; the committed copy
-      # is compared so a page cannot drift from the code it describes.
-      - name: site numbers are current
+      # is compared so a page cannot drift from the code it describes. The same
+      # step recompiles the tray and compares the vendored library.
+      - name: site numbers, tray and vendor are current
         run: python3 scripts/build_site.py --check
 
       - uses: actions/configure-pages@v6

@@ -126,6 +126,17 @@ reference page from the interfaces, `embed` rebuilds the corpus literals, and
 Differential fixtures are produced offline by fontTools and FreeType and
 replayed by the MoonBit tests; no third-party MoonBit module is a dependency.
 
+The documentation site is built rather than assembled: `scripts/build_site.py`
+compiles this library to JavaScript, compiles the tray on the homepage, and
+writes the counts the page quotes. The tray is TypeScript (`site/src/tray.ts`)
+and is the only part of the site with a Node toolchain — `npm ci --prefix site`
+installs it. It collides the castings with matter-js, vendored under
+`docs/vendor/` at the pinned version, so a page that promises to make no request
+it does not serve itself keeps that promise.
+
+The compiled tray is committed, because Pages serves `docs/` as it stands; CI
+recompiles it and refuses a copy that no longer matches its source or its pin.
+
 ## Licence
 
 Apache-2.0. See `LICENSE`.

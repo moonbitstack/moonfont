@@ -15,6 +15,7 @@ Usage:
     python3 scripts/dev.py docs      # verify docs/api.html instead of writing it
     python3 scripts/dev.py embed     # rebuild the in-source corpus literals
     python3 scripts/dev.py formats   # rebuild the format fixtures and their test
+    python3 scripts/dev.py site      # rebuild the browser engine, tray and numbers
 """
 
 from __future__ import annotations
@@ -63,6 +64,10 @@ def formats() -> int:
     return run(sys.executable, "scripts/difftest/make_formats.py")
 
 
+def site() -> int:
+    return run(sys.executable, "scripts/build_site.py")
+
+
 TASKS = {
     "check": check,
     "test": test,
@@ -71,6 +76,7 @@ TASKS = {
     "docs": docs,
     "embed": embed,
     "formats": formats,
+    "site": site,
 }
 
 

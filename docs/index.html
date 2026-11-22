@@ -193,28 +193,49 @@
       <canvas id="lab3dCanvas" class="lab3d__canvas"></canvas>
     </section>
     <!-- TRAY -->
-    <section id="tray" class="block">
+    <section id="tray" class="block tray">
       <header class="block__head">
-        <p class="block__index">05 — Sort</p>
+        <p class="block__index">05 — Pour</p>
         <h2 class="block__title">A tray of castings</h2>
         <p class="block__lede">
-          Every shape below is a glyph this page decoded. Drag one, throw it, and
-          it falls, turns and stacks against its neighbours and against the page
-          itself: the button and the caption in the tray are solid, so letters
-          settle on them. The collision shape is the coverage mask the rasteriser
-          produced, sampled into a handful of circles; the outline drawn over it
-          is the path the engine handed out. Nothing here is a webfont.
+          Every piece below is a glyph this page decoded, sampled into convex
+          hulls and handed to a rigid-body solver. Drag one: it hangs from a
+          spring, swings, and keeps the speed of your hand when you let go. It
+          lands on its neighbours, and on the button and the caption, which are
+          solids too. Depth, light and shadow are drawn from the same outline,
+          so the same body can be read five ways.
         </p>
+        <div class="modes" role="group" aria-label="Rendering of the castings">
+          <button class="mode" type="button" data-mode="cast" aria-pressed="true">Cast</button>
+          <button class="mode" type="button" data-mode="ink" aria-pressed="false">Ink</button>
+          <button class="mode" type="button" data-mode="wire" aria-pressed="false">Wire</button>
+          <button class="mode" type="button" data-mode="raster" aria-pressed="false">Raster</button>
+          <button class="mode" type="button" data-mode="hull" aria-pressed="false">Hulls</button>
+        </div>
       </header>
       <div class="tray__stage">
-        <canvas class="tray__canvas" aria-label="Glyphs fall, stack and are thrown around a tray"></canvas>
+        <canvas class="tray__canvas" tabindex="0"
+                aria-label="A tray of castings. Drag a letter to throw it, or press space to drop one."></canvas>
+        <div class="tray__marks" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <span class="tray__hud" aria-hidden="true">
+          <span class="tray__hud-mode" data-hud-mode>cast</span>
+          <span data-hud>07 / 20</span>
+        </span>
         <p class="tray__note" data-collide>
-          The button and this line are solids: letters rest on them.
+          <span data-mode-note>Solid: the outline extruded towards the light, one shadow per piece.</span>
+          <span class="tray__note-solid">This line and the button are solids. The letters rest on them.</span>
         </p>
         <button class="btn tray__button" data-refill type="button" data-collide>
           Drop another
         </button>
       </div>
+      <p class="tray__credit">
+        Collision by <a href="https://brm.io/matter-js/">matter-js</a> 0.20 (MIT),
+        vendored beside this page; the hulls come from the coverage mask
+        <code>rasterise</code> produced.
+      </p>
     </section>
   </main>
 
@@ -246,7 +267,9 @@
     <code>file://</code>, so the engine can load.
   </div>
 
+  <script src="vendor/matter.min.js" defer></script>
   <script src="theme.js" defer></script>
   <script type="module" src="lab.js"></script>
+  <script type="module" src="site/tray.js"></script>
 </body>
 </html>

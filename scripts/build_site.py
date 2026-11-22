@@ -8,24 +8,31 @@ compiled to JavaScript, and the counts they show are read from the source. Both
 are produced here rather than committed, so a page cannot drift from the code it
 describes.
 
-    python3 scripts/build_site.py            # engine and numbers
+    python3 scripts/build_site.py            # engine, tray, vendor, numbers
     python3 scripts/build_site.py engine     # docs/engine/ only
+    python3 scripts/build_site.py tray       # docs/site/tray.js and the vendor copy
     python3 scripts/build_site.py numbers    # docs/numbers.json only
-    python3 scripts/build_site.py --check    # numbers are current, no build
+    python3 scripts/build_site.py --check    # the committed copies are current
 
 `docs/engine/` is not committed: the workflow builds it before uploading the
-site. `docs/numbers.json` is committed, because the pages are readable without a
-build and CI can then hold the file to the source.
+site. `docs/numbers.json` and `docs/site/tray.js` are, because the pages are
+readable without a build and CI can then hold them to their sources.
+
+The tray is TypeScript (`site/src/tray.ts`) compiled by `tsc`; matter-js is
+vendored under `docs/vendor/` from the version `site/package-lock.json` pins,
+because the page promises to make no request it does not serve itself.
 """
 
 from __future__ import annotations
 
 import argparse
+import filecmp
 import json
 import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,11 +40,14 @@ DOCS = ROOT / "docs"
 ENGINE = DOCS / "engine"
 ASSETS = ROOT / "scripts" / "site"
 NUMBERS = DOCS / "numbers.json"
+SITE = ROOT / "site"
+TRAY = DOCS / "site" / "tray.js"
+VENDOR = DOCS / "vendor"
 
 
-def run(command: list[str]) -> None:
+def run(command: list[str], cwd: Path = ROOT) -> None:
     print(" ".join(command))
-    result = subprocess.run(command, cwd=ROOT)
+    result = subprocess.run(command, cwd=cwd)
     if result.returncode != 0:
         raise SystemExit(f"{command[0]} failed with {result.returncode}")
 
@@ -55,6 +65,57 @@ def build_engine() -> None:
     shutil.copy2(ASSETS / "loader.js", ENGINE / "moonfont.js")
     shutil.copy2(ASSETS / "web.d.ts", ENGINE / "web.d.ts")
     print(f"engine written to {ENGINE.relative_to(ROOT)}")
+
+
+def npm() -> str:
+    """npm on the PATH, which is `npm.cmd` on Windows."""
+    found = shutil.which("npm")
+    if not found:
+        raise SystemExit("npm is not on the PATH; the tray needs Node")
+    return found
+
+
+def build_tray() -> None:
+    """Compile the tray and take the vendor copy from the pinned package."""
+    if not (SITE / "node_modules").exists():
+        raise SystemExit("site/node_modules is missing; run `npm ci --prefix site`")
+    run([npm(), "run", "build", "--silent"], cwd=SITE)
+    package = SITE / "node_modules" / "matter-js"
+    if not package.exists():
+        raise SystemExit("matter-js is not installed; run `npm ci --prefix site`")
+    VENDOR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(package / "build" / "matter.min.js", VENDOR / "matter.min.js")
+    shutil.copy2(package / "LICENSE", VENDOR / "matter.LICENSE")
+    print(f"tray written to {TRAY.relative_to(ROOT)}; vendor copied to {VENDOR.relative_to(ROOT)}")
+
+
+def check_tray() -> int:
+    """The committed script is what the source and the pin produce."""
+    if not TRAY.exists():
+        print("docs/site/tray.js is missing; run build_site.py tray", file=sys.stderr)
+        return 1
+    if not (SITE / "node_modules").exists():
+        print("site/node_modules is missing; run `npm ci --prefix site`", file=sys.stderr)
+        return 1
+    with tempfile.TemporaryDirectory() as temporary:
+        result = subprocess.run(
+            [npm(), "run", "build", "--silent", "--", "--outDir", temporary],
+            cwd=SITE,
+        )
+        if result.returncode != 0:
+            print("the tray did not compile", file=sys.stderr)
+            return 1
+        built = Path(temporary) / "tray.js"
+        if not built.exists() or not filecmp.cmp(built, TRAY, shallow=False):
+            print("docs/site/tray.js does not match site/src/tray.ts", file=sys.stderr)
+            return 1
+    vendored = VENDOR / "matter.min.js"
+    package = SITE / "node_modules" / "matter-js" / "build" / "matter.min.js"
+    if package.exists() and not filecmp.cmp(package, vendored, shallow=False):
+        print("docs/vendor/matter.min.js does not match the pinned matter-js", file=sys.stderr)
+        return 1
+    print("the tray and its vendor copy are current")
+    return 0
 
 
 def count(pattern: str, paths: list[Path], flags: int = 0) -> int:
@@ -124,14 +185,17 @@ def check_numbers() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("what", nargs="?", choices=["engine", "numbers"], default=None)
+    parser.add_argument("what", nargs="?", choices=["engine", "tray", "numbers"], default=None)
     parser.add_argument("--check", action="store_true", help="compare, never write")
     args = parser.parse_args()
     if args.check:
         failure = check_numbers()
+        failure = failure or check_tray()
         return failure or check_assets()
     if args.what in (None, "engine"):
         build_engine()
+    if args.what in (None, "tray"):
+        build_tray()
     if args.what in (None, "numbers"):
         write_numbers()
     return 0

@@ -48,6 +48,21 @@
 
 * { box-sizing: border-box; }
 
+/* Copy is copy; chrome is not. Selecting the label of a control, or a caption
+   that is also a physics body, only ever happens by accident. */
+button,
+label,
+select,
+.topbar,
+.modes,
+.figures,
+.scrollcue,
+.tray__stage,
+.tile__ch {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* Code keeps the characters a reader has to type: no ligatures that draw `>=`
    as a single glyph. Form controls do not inherit, so they are named too. */
 html, button, input, textarea, select { font-variant-ligatures: no-contextual; }
@@ -300,7 +315,7 @@ code {
   padding: 120px 28px;
   border-top: 1px solid var(--line);
 }
-.block__head { max-width: 720px; margin-bottom: 48px; }
+.block__head { max-width: 720px; margin-bottom: 42px; }
 .block__index {
   margin: 0 0 12px;
   font-size: 12px;
@@ -525,16 +540,23 @@ code {
 
 /* The tray. The canvas is the floor of the stage; the two controls that sit in
    it are real page elements, so the letters collide with them and a reader can
-   still click them. */
+   still click them. Nothing in the stage takes a text selection: a drag that
+   highlighted the caption instead of throwing a letter would be a failure of
+   the interaction, not a convenience. */
 .tray__stage {
   position: relative;
-  height: min(62vh, 520px);
+  height: min(42vh, 350px);
+  min-height: 300px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
-    radial-gradient(120% 90% at 50% 0%, var(--sheen), transparent 70%),
+    radial-gradient(120% 80% at 32% 0%, var(--sheen-strong), transparent 62%),
+    radial-gradient(90% 70% at 70% 110%, var(--sheen), transparent 70%),
     var(--bg-panel);
   overflow: hidden;
+  isolation: isolate;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .tray__canvas {
   position: absolute;
@@ -543,11 +565,35 @@ code {
   width: 100%;
   height: 100%;
   touch-action: none;
-  cursor: grab;
+  cursor: default;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
-.tray__canvas:active { cursor: grabbing; }
+/* Registration marks, as on a proof sheet: four ticks, not a frame. */
+.tray__marks span {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid color-mix(in srgb, var(--ink) 24%, transparent);
+  pointer-events: none;
+}
+.tray__marks span:nth-child(1) { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
+.tray__marks span:nth-child(2) { top: 10px; right: 10px; border-left: 0; border-bottom: 0; }
+.tray__marks span:nth-child(3) { bottom: 10px; left: 10px; border-right: 0; border-top: 0; }
+.tray__marks span:nth-child(4) { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
+.tray__hud {
+  position: absolute;
+  top: 18px;
+  left: 32px;
+  font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 3px var(--bg-panel), 0 0 6px var(--bg-panel);
+}
 .tray__note,
 .tray__button {
   position: absolute;
@@ -555,14 +601,104 @@ code {
   user-select: none;
   -webkit-user-select: none;
 }
+/* The note is a solid, so it needs the opacity of one: a label, frosted, so a
+   letter resting behind it cannot make the sentence unreadable. */
 .tray__note {
-  left: 22px; bottom: 26px;
-  max-width: 230px;
+  left: 22px;
+  bottom: 24px;
+  max-width: 250px;
+  min-height: 64px;
   margin: 0;
+  padding: 10px 12px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-panel) 76%, transparent);
+  backdrop-filter: blur(7px);
   font-size: 12px;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-  color: var(--ink-faint);
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: var(--ink-dim);
   pointer-events: none; /* the letters bounce off it; the text is not a target */
 }
-.tray__button { right: 22px; bottom: 22px; }
+.tray__note span { display: block; }
+.tray__hud-mode { display: none; }
+.tray__hud-mode::after { content: " · "; opacity: 0.6; }
+.tray__note-solid {
+  margin-top: 7px;
+  color: var(--ink-faint);
+}
+.tray__button {
+  right: 22px;
+  bottom: 22px;
+  background: color-mix(in srgb, var(--bg-panel) 74%, transparent);
+  backdrop-filter: blur(7px);
+}
+.tray__button:focus-visible,
+.tray__canvas:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* The renderings. A rule across the tabs, the active one marked like a
+   specimen's section index rather than boxed like a widget. */
+.modes {
+  margin-top: 34px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-top: 1px solid var(--line);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mode {
+  position: relative;
+  margin-top: -1px;
+  padding: 13px 22px 11px;
+  border: 0;
+  border-top: 1px solid transparent;
+  background: none;
+  color: var(--ink-faint);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+.mode:first-child { padding-left: 0; }
+.mode:hover { color: var(--ink); }
+.mode[aria-pressed="true"] {
+  color: var(--ink);
+  border-top-color: var(--accent);
+}
+.mode:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+/* On a phone the label would sit on the button, so it moves under the count,
+   keeps only the line that explains the rendering, and leaves the floor to the
+   letters. */
+@media (width <= 560px) {
+  .mode { padding: 12px 12px 10px; letter-spacing: 0.14em; }
+  /* No room for a label over the castings: the rendering's name moves into
+     the count, where it costs one line and covers nothing. */
+  .tray__note { display: none; }
+  .tray__hud-mode { display: inline; }
+  .tray__button { right: 14px; bottom: 14px; padding: 9px 12px; }
+}
+
+.tray__credit {
+  margin: 14px 0 0;
+  max-width: 720px;
+  color: var(--ink-faint);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.tray__credit a {
+  color: var(--ink-dim);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+}
+.tray__credit a:hover { color: var(--accent); }
