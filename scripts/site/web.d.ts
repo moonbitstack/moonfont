@@ -5,6 +5,13 @@ export function outline_svg(face: any,
 
 export function font_metrics(face: any): any;
 
+export function metrics(face: any,
+                        glyph: MoonBit.Int): MoonBit.Result<any, any>;
+
+export function scale_value(face: any,
+                            value: MoonBit.Int,
+                            pixels_per_em: MoonBit.Int): MoonBit.Int;
+
 export function rasterise(face: any,
                           glyph: MoonBit.Int,
                           pixels_per_em: MoonBit.Int): MoonBit.Result<any, any>;
