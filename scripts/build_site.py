@@ -85,6 +85,31 @@ def write_numbers() -> None:
     print(f"numbers written to {NUMBERS.relative_to(ROOT)}: {payload}")
 
 
+def check_assets() -> int:
+    """Every local file a page points at must exist.
+
+    A page that names a script which has been deleted fails silently in a
+    browser: the page still loads, the console shows one 404, and nothing a
+    reader sees says so. This is the check that would have caught it.
+    """
+    pattern = re.compile(r'(?:src|href)="([^":]+)"')
+    missing = []
+    for page in sorted(DOCS.glob("*.html")):
+        text = page.read_text(encoding="utf-8")
+        for reference in pattern.findall(text):
+            if reference.startswith(("//", "#")) or "://" in reference:
+                continue
+            target = (page.parent / reference).resolve()
+            if not target.exists():
+                missing.append(f"{page.name} points at {reference}")
+    if missing:
+        for line in missing:
+            print(line, file=sys.stderr)
+        return 1
+    print("every asset a page names exists")
+    return 0
+
+
 def check_numbers() -> int:
     if not NUMBERS.exists():
         print("docs/numbers.json is missing; run build_site.py numbers", file=sys.stderr)
@@ -103,7 +128,8 @@ def main() -> int:
     parser.add_argument("--check", action="store_true", help="compare, never write")
     args = parser.parse_args()
     if args.check:
-        return check_numbers()
+        failure = check_numbers()
+        return failure or check_assets()
     if args.what in (None, "engine"):
         build_engine()
     if args.what in (None, "numbers"):

@@ -105,7 +105,6 @@ SHELL = """<!doctype html>
   </div>
 </footer>
 <script src="theme.js" defer></script>
-<script src="site.js" defer></script>
 </body>
 </html>
 """
