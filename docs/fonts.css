@@ -1,0 +1,35 @@
+/* The page's face.
+   HarmonyOS Sans SC, subset to Latin, punctuation and the 6,763 hanzi of
+   GB 2312 — the characters a reader is likely to type into the specimen, in
+   Chinese or in English. The weight span is two files, not five: 400 for
+   reading and 500 for headings, close enough to the 600 the sheets ask for
+   that the browser never has to synthesise a bolder one.
+
+   Source and licence: docs/fonts/LICENSE-harmony.txt. */
+
+@font-face {
+  font-family: "HarmonyOS Sans SC";
+  src: url("fonts/harmony-sans-sc-regular.woff2") format("woff2");
+  font-weight: 300 450;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "HarmonyOS Sans SC";
+  src: url("fonts/harmony-sans-sc-medium.woff2") format("woff2");
+  font-weight: 451 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* The face the specimen is about, served so that code blocks and the specimen
+   are the same typeface on every machine, not just on one that has JetBrains
+   Mono installed. The same file is the demo face the engine decodes. */
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("fonts/demo.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

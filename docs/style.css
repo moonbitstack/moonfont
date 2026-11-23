@@ -36,10 +36,13 @@
   --danger-wash:  light-dark(rgb(155 51 39 / 10%),   rgb(230 144 127 / 12%));
   --success-wash: light-dark(rgb(46 98 79 / 10%),    rgb(152 203 176 / 12%));
 
-  --font-display: "Helvetica Neue", "Arial Nova", Arial, "Liberation Sans",
-                  "Nimbus Sans", "Segoe UI", system-ui, sans-serif;
-  --font-body:    "Charter", "Bitstream Charter", "Iowan Old Style", Georgia,
-                  "Liberation Serif", "Times New Roman", serif;
+  /* One face for the whole site, the same one the specimen page sets its own
+     chrome in: a reader who types Chinese into a specimen sees the page's face
+     rather than whatever their system happens to carry. */
+  --font-display: "HarmonyOS Sans SC", "Helvetica Neue", "Arial Nova", Arial,
+                  "Liberation Sans", "Nimbus Sans", "Segoe UI", system-ui, sans-serif;
+  --font-body:    "HarmonyOS Sans SC", "Charter", "Bitstream Charter",
+                  "Iowan Old Style", Georgia, "Liberation Serif", serif;
   --font-mono:    "JetBrains Mono", "Cascadia Mono", "SF Mono", Menlo, Consolas,
                   "Liberation Mono", "DejaVu Sans Mono", monospace;
 

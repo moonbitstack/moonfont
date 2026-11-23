@@ -340,6 +340,12 @@ interface Piece {
   hover: number;
   /** the eased value, which lifts the piece a little */
   hoverEase: number;
+  /** last place the piece was seen to actually go, for the tremor test */
+  mark: { x: number; y: number };
+  /** consecutive windows in which it moved nowhere but kept moving */
+  tremor: number;
+  /** seconds since the last tremor window closed */
+  tremorClock: number;
 }
 
 interface Rect {
@@ -822,6 +828,9 @@ class Tray {
       liftTarget: 0,
       hover: 0,
       hoverEase: 0,
+      mark: { x: body.position.x, y: body.position.y },
+      tremor: 0,
+      tremorClock: 0,
     };
     this.pieces.push(piece);
 
@@ -1016,8 +1025,49 @@ class Tray {
     }
   }
 
+  /**
+   * A casting pushed into another can tremble without going anywhere: the solver
+   * pushes it out, the contact pushes it back, and it has speed forever while its
+   * position does not change. Matter sees motion, so it never sleeps, and the
+   * reader sees one letter shivering in the pile for as long as the page is open.
+   *
+   * Speed cannot tell that apart from a real fall, so the test is displacement:
+   * a piece that has not moved a pixel in a third of a second, but still has
+   * velocity, is wedged. After three such windows it is put down.
+   */
+  private settleTremor(dt: number): void {
+    const held = this.grab.constraint.bodyB;
+    for (const piece of this.pieces) {
+      const body = piece.body;
+      if (body.isSleeping || body === held) {
+        piece.tremor = 0;
+        piece.tremorClock = 0;
+        continue;
+      }
+      piece.tremorClock += dt;
+      if (piece.tremorClock < 0.33) continue;
+      piece.tremorClock = 0;
+
+      const moved = Math.hypot(body.position.x - piece.mark.x, body.position.y - piece.mark.y);
+      const restless = body.speed > 0.5 || Math.abs(body.angularVelocity) > 0.05;
+      if (moved < 1.2 && restless) {
+        piece.tremor += 1;
+      } else {
+        piece.tremor = 0;
+        piece.mark = { x: body.position.x, y: body.position.y };
+      }
+      if (piece.tremor >= 3) {
+        piece.tremor = 0;
+        this.M.Body.setVelocity(body, { x: 0, y: 0 });
+        this.M.Body.setAngularVelocity(body, 0);
+        this.M.Sleeping.set(body, true);
+      }
+    }
+  }
+
   private animate(dt: number): void {
     const held = this.grab.constraint.bodyB;
+    this.settleTremor(dt);
 
     // A pile wedged between two other pieces can creep at a few pixels a
     // second for ever: matter's own sleep test never fires on that crawl, and

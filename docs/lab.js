@@ -610,6 +610,28 @@ function createRenderer(canvas, opts = {}) {
 // The hero letter is a shape, not a picture: filling its outline keeps the edges
 // of a glyph drawn a metre across as crisp as the ones in the panels, where a
 // mask blown up four times is a grey smear with a halo around it.
+// A character the demo face does not carry — Chinese, or anything outside its
+// coverage — is still shown, in the page's own face and at the hero's scale.
+// The letter is a picture of a glyph; this is the glyph the reader typed.
+function paintCharacter(canvas, text, opts = {}) {
+  if (!canvas) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cw = canvas.clientWidth || canvas.width;
+  const ch = canvas.clientHeight || canvas.height;
+  canvas.width = Math.max(1, Math.round(cw * dpr));
+  canvas.height = Math.max(1, Math.round(ch * dpr));
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!text) return;
+  const size = (opts.size || Math.min(cw, ch) * 0.5) * dpr;
+  const ink = opts.color || inkColor();
+  ctx.font = `${opts.weight || 600} ${size}px "HarmonyOS Sans SC", ui-sans-serif, system-ui, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = fade(ink, opts.alpha === undefined ? 0.3 : opts.alpha);
+  ctx.fillText(text, (opts.x === undefined ? cw / 2 : opts.x) * dpr, (opts.y === undefined ? ch / 2 : opts.y) * dpr);
+}
+
 function paintGlyphPath(canvas, path, box, opts = {}) {
   if (!canvas) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -624,7 +646,13 @@ function paintGlyphPath(canvas, path, box, opts = {}) {
   const span = Math.min(canvas.width / box.w, canvas.height / box.h) * (opts.fit || 0.84);
   const dw = box.w * span;
   const dh = box.h * span;
-  const dx = (canvas.width - dw) / 2 + (opts.shiftX || 0) * canvas.width;
+  // Either a nudge from the centre, or a margin from the right edge: the hero
+  // letter is placed by its margin, so it keeps its distance from the copy at
+  // every width instead of drifting off the page on a narrow one.
+  const dx =
+    opts.right === undefined
+      ? (canvas.width - dw) / 2 + (opts.shiftX || 0) * canvas.width
+      : canvas.width - dw - opts.right * canvas.width;
   const dy = (canvas.height - dh) / 2 + (opts.shiftY || 0) * canvas.height;
 
   const ink = opts.color || inkColor();
@@ -649,13 +677,31 @@ function paintGlyphPath(canvas, path, box, opts = {}) {
   ctx.restore();
 }
 
+// The hero's placement, for a character the demo face has no outline for.
+function heroCharacter(canvas, text) {
+  const cw = canvas.clientWidth || window.innerWidth;
+  const ch = canvas.clientHeight || 1;
+  const copyRight = document.querySelector(".hero__copy")?.getBoundingClientRect().right ?? 0;
+  const room = cw - copyRight;
+  const beside = cw >= 760 && room > cw * 0.16;
+  const dark = (document.documentElement.dataset.theme || "dark") === "dark";
+  paintCharacter(canvas, text, {
+    color: inkColor(),
+    alpha: beside ? (dark ? 0.3 : 0.22) : cw < 760 ? 0.1 : 0.14,
+    weight: 500,
+    size: Math.min(cw, ch) * (beside ? 0.42 : 0.5),
+    x: beside ? copyRight + room / 2 : cw / 2,
+    y: ch / 2,
+  });
+}
+
 function renderHero() {
   const canvas = document.getElementById("heroCanvas");
   const ch = (document.getElementById("heroChar").value || "A")[0];
   if (!state.face || !ch) return;
   const gi = glyphIndex(state.face, ch.charCodeAt(0));
   if (gi < 0) {
-    paintMask(canvas, null);
+    heroCharacter(canvas, ch);
     return;
   }
   const out = outlineSvg(state.face, gi);
@@ -667,19 +713,33 @@ function renderHero() {
     return;
   }
   const dark = (document.documentElement.dataset.theme || "dark") === "dark";
-  const narrow = window.innerWidth < 760;
-  // The glyph is the backdrop for the title: shifted right, and lighter than
-  // the copy, so the heading stays the subject. On a phone the copy covers most
-  // of it, so it becomes a watermark and rises out of the text's way — the
-  // title is drawn in `difference` and has to read on paper as well as on ink.
+  const cw = canvas.clientWidth || window.innerWidth;
+  const chPx = canvas.clientHeight || 1;
+  const ratio = box.w / box.h;
+  const full = Math.min(cw, chPx * ratio);
+
+  // The copy takes a fixed measure, so the question is how much column is left
+  // beside it. Given room, the letter stands in the middle of that column; on a
+  // narrow one it shrinks to fit; with none left it becomes the ground behind
+  // the copy, as it is on a phone.
+  const copyRight = document.querySelector(".hero__copy")?.getBoundingClientRect().right ?? 0;
+  const room = cw - copyRight;
+  const gap = 96;
+  let fit = cw < 760 ? 0.7 : 0.78;
+  let beside = cw >= 760 && room > full * 0.52 + gap;
+  if (beside && full * fit > room - gap) fit = (room - gap) / full;
+  const inset = beside ? (room - full * fit) / 2 / cw : 0;
+
+  // The glyph is the ground for the title, lighter than the copy, so the
+  // heading stays the subject; on a phone it also rises out of the text's way.
   paintGlyphPath(canvas, out.value, box, {
     color: inkColor(),
-    alpha: narrow ? 0.1 : dark ? 0.3 : 0.22,
+    alpha: beside ? (dark ? 0.3 : 0.22) : cw < 760 ? 0.1 : 0.14,
     // A hair lighter at the foot, where the stats sit under it.
-    alphaFoot: narrow ? 0.03 : dark ? 0.16 : 0.12,
-    fit: narrow ? 0.7 : 0.78,
-    shiftX: narrow ? 0.02 : 0.06,
-    shiftY: narrow ? -0.17 : 0,
+    alphaFoot: beside ? (dark ? 0.16 : 0.12) : 0.03,
+    fit,
+    ...(beside ? { right: inset } : { shiftX: 0.02 }),
+    shiftY: beside ? 0 : -0.15,
   });
 }
 

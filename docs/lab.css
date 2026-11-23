@@ -15,8 +15,8 @@
   --cool: #6ad7ff;
   --radius: 14px;
   --maxw: 1180px;
-  --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
+  --font-ui: "HarmonyOS Sans SC", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --topbar-wash: rgba(10, 10, 12, 0.85);
   --topbar-fade: rgba(10, 10, 12, 0);
   --sheen: rgba(255, 255, 255, 0.04);

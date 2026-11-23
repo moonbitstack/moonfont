@@ -58,6 +58,7 @@ SHELL = """<!doctype html>
   })();
 </script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>

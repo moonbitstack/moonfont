@@ -17,6 +17,7 @@
   })();
 </script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -51,11 +52,15 @@
             <line x1="0" y1="0" x2="2000" y2="0" stroke-width="3"/>
             <line x1="1000" y1="-800" x2="1000" y2="200" stroke-width="1" stroke-dasharray="12 12"/>
           </g>
-          <g fill="currentColor"><path d="M100 0 L500 0 Q600 -300 500 -500 Q400 -700 200 -700 Q0 -300 100 0 Z"/></g>
-          <g transform="translate(1000 0)" fill="currentColor"><path d="M100 0 L500 0 Q600 -300 500 -500 Q400 -700 200 -700 Q0 -300 100 0 Z"/></g>
-          <g fill="currentColor" font-size="12">
-            <text x="0" y="250">moonfont</text>
-            <text x="1000" y="250">reference oracle</text>
+          <!-- The outline of the sort A in the demo face, drawn twice in the same
+               frame: font units, baseline at 0, y up under a flip. -->
+          <g fill="currentColor">
+            <g transform="translate(200 0) scale(1 -1)"><path d="M50 0L240 730L361 730L550 0L459 0L411 194L190 194L142 0ZM208 270L392 270L336 495Q320 559 311 602Q302 645 300 658Q298 645 289 602Q280 559 264 496Z"/></g>
+            <g transform="translate(1200 0) scale(1 -1)"><path d="M50 0L240 730L361 730L550 0L459 0L411 194L190 194L142 0ZM208 270L392 270L336 495Q320 559 311 602Q302 645 300 658Q298 645 289 602Q280 559 264 496Z"/></g>
+          </g>
+          <g fill="currentColor" font-size="12" text-anchor="middle">
+            <text x="500" y="250">moonfont</text>
+            <text x="1500" y="250">reference oracle</text>
           </g>
         </svg>
         <figcaption>A kerning pair in the proofreader's sense: the same <code>U+0041</code> outline read twice. A disagreement shows at the edges and is recorded as a word plus a mono delta, never as colour alone.</figcaption>
