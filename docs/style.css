@@ -380,6 +380,55 @@ code, .sig, .case-index-count, .field-name, .field-type, .tok-num {
 :root[data-theme="light"] .theme-toggle .foot { opacity: 0; }
 :root[data-theme="dark"] .theme-toggle .face { opacity: 0; }
 
+/* Copy is copy; chrome is not. Selecting across the masthead, a drawer label or
+   a table of contents leaves a highlight that means nothing, and an I-beam over
+   a label says the label is text. Prose, code, tables and signatures keep their
+   selection; the furniture does not. */
+header,
+nav,
+footer,
+button,
+label,
+canvas,
+img,
+svg,
+.top,
+.brand,
+.link,
+.github,
+.theme-toggle,
+.skip,
+.case-index,
+.case-index-item,
+.stick,
+.pick,
+.pick__button,
+.pick__option,
+.field-label,
+.pkg-kind,
+.mark,
+.rule-figure {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+.case-index,
+.stick,
+.pick,
+.field-label,
+label,
+.rule-figure {
+  cursor: default;
+}
+
+/* The drawing is furniture; its caption is prose, and a reader may want it. */
+.rule-figure figcaption {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: auto;
+}
+
 /* --------------------------------------------------------------------------
    The case: drawer labels on the left, compartments on the right
    -------------------------------------------------------------------------- */

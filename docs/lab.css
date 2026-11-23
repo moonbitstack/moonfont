@@ -48,18 +48,56 @@
 
 * { box-sizing: border-box; }
 
-/* Copy is copy; chrome is not. Selecting the label of a control, or a caption
-   that is also a physics body, only ever happens by accident. */
+/* The highlight is the page's mark, not the browser's blue. */
+::selection {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  color: var(--ink);
+}
+
+/* Copy is copy; chrome is not. A selection that spans the masthead, a tab, a
+   stat or a diagram is never wanted, and the I-beam over a label reads as an
+   invitation to select something that is not text. Prose, code and the inputs
+   keep their selection; everything that is furniture does not. */
 button,
 label,
 select,
+canvas,
+img,
+svg,
 .topbar,
-.modes,
+.wordmark,
 .figures,
+.modes,
+.pick,
+.dropzone,
+.panel,
+.grid,
 .tray__stage,
-.tile__ch {
+.tray__note,
+.hud,
+.field__label,
+.hero__eyebrow,
+.block__index,
+.footer__nav,
+.theme-toggle,
+.tool {
   user-select: none;
   -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* The pointer stays an arrow over these: they are not paragraphs. */
+.figures,
+.modes,
+.hud,
+.field__label,
+.hero__eyebrow,
+.block__index,
+.panel,
+.grid,
+.tray__note,
+label {
+  cursor: default;
 }
 
 /* Code keeps the characters a reader has to type: no ligatures that draw `>=`
@@ -571,6 +609,12 @@ code {
   touch-action: none;
 }
 .lab3d__canvas:active { cursor: grabbing; }
+
+/* The anatomy solid turns under the hand as well, so it says so. The tray's
+   canvas is driven by its own hover test: grab over a casting, arrow on the
+   floor between them. */
+#ana3d { cursor: grab; }
+#ana3d:active { cursor: grabbing; }
 
 /* footer */
 .footer {
