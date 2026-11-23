@@ -24,6 +24,8 @@ const state = {
   face: null,
   fontName: "JetBrains Mono",
   units: 2048,
+  // The name of a file that would not decode, if the reader has just tried one.
+  uploadError: null,
 };
 
 // Coverage masks are cached per glyph id and size. The cache is cleared whenever
@@ -91,7 +93,10 @@ function paintMask(canvas, mask, opts = {}) {
   // A glyph that sits behind reading matter is drawn lighter and off centre,
   // so the copy over it keeps its contrast.
   ctx.globalAlpha = opts.alpha === undefined ? 1 : opts.alpha;
-  const scale = Math.min(canvas.width / mask.width, canvas.height / mask.height) * 0.84;
+  // How much of the box the ink is allowed to fill. A tile keeps a strip at its
+  // foot for the character's name, so it asks for a little more margin.
+  const fit = opts.fit === undefined ? 0.84 : opts.fit;
+  const scale = Math.min(canvas.width / mask.width, canvas.height / mask.height) * fit;
   const dw = mask.width * scale;
   const dh = mask.height * scale;
   const dx = (canvas.width - dw) / 2 + (opts.shiftX || 0) * canvas.width;
@@ -931,11 +936,12 @@ function renderAnatomy() {
 }
 
 function renderGrid(container, text, opts = {}) {
-  if (!container) return;
+  if (!container) return { absent: [] };
   container.innerHTML = "";
-  if (!state.face) return;
+  if (!state.face) return { absent: [] };
   const ppem = opts.ppem || 72;
   const chars = Array.from(text || "");
+  const absent = [];
   for (const ch of chars) {
     const tile = document.createElement("div");
     tile.className = "tile";
@@ -950,20 +956,38 @@ function renderGrid(container, text, opts = {}) {
       paintMask(cv, null);
       continue;
     }
-    const gi = glyphIndex(state.face, ch.charCodeAt(0));
+    // Code points, not code units: a character outside the basic plane is two
+    // units long, and would otherwise be looked up as half of itself.
+    const gi = glyphIndex(state.face, ch.codePointAt(0));
     if (gi < 0) {
-      // Not in the face: show it in the page's face where the grid is a
-      // courtesy, and leave the hole where the grid is a test of the face —
-      // an uploaded font is being asked whether it has the character.
+      // Not in the face. Where the grid is a courtesy, the page's own face
+      // stands in at full strength. Where the grid is a test of the file, it
+      // stands in faintly behind a dashed rule — an empty tile cannot be told
+      // apart from a renderer that failed, and the reader is owed the
+      // difference.
       if (opts.fallback) {
-        paintMask(cv, textCoverage(ch, ppem), { color: inkColor(), smooth: true });
+        paintMask(cv, textCoverage(ch, ppem), {
+          color: inkColor(),
+          smooth: true,
+          fit: 0.76,
+        });
+      } else if (opts.markAbsent) {
+        paintMask(cv, textCoverage(ch, ppem), {
+          color: inkColor(),
+          smooth: true,
+          alpha: 0.42,
+          fit: 0.76,
+        });
+        tile.dataset.absent = "true";
+        tile.title = "Not in this file — set in the page's face.";
+        absent.push(ch);
       } else {
         paintMask(cv, null);
       }
       continue;
     }
     const mask = getMask(gi, ppem);
-    paintMask(cv, mask, { color: inkColor(), smooth: true });
+    paintMask(cv, mask, { color: inkColor(), smooth: true, fit: 0.76 });
     if (opts.clickTo3d) {
       tile.style.cursor = "pointer";
       tile.addEventListener("click", () => {
@@ -976,11 +1000,33 @@ function renderGrid(container, text, opts = {}) {
       });
     }
   }
+  return { absent };
 }
 
 function renderUpload() {
+  const grid = document.getElementById("uploadGrid");
+  // A file that would not decode leaves the section empty until another one
+  // does; repainting it from the previous face would contradict the name above.
+  if (state.uploadError) {
+    if (grid) grid.innerHTML = "";
+    return;
+  }
   const text = document.getElementById("uploadText").value;
-  renderGrid(document.getElementById("uploadGrid"), text, { ppem: 72, clickTo3d: true });
+  const drawn = renderGrid(grid, text, {
+    ppem: 72,
+    clickTo3d: true,
+    markAbsent: true,
+  });
+  const note = document.getElementById("uploadNote");
+  if (!note) return;
+  const missing = drawn ? drawn.absent : [];
+  note.hidden = missing.length === 0;
+  if (!missing.length) return;
+  const shown = missing.slice(0, 6).join(", ");
+  const rest = missing.length > 6 ? " and " + (missing.length - 6) + " more" : "";
+  note.textContent =
+    (state.fontName || "This file") + " has no glyph for " + shown + rest +
+    ". Those tiles are set in the page's own face, faintly, behind a dashed rule.";
 }
 
 function renderPlayground() {
@@ -1049,11 +1095,24 @@ function handleFile(file) {
         document.getElementById("uploadName").textContent = file.name;
         document.getElementById("uploadMeta").textContent = " — could not decode this file";
       }
+      // Nothing was drawn, so nothing is left on the sheet: keeping the previous
+      // file's tiles under this file's name would be a lie about what is shown.
+      state.uploadError = file.name;
+      const grid = document.getElementById("uploadGrid");
+      if (grid) grid.innerHTML = "";
+      const note = document.getElementById("uploadNote");
+      if (note) {
+        note.hidden = false;
+        note.textContent =
+          "moonfont could not read this file, so nothing was drawn. The other " +
+          "specimens on the page are still set in the face that loaded before it.";
+      }
       return;
     }
     state.face = r.value;
     state.fontName = file.name;
     state.units = unitsPerEm(state.face);
+    state.uploadError = null;
     maskCache.clear();
     const info = document.getElementById("uploadInfo");
     if (info) {
