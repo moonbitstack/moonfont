@@ -23,7 +23,7 @@
   <div class="grain" aria-hidden="true"></div>
 
   <header class="topbar">
-    <a class="wordmark" href="index.html">moonfont</a>
+    <a class="wordmark" href="index.html">MBT FONT LIB</a>
     <nav class="topbar__nav" aria-label="Sections">
       <a href="index.html" aria-current="page">Specimen</a>
       <a href="guide.html">Guide</a>
@@ -90,13 +90,24 @@
           <label for="anaChar">Character</label>
           <input id="anaChar" class="glyph-input" maxlength="1" value="g"
                  autocomplete="off" spellcheck="false" />
-          <label for="anaPpem">Size</label>
-          <select id="anaPpem" class="select">
-            <option value="48">48px</option>
-            <option value="72" selected>72px</option>
-            <option value="96">96px</option>
-            <option value="128">128px</option>
-          </select>
+          <span class="field__label" id="anaPpemLabel">Size</span>
+          <div class="pick" data-pick>
+            <button class="pick__button" type="button" aria-haspopup="listbox"
+                    aria-expanded="false" aria-labelledby="anaPpemLabel">
+              <span data-pick-label>72 px</span>
+              <svg class="pick__mark" viewBox="0 0 10 6" aria-hidden="true" focusable="false">
+                <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor"
+                      stroke-width="1.3" stroke-linecap="round" />
+              </svg>
+            </button>
+            <ul class="pick__list" role="listbox" aria-labelledby="anaPpemLabel" hidden>
+              <li class="pick__option" role="option" tabindex="-1" data-value="48" aria-selected="false">48 px</li>
+              <li class="pick__option" role="option" tabindex="-1" data-value="72" aria-selected="true">72 px</li>
+              <li class="pick__option" role="option" tabindex="-1" data-value="96" aria-selected="false">96 px</li>
+              <li class="pick__option" role="option" tabindex="-1" data-value="128" aria-selected="false">128 px</li>
+            </ul>
+            <input id="anaPpem" type="hidden" value="72" />
+          </div>
         </div>
       </header>
       <div class="quad">
@@ -183,7 +194,7 @@
                  autocomplete="off" spellcheck="false" />
           <label for="lab3dDepth">Depth</label>
           <input id="lab3dDepth" class="range" type="range" min="4" max="120"
-                 value="56" />
+                 value="44" />
           <label for="lab3dLight">Light</label>
           <input id="lab3dLight" class="range" type="range" min="0" max="360"
                  value="45" />
@@ -205,7 +216,7 @@
           solids too. Depth, light and shadow are drawn from the same outline,
           so the same body can be read five ways.
         </p>
-        <div class="modes" role="group" aria-label="Rendering of the castings">
+        <div class="modes" data-spring-tabs role="group" aria-label="Rendering of the castings">
           <button class="mode" type="button" data-mode="cast" aria-pressed="true">Cast</button>
           <button class="mode" type="button" data-mode="ink" aria-pressed="false">Ink</button>
           <button class="mode" type="button" data-mode="wire" aria-pressed="false">Wire</button>
@@ -242,7 +253,7 @@
   <footer class="footer">
     <div class="footer__cols">
       <div>
-        <p class="footer__title">moonfont</p>
+        <p class="footer__title">MBT FONT LIB</p>
         <p class="footer__note">
           A MoonBit font engine. The build you are using is compiled to
           JavaScript and loaded straight into this page.
@@ -256,7 +267,7 @@
       </nav>
     </div>
     <p class="footer__fine">
-      Demo typeface: DejaVu Sans Mono (Bitstream Vera / DejaVu licence). No
+      Demo typeface: JetBrains Mono (SIL Open Font License 1.1). No
       external requests are made by this page.
     </p>
   </footer>
@@ -270,5 +281,7 @@
   <script src="theme.js" defer></script>
   <script type="module" src="lab.js"></script>
   <script type="module" src="site/tray.js"></script>
+  <script type="module" src="site/pick.js"></script>
+  <script type="module" src="site/marks.js"></script>
 </body>
 </html>

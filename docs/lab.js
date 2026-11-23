@@ -22,7 +22,7 @@ const DEMO_URL = "./fonts/demo.ttf";
 
 const state = {
   face: null,
-  fontName: "DejaVu Sans Mono",
+  fontName: "JetBrains Mono",
   units: 2048,
 };
 
@@ -53,7 +53,7 @@ function hexToRgb(hex) {
 // Paint a coverage mask upright, centred and scaled to fit the canvas. The mask
 // is already top-down (row 0 is the top of the glyph), so no y-flip is needed.
 function paintMask(canvas, mask, opts = {}) {
-  const color = opts.color || "#ededf0";
+  const color = opts.color || inkColor();
   const glow = opts.glow || 0;
   const clear = opts.clear !== false;
   if (!canvas) return;
@@ -100,91 +100,140 @@ function paintMask(canvas, mask, opts = {}) {
   ctx.shadowBlur = 0;
 }
 
-// Draw an SVG outline path (font coordinates, y up) inside an <svg> element,
-// fitted into the em square.
-function paintOutline(svgEl, path, units) {
+// Colours come from the page, not from constants: the same panel has to work
+// in the night impression and on paper, and a theme change repaints it.
+function cssVar(name, fallback) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
+function inkColor() {
+  return cssVar("--ink", "#ededf0");
+}
+function accentColor() {
+  return cssVar("--accent", "#ff5a36");
+}
+function fade(hex, alpha) {
+  const c = hexToRgb(hex);
+  return `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
+}
+
+// The ink's box in font units. The path frame is y down with the baseline at
+// 0, so the mask's top is a negative y and its left can be negative as well.
+function inkBox(mask, units, ppem) {
+  if (!mask) return null;
+  const perUnit = ppem / units;
+  return {
+    x: mask.left / perUnit,
+    y: mask.top / perUnit,
+    w: mask.width / perUnit,
+    h: mask.height / perUnit,
+  };
+}
+
+// Draw the outline inside an <svg>. The path is in font units with y pointing
+// down and the baseline at 0, so the viewBox is the ink's own box — negative y
+// above the baseline included. Fitting the ink rather than the em square means
+// a font with a deep descender or a wide side bearing is not cropped.
+function paintOutline(svgEl, path, box) {
   if (!svgEl) return;
-  svgEl.setAttribute("viewBox", `0 0 ${units} ${units}`);
   svgEl.innerHTML = "";
-  if (!path) return;
+  if (!path || !box) {
+    svgEl.setAttribute("viewBox", "0 0 1000 1000");
+    return;
+  }
+  const pad = Math.max(box.w, box.h) * 0.06;
+  svgEl.setAttribute(
+    "viewBox",
+    `${box.x - pad} ${box.y - pad} ${box.w + pad * 2} ${box.h + pad * 2}`,
+  );
   const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
   p.setAttribute("d", path);
-  // The engine emits the path with y already pointing down, in font units, so
-  // the pen origin is at the top of the viewBox: translate, do not flip.
-  p.setAttribute("transform", `translate(0 ${units})`);
   p.setAttribute("fill", "none");
-  p.setAttribute("stroke", "#ededf0");
-  p.setAttribute("stroke-width", String(units * 0.012));
+  p.setAttribute("stroke", "currentColor");
+  p.setAttribute("stroke-width", String(Math.max(box.w, box.h) * 0.008));
   p.setAttribute("stroke-linejoin", "round");
   p.setAttribute("stroke-linecap", "round");
   svgEl.appendChild(p);
 }
 
-// Draw the glyph plus the em-square metric rules.
-function paintMetrics(canvas, mask, metrics, units) {
+// The glyph inside the em square, with the metrics the engine measured. The
+// frame is the path's: font units, y down, baseline at 0 — so the ascender is
+// a negative y and every rule is drawn at minus its value.
+function paintMetrics(canvas, mask, path, metrics, units, ppem) {
   if (!canvas) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = canvas.clientWidth * dpr;
-  canvas.height = canvas.clientHeight * dpr;
+  canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
+  canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!metrics) return;
   const w = canvas.width;
   const h = canvas.height;
+  const ink = inkColor();
+  const accent = accentColor();
 
-  // Fit the em square (units x units) into the canvas.
-  const pad = 22 * dpr;
-  const s = (Math.min(w, h) - pad * 2) / units;
-  const ox = (w - units * s) / 2;
-  const oy = (h - units * s) / 2;
-  const X = (fx) => ox + fx * s;
-  const Y = (fy) => oy + (units - fy) * s; // y up -> screen down
+  // Mask pixels are `ppem` per em; the path is in `units` per em.
+  const perUnit = ppem / units;
+  const glyph = mask
+    ? {
+        x: mask.left / perUnit,
+        y: mask.top / perUnit,
+        w: mask.width / perUnit,
+        h: mask.height / perUnit,
+      }
+    : null;
+  // The visible box holds the em square, the ink, and every rule: the
+  // ascender can sit above the em and the descender below the baseline.
+  const left = Math.min(0, glyph ? glyph.x : 0);
+  const right = Math.max(units, glyph ? glyph.x + glyph.w : units);
+  const top = Math.min(-units, -metrics.ascent, glyph ? glyph.y : -units);
+  const bottom = Math.max(0, -metrics.descent, glyph ? glyph.y + glyph.h : 0);
 
-  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  const pad = 20 * dpr;
+  const gutter = 78 * dpr; // room for the rule labels on the right
+  const spanW = Math.max(1, right - left);
+  const spanH = Math.max(1, bottom - top);
+  const s = Math.min((w - pad * 2 - gutter) / spanW, (h - pad * 2) / spanH);
+  const ox = (w - gutter - spanW * s) / 2 - left * s;
+  const oy = (h - spanH * s) / 2 - top * s;
+  const X = (x) => ox + x * s;
+  const Y = (y) => oy + y * s;
+
+  // the em square
+  ctx.strokeStyle = fade(ink, 0.2);
   ctx.lineWidth = 1 * dpr;
-  ctx.strokeRect(X(0), Y(units), units * s, units * s);
+  ctx.strokeRect(X(0), Y(-units), units * s, units * s);
 
-  const rule = (fy, label, dash) => {
+  ctx.font = `${10.5 * dpr}px ui-monospace, "DejaVu Sans Mono", monospace`;
+  const rule = (y, label, dash) => {
     ctx.save();
-    ctx.setLineDash(dash ? [6 * dpr, 6 * dpr] : []);
-    ctx.strokeStyle = "rgba(255,90,54,0.55)";
+    ctx.setLineDash(dash ? [5 * dpr, 5 * dpr] : []);
+    ctx.strokeStyle = fade(accent, 0.6);
     ctx.beginPath();
-    ctx.moveTo(X(0), Y(fy));
-    ctx.lineTo(X(units), Y(fy));
+    ctx.moveTo(X(left), Y(y));
+    ctx.lineTo(X(right), Y(y));
     ctx.stroke();
     ctx.restore();
-    if (label) {
-      ctx.fillStyle = "rgba(255,255,255,0.5)";
-      ctx.font = `${11 * dpr}px ui-monospace, monospace`;
-      ctx.fillText(label, X(units) + 6 * dpr, Y(fy) + 3 * dpr);
-    }
+    if (!label) return;
+    ctx.fillStyle = fade(ink, 0.55);
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, X(right) + 8 * dpr, Y(y));
   };
-  rule(metrics.ascent, "ascender", true);
-  rule(metrics.cap_height, "cap", true);
-  rule(metrics.x_height, "x-height", true);
+  rule(-metrics.ascent, "ascender", true);
+  rule(-metrics.cap_height, "cap", true);
+  rule(-metrics.x_height, "x-height", true);
   rule(0, "baseline", false);
-  rule(metrics.descent, "descender", true);
+  rule(-metrics.descent, "descender", true);
 
-  // Faint glyph fill from the mask, scaled to em square.
-  if (mask) {
-    const off = document.createElement("canvas");
-    off.width = mask.width;
-    off.height = mask.height;
-    const octx = off.getContext("2d");
-    const img = octx.createImageData(mask.width, mask.height);
-    const ms = mask.samples;
-    for (let i = 0; i < ms.length; i++) {
-      img.data[i * 4] = 237;
-      img.data[i * 4 + 1] = 237;
-      img.data[i * 4 + 2] = 240;
-      img.data[i * 4 + 3] = ms[i];
-    }
-    octx.putImageData(img, 0, 0);
-    const gw = mask.width * s;
-    const gh = mask.height * s;
-    ctx.imageSmoothingEnabled = true;
-    ctx.globalAlpha = 0.85;
-    ctx.drawImage(off, 0, 0, mask.width, mask.height, X(0), Y(units) - gh, gw, gh);
-    ctx.globalAlpha = 1;
+  // The glyph is filled from the same path the outline panel strokes, in the
+  // same frame as the rules, so the two cannot disagree about its size.
+  if (path) {
+    ctx.save();
+    ctx.translate(X(0), Y(0));
+    ctx.scale(s, s);
+    ctx.fillStyle = fade(ink, 0.9);
+    ctx.fill(path);
+    ctx.restore();
   }
 }
 
@@ -212,7 +261,9 @@ function createRenderer(canvas, opts = {}) {
     void main() {
       vec3 N = normalize(vN);
       vec3 L = normalize(uLightDir);
-      float d = max(dot(N, L), 0.0);
+      // Two-sided: the mesh is a stack of per-pixel quads, and a face turned
+      // away from the camera is still a face of the same solid.
+      float d = abs(dot(N, L));
       vec3 V = vec3(0.0, 0.0, 1.0);
       vec3 H = normalize(L + V);
       float s = pow(max(dot(N, H), 0.0), 30.0) * 0.55;
@@ -262,6 +313,8 @@ function createRenderer(canvas, opts = {}) {
     yaw: opts.yaw || 0.5,
     pitch: opts.pitch || 0.25,
     autoRotate: opts.autoRotate !== false,
+    baseYaw: opts.yaw || 0.5,
+    phase: 0,
     dragging: false,
     lastX: 0,
     lastY: 0,
@@ -320,10 +373,14 @@ function createRenderer(canvas, opts = {}) {
   };
   r.reset = () => {
     r.yaw = opts.yaw || 0.5;
+    r.baseYaw = r.yaw;
+    r.phase = 0;
     r.pitch = opts.pitch || 0.25;
   };
 
-  // Minimal mat4 helpers.
+  // Minimal mat4 helpers, column-major as GL expects them. The product is
+  // written column by column: a row-major multiply here transposes the result
+  // and the solid lands outside the clip volume instead of in the middle.
   function perspective(fovy, aspect, near, far) {
     const f = 1 / Math.tan(fovy / 2);
     const nf = 1 / (near - far);
@@ -335,24 +392,24 @@ function createRenderer(canvas, opts = {}) {
     ];
   }
   function multiply(a, b) {
-    const o = new Array(16);
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        o[i * 4 + j] =
-          a[i * 4] * b[j] +
-          a[i * 4 + 1] * b[4 + j] +
-          a[i * 4 + 2] * b[8 + j] +
-          a[i * 4 + 3] * b[12 + j];
+    const out = new Array(16).fill(0);
+    for (let column = 0; column < 4; column++) {
+      for (let row = 0; row < 4; row++) {
+        let sum = 0;
+        for (let k = 0; k < 4; k++) {
+          sum += a[k * 4 + row] * b[column * 4 + k];
+        }
+        out[column * 4 + row] = sum;
       }
     }
-    return o;
+    return out;
   }
-  function rotationX(a) {
-    const c = Math.cos(a), s = Math.sin(a);
+  function rotationX(angle) {
+    const c = Math.cos(angle), s = Math.sin(angle);
     return [1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1];
   }
-  function rotationY(a) {
-    const c = Math.cos(a), s = Math.sin(a);
+  function rotationY(angle) {
+    const c = Math.cos(angle), s = Math.sin(angle);
     return [c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1];
   }
   function translation(x, y, z) {
@@ -374,25 +431,36 @@ function createRenderer(canvas, opts = {}) {
       return;
     }
     resize();
-    if (r.autoRotate && !r.dragging) r.yaw += 0.006;
+    if (r.autoRotate && !r.dragging) {
+      // A slow sway rather than a spin: the point is to read the form, and a
+      // full turn spends half its time showing the solid edge-on.
+      r.phase += 0.004;
+      r.yaw = r.baseYaw + Math.sin(r.phase) * 0.32;
+    }
     const aspect = canvas.width / canvas.height;
     const proj = perspective((45 * Math.PI) / 180, aspect, 0.1, 100);
     const view = translation(0, 0, -5.2);
     const model = multiply(rotationY(r.yaw), rotationX(r.pitch));
 
-    // Fit: scale so the mask's largest dimension is about 3.4 world units.
+    // Fit: scale so the mask's largest dimension is about 3.1 world units.
     let cx = 0, cy = 0;
     if (r.mask) {
       cx = r.mask.width / 2;
       cy = r.mask.height / 2;
     }
-    const span = r.mask ? Math.max(r.mask.width, r.mask.height, 1) : 1;
-    const fit = 3.4 / span;
+    // The depth is part of the silhouette: a slab turned towards the camera is
+    // as tall as its thickness plus its face, so the fit has to include it.
+    const span = r.mask
+      ? Math.max(r.mask.width, r.mask.height, r.depth * 1.7, 1)
+      : 1;
+    const fit = 3.1 / span;
 
-    // Bake the centring + fit into the model matrix (column-major combine).
+    // Bake the centring and the fit into the model matrix. The mask's y runs
+    // down and the world's runs up, so y takes the negative scale: without it
+    // the solid is poured upside down.
     const fitMat = [
       fit, 0, 0, 0,
-      0, fit, 0, 0,
+      0, -fit, 0, 0,
       0, 0, fit, 0,
       -cx * fit, cy * fit, -(r.depth * fit) / 2, 1,
     ];
@@ -470,7 +538,7 @@ function renderHero() {
   // The glyph is the backdrop for the title, so it is drawn at just over half
   // strength and shifted right: the heading has to stay crisp over it.
   paintMask(canvas, mask, {
-    color: "#ffffff",
+    color: inkColor(),
     glow: 26,
     smooth: true,
     alpha: 0.42,
@@ -484,18 +552,31 @@ function renderAnatomy() {
   const gi = state.face ? glyphIndex(state.face, ch.charCodeAt(0)) : -1;
   if (gi < 0) {
     ["anaFill", "ana3d"].forEach((id) => paintMask(document.getElementById(id), null));
-    paintOutline(document.getElementById("anaOutline"), "", state.units);
+    paintOutline(document.getElementById("anaOutline"), "", null);
+    paintMetrics(document.getElementById("anaMetrics"), null, null, null, state.units, ppem);
     return;
   }
   const mask = getMask(gi, ppem);
-  paintMask(document.getElementById("anaFill"), mask, { color: "#ededf0", smooth: true });
+  paintMask(document.getElementById("anaFill"), mask, { color: inkColor(), smooth: true });
   const out = outlineSvg(state.face, gi);
-  paintOutline(document.getElementById("anaOutline"), out.ok ? out.value : "", state.units);
-  paintMetrics(document.getElementById("anaMetrics"), mask, fontMetrics(state.face), state.units);
+  paintOutline(
+    document.getElementById("anaOutline"),
+    out.ok ? out.value : "",
+    inkBox(mask, state.units, ppem),
+  );
+  const path = out.ok ? new Path2D(out.value) : null;
+  paintMetrics(
+    document.getElementById("anaMetrics"),
+    mask,
+    path,
+    fontMetrics(state.face),
+    state.units,
+    ppem,
+  );
 
   const r3d = renderers.ana;
   if (r3d) {
-    r3d.depth = Math.max(8, ppem * 0.7);
+    r3d.depth = Math.max(8, ppem * 0.22);
     r3d.setMask(mask);
   }
 }
@@ -526,7 +607,7 @@ function renderGrid(container, text, opts = {}) {
       continue;
     }
     const mask = getMask(gi, ppem);
-    paintMask(cv, mask, { color: "#ededf0", smooth: true });
+    paintMask(cv, mask, { color: inkColor(), smooth: true });
     if (opts.clickTo3d) {
       tile.style.cursor = "pointer";
       tile.addEventListener("click", () => {
@@ -583,7 +664,7 @@ async function loadDemo() {
       return;
     }
     state.face = r.value;
-    state.fontName = "DejaVu Sans Mono";
+    state.fontName = "JetBrains Mono";
     state.units = unitsPerEm(state.face);
     maskCache.clear();
     renderAll();
@@ -633,16 +714,47 @@ function init() {
 
   renderers.ana = createRenderer(document.getElementById("ana3d"), {
     autoRotate: true,
-    yaw: 0.6,
-    pitch: 0.3,
+    yaw: 0.34,
+    pitch: 0.14,
   });
   renderers.lab = createRenderer(document.getElementById("lab3dCanvas"), {
     autoRotate: false,
-    yaw: 0.5,
-    pitch: 0.25,
+    yaw: 0.36,
+    pitch: 0.16,
   });
   if (renderers.ana) renderers.ana.start();
   if (renderers.lab) renderers.lab.start();
+
+  // The panels are painted in the page's ink and the solids are lit in it, so
+  // a change of impression repaints them instead of leaving the old colour.
+  const applyPalette = () => {
+    // On paper the ink is nearly black, and a black solid shows no shading at
+    // all; a little of the ground mixed in keeps its faces readable.
+    const ink = hexToRgb(inkColor());
+    const ground = hexToRgb(cssVar("--bg-panel", "#121216"));
+    const dark = (document.documentElement.dataset.theme || "dark") === "dark";
+    const t = dark ? 0 : 0.24;
+    const colour = [
+      (ink.r + (ground.r - ink.r) * t) / 255,
+      (ink.g + (ground.g - ink.g) * t) / 255,
+      (ink.b + (ground.b - ink.b) * t) / 255,
+    ];
+    for (const renderer of Object.values(renderers)) {
+      if (renderer) renderer.color = colour;
+    }
+  };
+  applyPalette();
+  let repaint = 0;
+  new MutationObserver(() => {
+    cancelAnimationFrame(repaint);
+    repaint = requestAnimationFrame(() => {
+      applyPalette();
+      renderAll();
+    });
+  }).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
 
   // Hero
   const heroChar = document.getElementById("heroChar");

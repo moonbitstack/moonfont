@@ -64,7 +64,7 @@ SHELL = """<!doctype html>
 <a class="skip" href="#case">Skip to the case</a>
 <header class="top">
   <nav aria-label="Sections">
-    <a class="brand" href="index.html"><b>moonfont</b><span>font reading for MoonBit</span></a>
+    <a class="brand" href="index.html"><b>MBT FONT LIB</b><span>font reading for MoonBit</span></a>
     <a class="link" href="index.html">Specimen</a>
     <a class="link" href="guide.html">Guide</a>
     <a class="link" href="api.html" aria-current="page">Reference</a>
@@ -95,7 +95,7 @@ SHELL = """<!doctype html>
 </main>
 <footer>
   <div class="wrap row">
-    <span class="mark">moonfont</span>
+    <span class="mark">MBT FONT LIB</span>
     <a href="index.html">Specimen</a>
     <a href="guide.html">Guide</a>
     <a href="api.html">Reference</a>

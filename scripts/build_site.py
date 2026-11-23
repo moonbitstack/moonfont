@@ -90,9 +90,9 @@ def build_tray() -> None:
 
 
 def check_tray() -> int:
-    """The committed script is what the source and the pin produce."""
+    """The committed scripts are what the sources and the pin produce."""
     if not TRAY.exists():
-        print("docs/site/tray.js is missing; run build_site.py tray", file=sys.stderr)
+        print("docs/site is missing; run build_site.py tray", file=sys.stderr)
         return 1
     if not (SITE / "node_modules").exists():
         print("site/node_modules is missing; run `npm ci --prefix site`", file=sys.stderr)
@@ -103,18 +103,23 @@ def check_tray() -> int:
             cwd=SITE,
         )
         if result.returncode != 0:
-            print("the tray did not compile", file=sys.stderr)
+            print("the site scripts did not compile", file=sys.stderr)
             return 1
-        built = Path(temporary) / "tray.js"
-        if not built.exists() or not filecmp.cmp(built, TRAY, shallow=False):
-            print("docs/site/tray.js does not match site/src/tray.ts", file=sys.stderr)
+        built = sorted(p.name for p in Path(temporary).glob("*.js"))
+        committed = sorted(p.name for p in TRAY.parent.glob("*.js"))
+        if built != committed:
+            print(f"docs/site holds {committed}, the sources compile to {built}", file=sys.stderr)
             return 1
+        for name in built:
+            if not filecmp.cmp(Path(temporary) / name, TRAY.parent / name, shallow=False):
+                print(f"docs/site/{name} does not match its source", file=sys.stderr)
+                return 1
     vendored = VENDOR / "matter.min.js"
     package = SITE / "node_modules" / "matter-js" / "build" / "matter.min.js"
     if package.exists() and not filecmp.cmp(package, vendored, shallow=False):
         print("docs/vendor/matter.min.js does not match the pinned matter-js", file=sys.stderr)
         return 1
-    print("the tray and its vendor copy are current")
+    print("the site scripts and their vendor copy are current")
     return 0
 
 

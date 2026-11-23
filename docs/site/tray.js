@@ -225,6 +225,8 @@ class Tray {
     solidRects = "";
     shapes = new Map();
     pool = [];
+    /** glyphs not yet poured this time round the case */
+    bag = [];
     width = 0;
     height = 0;
     dpr = 1;
@@ -251,7 +253,9 @@ class Tray {
     constructor(root, M) {
         this.root = root;
         this.M = M;
-        const canvas = root.querySelector("canvas");
+        // The stage's canvas by name: the tab marker is a canvas too, and it sits
+        // earlier in the same section.
+        const canvas = root.querySelector("canvas.tray__canvas");
         if (!canvas)
             throw new Error("the tray needs a canvas");
         this.canvas = canvas;
@@ -312,13 +316,19 @@ class Tray {
         const beside = label ? label.right - field.left + 14 : 12;
         this.cursor = beside > this.width * 0.35 ? 12 : beside;
         this.originCursor = this.cursor;
-        const pour = clamp(Math.round(this.width / 74), 7, 15);
+        // As many pieces as the floor beside the label holds, at roughly a
+        // hundred pixels each: a second row only when the first is genuinely full.
+        const room = Math.max(1, this.width - this.cursor - 28);
+        const pour = clamp(Math.round(room / 104), 5, 11);
         for (let i = 0; i < pour; i++)
             this.pour(false);
         // A composed pile is a better first impression than a shower of letters,
         // so the pour is simulated to rest before anything is drawn, and the tray
         // starts asleep: no loop, no battery, no drift. The reader starts it.
-        for (let i = 0; i < 420; i++)
+        // Ten steps, not four hundred: enough for each piece to seat itself on the
+        // floor, too few for a row of upright castings to rock itself over. The
+        // composed row is the first impression; the reader may wreck it after.
+        for (let i = 0; i < 10; i++)
             this.M.Engine.update(this.engine, STEP);
         for (const piece of this.pieces)
             this.M.Sleeping.set(piece.body, true);
@@ -498,6 +508,17 @@ class Tray {
         M.Composite.add(this.engine.world, this.solids);
     }
     // --- pieces ---------------------------------------------------------------
+    /** One glyph from the bag, so a pour does not repeat itself. */
+    nextGlyph() {
+        if (this.bag.length === 0) {
+            this.bag = [...this.pool];
+            for (let i = this.bag.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.bag[i], this.bag[j]] = [this.bag[j], this.bag[i]];
+            }
+        }
+        return this.bag.pop() ?? 0;
+    }
     shapeFor(glyph) {
         if (!this.face || !this.engineApi)
             return null;
@@ -521,8 +542,8 @@ class Tray {
             return;
         let shape = null;
         let glyph = 0;
-        for (let attempt = 0; attempt < 12 && !shape; attempt++) {
-            glyph = this.pool[Math.floor(Math.random() * this.pool.length)] ?? 0;
+        for (let attempt = 0; attempt < 16 && !shape; attempt++) {
+            glyph = this.nextGlyph();
             shape = this.shapeFor(glyph);
         }
         if (!shape)
@@ -549,7 +570,7 @@ class Tray {
         }
         const x = this.cursor + width / 2;
         const y = this.height - 34 - height / 2 - this.row * 104;
-        this.cursor += width * 0.94;
+        this.cursor += width * 1.04;
         this.compose(shape, factor, x, y, true);
     }
     /** Build the compound body for one glyph and put it in the world. */
@@ -586,7 +607,7 @@ class Tray {
         M.Body.setPosition(body, { x, y });
         // Poured type is roughly upright and slightly askew; a uniform random
         // angle makes a heap that reads as debris rather than as a type case.
-        const spread = upright ? 0.05 : 0.5;
+        const spread = upright ? 0.025 : 0.5;
         M.Body.setAngle(body, (Math.random() - 0.5) * spread);
         M.Body.setAngularVelocity(body, (Math.random() - 0.5) * spread * 0.1);
         M.Composite.add(this.engine.world, body);
