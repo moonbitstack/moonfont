@@ -674,9 +674,9 @@ function renderHero() {
   // title is drawn in `difference` and has to read on paper as well as on ink.
   paintGlyphPath(canvas, out.value, box, {
     color: inkColor(),
-    alpha: narrow ? 0.1 : dark ? 0.2 : 0.16,
+    alpha: narrow ? 0.1 : dark ? 0.3 : 0.22,
     // A hair lighter at the foot, where the stats sit under it.
-    alphaFoot: narrow ? 0.03 : dark ? 0.1 : 0.08,
+    alphaFoot: narrow ? 0.03 : dark ? 0.16 : 0.12,
     fit: narrow ? 0.7 : 0.78,
     shiftX: narrow ? 0.04 : 0.13,
     shiftY: narrow ? -0.17 : 0,

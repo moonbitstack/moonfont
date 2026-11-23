@@ -184,6 +184,18 @@ def check_numbers() -> int:
     if NUMBERS.read_text(encoding="utf-8") != expected:
         print("docs/numbers.json does not match the source", file=sys.stderr)
         return 1
+    # The page carries the same counts as a fallback for the moment before the
+    # JSON arrives; a stale fallback shows a wrong number to a reader whose
+    # script has not run yet, so the two are held together.
+    page = (DOCS / "index.html").read_text(encoding="utf-8")
+    counts = gather_numbers()
+    for name, value in re.findall(r'data-count="([a-z_]+)">(\d+)<', page):
+        if int(value) != counts.get(name):
+            print(
+                f"docs/index.html shows {value} for {name}, the source says {counts.get(name)}",
+                file=sys.stderr,
+            )
+            return 1
     print("site numbers are current")
     return 0
 
