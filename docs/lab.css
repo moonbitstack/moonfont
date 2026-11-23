@@ -246,9 +246,8 @@ code {
   padding: 0 28px;
   overflow: hidden;
 }
-/* Behind the copy, and behind the hero's own background too: the title is
-   drawn in `difference`, and a stacking context between the two would blend
-   it against nothing — white letters on white paper. */
+/* Behind the copy: the letter is the hero's ground, and the copy is what the
+   hero says. */
 .hero__canvas {
   position: absolute;
   inset: 0;
@@ -273,9 +272,10 @@ code {
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 0.92;
-  /* the title sits over the rendered glyph; keep it legible */
-  mix-blend-mode: difference;
-  color: #fff;
+  /* The title sits over the rendered glyph, which is faint enough to be a
+     ground: the page's ink reads on paper and over the letter in both
+     impressions, so the heading needs no blending trick to survive it. */
+  color: var(--ink);
 }
 .hero__tagline {
   margin: 26px 0 0;

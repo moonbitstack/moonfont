@@ -678,7 +678,7 @@ function renderHero() {
     // A hair lighter at the foot, where the stats sit under it.
     alphaFoot: narrow ? 0.03 : dark ? 0.16 : 0.12,
     fit: narrow ? 0.7 : 0.78,
-    shiftX: narrow ? 0.04 : 0.13,
+    shiftX: narrow ? 0.02 : 0.06,
     shiftY: narrow ? -0.17 : 0,
   });
 }
