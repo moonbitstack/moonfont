@@ -607,6 +607,48 @@ function createRenderer(canvas, opts = {}) {
 }
 
 // ---- Section renderers ----
+// The hero letter is a shape, not a picture: filling its outline keeps the edges
+// of a glyph drawn a metre across as crisp as the ones in the panels, where a
+// mask blown up four times is a grey smear with a halo around it.
+function paintGlyphPath(canvas, path, box, opts = {}) {
+  if (!canvas) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cw = canvas.clientWidth || canvas.width;
+  const ch = canvas.clientHeight || canvas.height;
+  canvas.width = Math.max(1, Math.round(cw * dpr));
+  canvas.height = Math.max(1, Math.round(ch * dpr));
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!path || !box || !box.w || !box.h) return;
+
+  const span = Math.min(canvas.width / box.w, canvas.height / box.h) * (opts.fit || 0.84);
+  const dw = box.w * span;
+  const dh = box.h * span;
+  const dx = (canvas.width - dw) / 2 + (opts.shiftX || 0) * canvas.width;
+  const dy = (canvas.height - dh) / 2 + (opts.shiftY || 0) * canvas.height;
+
+  const ink = opts.color || inkColor();
+  const top = opts.alpha === undefined ? 0.34 : opts.alpha;
+  const foot = opts.alphaFoot === undefined ? top : opts.alphaFoot;
+  let fill;
+  if (top === foot) {
+    fill = fade(ink, top);
+  } else {
+    const fadeOut = ctx.createLinearGradient(0, dy, 0, dy + dh);
+    fadeOut.addColorStop(0, fade(ink, top));
+    fadeOut.addColorStop(1, fade(ink, foot));
+    fill = fadeOut;
+  }
+
+  ctx.save();
+  ctx.translate(dx, dy);
+  ctx.scale(span, span);
+  ctx.translate(-box.x, -box.y);
+  ctx.fillStyle = fill;
+  ctx.fill(new Path2D(path));
+  ctx.restore();
+}
+
 function renderHero() {
   const canvas = document.getElementById("heroCanvas");
   const ch = (document.getElementById("heroChar").value || "A")[0];
@@ -616,20 +658,28 @@ function renderHero() {
     paintMask(canvas, null);
     return;
   }
-  const mask = getMask(gi, 220);
-  // The glyph is the backdrop for the title, so it is drawn at just over half
-  // strength and shifted right: the heading has to stay crisp over it. On a
-  // phone the copy covers most of the glyph, so it becomes a watermark and
-  // rises out of the text's way — the title is drawn in `difference`, and it
-  // has to be able to read against paper as well as against the glyph.
+  const out = outlineSvg(state.face, gi);
+  // A small mask is enough to say where the ink is; the drawing itself is the
+  // path, so the letter is sharp at any size.
+  const box = inkBox(getMask(gi, 96), state.units, 96);
+  if (!out.ok || !box) {
+    paintMask(canvas, null);
+    return;
+  }
+  const dark = (document.documentElement.dataset.theme || "dark") === "dark";
   const narrow = window.innerWidth < 760;
-  paintMask(canvas, mask, {
+  // The glyph is the backdrop for the title: shifted right, and lighter than
+  // the copy, so the heading stays the subject. On a phone the copy covers most
+  // of it, so it becomes a watermark and rises out of the text's way — the
+  // title is drawn in `difference` and has to read on paper as well as on ink.
+  paintGlyphPath(canvas, out.value, box, {
     color: inkColor(),
-    glow: narrow ? 18 : 26,
-    smooth: true,
-    alpha: narrow ? 0.2 : 0.42,
-    shiftX: narrow ? 0.05 : 0.13,
-    shiftY: narrow ? -0.14 : 0,
+    alpha: narrow ? 0.1 : dark ? 0.2 : 0.16,
+    // A hair lighter at the foot, where the stats sit under it.
+    alphaFoot: narrow ? 0.03 : dark ? 0.1 : 0.08,
+    fit: narrow ? 0.7 : 0.78,
+    shiftX: narrow ? 0.04 : 0.13,
+    shiftY: narrow ? -0.17 : 0,
   });
 }
 
