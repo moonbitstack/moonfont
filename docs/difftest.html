@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>moonfont — Comparison</title>
+<title>MBT FONT LIB — Comparison</title>
 <meta name="description" content="The cross-language oracle matrix, the pre-registered tolerances and the committed fixture and corpus counts.">
 <script>
   (() => {
@@ -34,8 +34,8 @@
     </a>
     <button class="theme-toggle" type="button" aria-label="Use the dark case" aria-pressed="false">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <g class="face"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.4"/></g>
-        <g class="foot"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18M4 12h16" stroke="currentColor" stroke-width="1.4"/></g>
+        <g class="face"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M5 5l1.8 1.8M17.2 17.2 19 19M19 5l-1.8 1.8M6.8 17.2 5 19" stroke="currentColor" stroke-width="1.4"/></g>
+        <g class="foot"><path d="M15.5 16.5A6.5 6.5 0 0 1 7.5 6a6.5 6.5 0 1 0 8 10.5Z" fill="none" stroke="currentColor" stroke-width="1.4"/></g>
       </svg>
     </button>
   </nav>
@@ -65,7 +65,7 @@
 
   <div class="wrap">
     <div class="table-wrap">
-        <table class="case-table">
+        <table class="case-table case-table--prose">
       <caption>Cross-language oracle assignment. Versions are the pins recorded in <code>contracts/DIFFTEST.md</code>, section 5; a version bump is a one-way door that invalidates every committed golden.</caption>
       <thead>
         <tr>
@@ -142,7 +142,13 @@
         </ul>
         <p>A replay cell always carries a word — match, disagrees or refused — and a mono delta. CI replays committed fixtures on wasm, wasm-gc, js and native; it never calls an oracle.</p>
 
-        <h2 id="formats">Containers, outlines and instances</h2>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <section aria-labelledby="formats">
+      <h2 id="formats">Containers, outlines and instances</h2>
         <p>The second fixture set covers the formats a font arrives in and the tables that move it. Every expectation comes from fontTools, and every outline is cross-checked against FreeType before either is written down: the two must describe the same points, or generation stops.</p>
         <div class="table-wrap">
         <table class="fixture-table">
@@ -161,7 +167,6 @@
           </tbody>
         </table>
         </div>
-      </div>
     </section>
   </div>
 

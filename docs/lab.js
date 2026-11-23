@@ -95,7 +95,7 @@ function paintMask(canvas, mask, opts = {}) {
   const dw = mask.width * scale;
   const dh = mask.height * scale;
   const dx = (canvas.width - dw) / 2 + (opts.shiftX || 0) * canvas.width;
-  const dy = (canvas.height - dh) / 2;
+  const dy = (canvas.height - dh) / 2 + (opts.shiftY || 0) * canvas.height;
   ctx.drawImage(off, 0, 0, mask.width, mask.height, dx, dy, dw, dh);
   ctx.shadowBlur = 0;
 }
@@ -305,6 +305,8 @@ function createRenderer(canvas, opts = {}) {
   gl.disable(gl.CULL_FACE);
   gl.clearColor(0, 0, 0, 0);
 
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   const r = {
     gl,
     mask: null,
@@ -313,8 +315,12 @@ function createRenderer(canvas, opts = {}) {
     yaw: opts.yaw || 0.5,
     pitch: opts.pitch || 0.25,
     autoRotate: opts.autoRotate !== false,
-    baseYaw: opts.yaw || 0.5,
-    phase: 0,
+    // Angular momentum, in radians per frame, taken away by drag. A turntable
+    // that is pushed slows down and stops; a sine would turn for ever.
+    spin: 0,
+    visible: true,
+    running: false,
+    raf: 0,
     dragging: false,
     lastX: 0,
     lastY: 0,
@@ -337,45 +343,83 @@ function createRenderer(canvas, opts = {}) {
       normals.push(nx, ny, nz, nx, ny, nz, nx, ny, nz);
       normals.push(nx, ny, nz, nx, ny, nz, nx, ny, nz);
     };
+
+    // A wall that takes its normal from the local edge — instead of the axis
+    // of the pixel step — shades as one continuous surface around a curve.
+    // Without this the side of a letter is a stack of little lit steps and
+    // reads as a pile of plates rather than a solid.
+    const blur = (x, y) => {
+      let sum = 0;
+      let weight = 0;
+      for (let dy = -2; dy <= 2; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          const sx = x + dx, sy = y + dy;
+          const c = sx < 0 || sy < 0 || sx >= w || sy >= h ? 0 : s[sy * w + sx] / 255;
+          const wgt = 3 - Math.max(Math.abs(dx), Math.abs(dy));
+          sum += c * wgt;
+          weight += wgt;
+        }
+      }
+      return weight ? sum / weight : 0;
+    };
+    const wallNormal = (x, y) => {
+      const gx = blur(x + 1, y) - blur(x - 1, y);
+      const gy = blur(x, y + 1) - blur(x, y - 1);
+      const len = Math.hypot(gx, gy);
+      if (len < 1e-4) return [0, 0, 0];
+      return [-gx / len, -gy / len, 0];
+    };
+
     const z1 = r.depth;
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
         if (!covered(x, y)) continue;
-        // top face (z = depth), normal up
+        // The face, and its mirror at z = 0: a closed slab, so a turn past
+        // three-quarters shows the back of the letter, not its hollow inside.
         pushQuad(x, y, z1, x + 1, y, z1, x + 1, y + 1, z1, x, y + 1, z1, 0, 0, 1);
-        if (!covered(x - 1, y))
-          pushQuad(x, y, z1, x, y + 1, z1, x, y + 1, 0, x, y, 0, -1, 0, 0);
-        if (!covered(x + 1, y))
-          pushQuad(x + 1, y, z1, x + 1, y + 1, z1, x + 1, y + 1, 0, x + 1, y, 0, 1, 0, 0);
-        if (!covered(x, y - 1))
-          pushQuad(x, y, z1, x + 1, y, z1, x + 1, y, 0, x, y, 0, 0, -1, 0);
-        if (!covered(x, y + 1))
-          pushQuad(x, y + 1, z1, x + 1, y + 1, z1, x + 1, y + 1, 0, x, y + 1, 0, 0, 1, 0);
+        pushQuad(x, y, 0, x, y + 1, 0, x + 1, y + 1, 0, x + 1, y, 0, 0, 0, -1);
+        if (!covered(x - 1, y) || !covered(x + 1, y) || !covered(x, y - 1) || !covered(x, y + 1)) {
+          const n = wallNormal(x, y);
+          const nx = n[0], ny = n[1];
+          if (!covered(x - 1, y))
+            pushQuad(x, y, z1, x, y + 1, z1, x, y + 1, 0, x, y, 0, nx, ny, 0);
+          if (!covered(x + 1, y))
+            pushQuad(x + 1, y, z1, x + 1, y + 1, z1, x + 1, y + 1, 0, x + 1, y, 0, nx, ny, 0);
+          if (!covered(x, y - 1))
+            pushQuad(x, y, z1, x + 1, y, z1, x + 1, y, 0, x, y, 0, nx, ny, 0);
+          if (!covered(x, y + 1))
+            pushQuad(x, y + 1, z1, x + 1, y + 1, z1, x + 1, y + 1, 0, x, y + 1, 0, nx, ny, 0);
+        }
       }
     }
-    r.vertexCount = positions.length / 3;
+  r.vertexCount = positions.length / 3;
     gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, nrmBuf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
   }
 
+  // Geometry arrives after the renderer is made, and there is no longer a
+  // loop running to notice: every change asks for one frame.
   r.setMask = (mask) => {
     r.mask = mask;
     buildGeometry();
+    if (r.start) r.start();
   };
   r.setDepth = (d) => {
     r.depth = d;
     if (r.mask) buildGeometry();
+    if (r.start) r.start();
   };
   r.setLight = (deg) => {
     r.light = deg;
+    if (r.start) r.start();
   };
   r.reset = () => {
     r.yaw = opts.yaw || 0.5;
-    r.baseYaw = r.yaw;
-    r.phase = 0;
+    r.spin = 0;
     r.pitch = opts.pitch || 0.25;
+    r.start();
   };
 
   // Minimal mat4 helpers, column-major as GL expects them. The product is
@@ -431,11 +475,15 @@ function createRenderer(canvas, opts = {}) {
       return;
     }
     resize();
-    if (r.autoRotate && !r.dragging) {
-      // A slow sway rather than a spin: the point is to read the form, and a
-      // full turn spends half its time showing the solid edge-on.
-      r.phase += 0.004;
-      r.yaw = r.baseYaw + Math.sin(r.phase) * 0.32;
+    if (r.dragging) {
+      // The hand owns the angle while it holds.
+    } else if (r.spin !== 0) {
+      r.yaw += r.spin;
+      // Bearing friction, per frame at sixty frames a second: a flick coasts
+      // for about two seconds and then the solid is simply still. The
+      // threshold is the point where the next step would move a pixel.
+      r.spin *= 0.985;
+      if (Math.abs(r.spin) < 0.0006) r.spin = 0;
     }
     const aspect = canvas.width / canvas.height;
     const proj = perspective((45 * Math.PI) / 180, aspect, 0.1, 100);
@@ -498,14 +546,20 @@ function createRenderer(canvas, opts = {}) {
   });
   canvas.addEventListener("pointermove", (ev) => {
     if (!r.dragging) return;
-    r.yaw += (ev.clientX - r.lastX) * 0.01;
+    const dx = ev.clientX - r.lastX;
+    r.yaw += dx * 0.01;
     r.pitch += (ev.clientY - r.lastY) * 0.01;
     r.pitch = Math.max(-1.4, Math.min(1.4, r.pitch));
     r.lastX = ev.clientX;
     r.lastY = ev.clientY;
+    // Remember the hand's last motion: released mid-swing, the solid keeps
+    // that turn and gives it back to friction.
+    r.spin = reduceMotion ? 0 : Math.max(-0.008, Math.min(0.008, dx * 0.0003));
+    r.start();
   });
   const stop = (ev) => {
     r.dragging = false;
+    r.start();
     if (ev.pointerId != null && canvas.releasePointerCapture) {
       try { canvas.releasePointerCapture(ev.pointerId); } catch (e) {}
     }
@@ -514,12 +568,40 @@ function createRenderer(canvas, opts = {}) {
   canvas.addEventListener("pointercancel", stop);
 
   r.start = () => {
+    if (r.running) return;
+    r.running = true;
     const loop = () => {
+      r.raf = 0;
       r.frame();
-      r._raf = requestAnimationFrame(loop);
+      const moving = r.dragging || r.spin !== 0;
+      if (moving && r.visible) {
+        r.raf = requestAnimationFrame(loop);
+      } else {
+        r.running = false;
+      }
     };
-    loop();
+    r.raf = requestAnimationFrame(loop);
   };
+
+  // A solid on a page is not a reason to draw sixty times a second while it
+  // sits below the fold: it is drawn when it is looked at.
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(() => {
+      if (!r.running) r.frame();
+    }).observe(canvas);
+  }
+
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          r.visible = entry.isIntersecting;
+          if (r.visible && (r.dragging || r.spin !== 0)) r.start();
+        }
+      },
+      { rootMargin: "120px" },
+    ).observe(canvas);
+  }
 
   return r;
 }
@@ -536,14 +618,28 @@ function renderHero() {
   }
   const mask = getMask(gi, 220);
   // The glyph is the backdrop for the title, so it is drawn at just over half
-  // strength and shifted right: the heading has to stay crisp over it.
+  // strength and shifted right: the heading has to stay crisp over it. On a
+  // phone the copy covers most of the glyph, so it becomes a watermark and
+  // rises out of the text's way — the title is drawn in `difference`, and it
+  // has to be able to read against paper as well as against the glyph.
+  const narrow = window.innerWidth < 760;
   paintMask(canvas, mask, {
     color: inkColor(),
-    glow: 26,
+    glow: narrow ? 18 : 26,
     smooth: true,
-    alpha: 0.42,
-    shiftX: 0.13,
+    alpha: narrow ? 0.2 : 0.42,
+    shiftX: narrow ? 0.05 : 0.13,
+    shiftY: narrow ? -0.14 : 0,
   });
+}
+
+// The extrusion is built out of coverage, so its side walls are only as smooth
+// as the mask is fine: one mask step is one stair on the silhouette. The panels
+// show the mask at the size the reader asked for; the solid is cut from a
+// finer one, which costs a few milliseconds once per change.
+function solidMask(gi, ppem) {
+  const fine = Math.min(192, Math.max(96, Math.round(ppem * 2.4)));
+  return { mask: getMask(gi, fine), ppem: fine };
 }
 
 function renderAnatomy() {
@@ -576,8 +672,10 @@ function renderAnatomy() {
 
   const r3d = renderers.ana;
   if (r3d) {
-    r3d.depth = Math.max(8, ppem * 0.22);
-    r3d.setMask(mask);
+    const solid = solidMask(gi, ppem);
+    // Depth is a fraction of the em, so it is expressed in the mask's pixels.
+    r3d.depth = Math.max(8, solid.ppem * 0.22);
+    r3d.setMask(solid.mask);
   }
 }
 
@@ -637,10 +735,11 @@ function renderLab3d() {
   if (!r) return;
   const ch = (document.getElementById("lab3dChar").value || "R")[0];
   const gi = state.face ? glyphIndex(state.face, ch.charCodeAt(0)) : -1;
-  const mask = gi >= 0 ? getMask(gi, 96) : null;
-  r.depth = parseInt(document.getElementById("lab3dDepth").value, 10);
+  const solid = gi >= 0 ? solidMask(gi, 96) : { mask: null, ppem: 96 };
+  const asked = parseInt(document.getElementById("lab3dDepth").value, 10);
+  r.depth = (asked * solid.ppem) / 96;
   r.setLight(parseInt(document.getElementById("lab3dLight").value, 10));
-  r.setMask(mask);
+  r.setMask(solid.mask);
 }
 
 function renderAll() {
@@ -722,7 +821,14 @@ function init() {
     yaw: 0.36,
     pitch: 0.16,
   });
-  if (renderers.ana) renderers.ana.start();
+  if (renderers.ana) {
+    // A gentle push when the page loads: the solid turns far enough to read as
+    // a solid, then friction takes the turn away and it rests. A reader who
+    // asked for less motion gets the resting view straight away.
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    renderers.ana.spin = still ? 0 : 0.006;
+    renderers.ana.start();
+  }
   if (renderers.lab) renderers.lab.start();
 
   // The panels are painted in the page's ink and the solids are lit in it, so

@@ -691,7 +691,14 @@ pre { overflow-x: auto; }
 .band p { max-width: 65ch; color: var(--on-solid); }
 .band a { color: var(--mark-on-solid); }
 .band svg { display: block; width: 100%; margin-block: var(--s-8); }
-.band code { background: var(--stock-deep); color: var(--on-solid); }
+/* The band is an inverted surface in either theme, so a code chip inside it
+   cannot take the page's paper chip: it would be a pale box with pale letters.
+   A little of the band's own text colour, laid over the band, keeps it legible
+   in both impressions. */
+.band code {
+  background: color-mix(in srgb, var(--on-solid) 14%, transparent);
+  color: var(--on-solid);
+}
 
 /* Two-column measure. */
 .measure {
@@ -793,7 +800,6 @@ pre code { overflow-wrap: normal; }
 
 .fixture-table {
   width: 100%;
-  min-width: 34rem;
   border-collapse: collapse;
   font-size: var(--t-label);
   line-height: 1.55;
@@ -1045,4 +1051,28 @@ input[type="range"]::-moz-range-track { height: 1px; background: var(--ink-faint
 input[type="range"]::-moz-range-thumb {
   width: 10px; height: 10px; border-radius: 1px;
   background: var(--mark); border: 1px solid var(--sheet);
+}
+
+/* The fixture table has three columns and long prose in the second; on a phone
+   it is fixed to the width and the cells break where they must, because a
+   horizontal scrollbar under a paragraph is not a table. */
+.fixture-table th,
+.fixture-table td { overflow-wrap: anywhere; }
+@media (width <= 760px) {
+  .fixture-table { table-layout: fixed; width: 100%; }
+}
+
+/* A table of prose rather than of figures reads left to right; only a column
+   of values belongs in the right margin. */
+.case-table--prose th,
+.case-table--prose td { text-align: left; }
+.case-table--prose tbody th[scope="row"] { width: 24%; }
+.case-table--prose th:nth-child(2),
+.case-table--prose td:nth-child(2) { width: 12%; }
+
+/* The ruler figures are drawn in font units, so their labels shrink with the
+   figure: at three hundred pixels a twelve-unit label is three pixels high.
+   The labels take a size that survives the reduction. */
+@media (max-width: 760px) {
+  .rule-figure svg text { font-size: 36px; }
 }

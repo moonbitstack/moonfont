@@ -45,12 +45,12 @@ SHELL = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>moonfont — Reference</title>
+<title>MBT FONT LIB — Reference</title>
 <meta name="description" content="Every public type, function and doc comment in moonfont, set out compartment by compartment.">
 <script>
   (() => {
     let chosen = null;
-    try { chosen = localStorage.getItem("moonfont-theme"); } catch (e) {}
+    try { chosen = sessionStorage.getItem("moonfont-theme"); } catch (e) {}
     const theme = chosen === "light" || chosen === "dark"
       ? chosen
       : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -72,8 +72,8 @@ SHELL = """<!doctype html>
     <a class="link" href="showcase.html">Measure</a>
     <button class="theme-toggle" type="button" aria-label="Use the dark case" aria-pressed="false">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <g class="face"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.4"/></g>
-        <g class="foot"><rect x="4" y="3" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18M4 12h16" stroke="currentColor" stroke-width="1.4"/></g>
+        <g class="face"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M5 5l1.8 1.8M17.2 17.2 19 19M19 5l-1.8 1.8M6.8 17.2 5 19" stroke="currentColor" stroke-width="1.4"/></g>
+        <g class="foot"><path d="M15.5 16.5A6.5 6.5 0 0 1 7.5 6a6.5 6.5 0 1 0 8 10.5Z" fill="none" stroke="currentColor" stroke-width="1.4"/></g>
       </svg>
     </button>
   </nav>

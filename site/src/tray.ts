@@ -401,6 +401,8 @@ class Tray {
   private row = 0;
   /** seconds the whole tray has been effectively still */
   private calm = 0;
+  /** seconds the tray has been moving without a hand on it */
+  private restless = 0;
   private hovered: Piece | null = null;
   private trail: { x: number; y: number; t: number }[] = [];
   private running = false;
@@ -774,7 +776,7 @@ class Tray {
     const options: MatterApi.IChamferableBodyDefinition = {
       friction: 0.52,
       frictionStatic: 0.9,
-      frictionAir: 0.014,
+      frictionAir: 0.02,
       restitution: 0.05,
       density: 0.0016,
       slop: 0.03,
@@ -944,6 +946,8 @@ class Tray {
   // --- simulation -----------------------------------------------------------
 
   private kick(): void {
+    // A hand on the stage restarts the clock the guard below keeps.
+    this.restless = 0;
     if (this.raf) return;
     if (!this.running) {
       this.running = true;
@@ -961,6 +965,7 @@ class Tray {
 
     while (this.accumulator >= STEP) {
       this.M.Engine.update(this.engine, STEP);
+      this.damp();
       this.accumulator -= STEP;
     }
 
@@ -989,6 +994,28 @@ class Tray {
     return false;
   }
 
+  /**
+   * Contact friction cannot stop a wedge that creeps between two neighbours,
+   * nor a casting that shivers on a slope: the solver keeps handing it a few
+   * tenths of a pixel a second and matter's own sleep test never fires on
+   * that crawl. Viscous drag at low speed stands in for the stiction a
+   * position-based solver does not model. Anything actually moving — a fall,
+   * a throw, a piece riding the spring — is above the threshold and untouched.
+   */
+  private damp(): void {
+    const held = this.grab.constraint.bodyB;
+    for (const piece of this.pieces) {
+      const body = piece.body;
+      if (body.isSleeping || body === held) continue;
+      if (body.speed > 2.5) continue;
+      this.M.Body.setVelocity(body, {
+        x: body.velocity.x * 0.94,
+        y: body.velocity.y * 0.94,
+      });
+      this.M.Body.setAngularVelocity(body, body.angularVelocity * 0.9);
+    }
+  }
+
   private animate(dt: number): void {
     const held = this.grab.constraint.bodyB;
 
@@ -1002,8 +1029,13 @@ class Tray {
       if (piece.body.speed > 2.2 || Math.abs(piece.body.angularVelocity) > 0.04) busy = true;
     }
     this.calm = busy ? 0 : this.calm + dt;
-    if (this.calm > 0.6) {
+    this.restless = busy && !held ? this.restless + dt : 0;
+    // Nothing on this stage moves for ever. If a piece is still busy twelve
+    // seconds after the last hand left it — spinning on a corner, sliding
+    // along a wall — the tray is put to rest rather than left to hum.
+    if (this.calm > 0.6 || this.restless > 12) {
       this.calm = 0;
+      this.restless = 0;
       for (const piece of this.pieces) this.M.Sleeping.set(piece.body, true);
     }
 
