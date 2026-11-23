@@ -51,22 +51,29 @@ function hex4(codepoint) {
   return "U+" + codepoint.toString(16).toUpperCase().padStart(4, "0");
 }
 
-/* The engine emits path commands with y already pointing down, and this drawing
-   is in mathematical coordinates with the baseline at zero, so the group is
-   mirrored once here rather than in every path. */
+/* The engine emits font-unit coordinates with y pointing up, which is the
+   convention these drawings already use — baseline at zero, ascender negative —
+   so the path is placed as it comes, with no mirroring. */
 function drawPath(container, glyph) {
   const path = outlineSvg(state.face, glyph);
-  if (!path || !path.ok) return false;
+  // A space has an outline of no commands: the call succeeded, but there is
+  // nothing to fill, and the caller draws the box a compositor would set.
+  if (!path || !path.ok || !path.value.trim()) return false;
   container.appendChild(
     element("path", {
       d: path.value,
       fill: "currentColor",
       "fill-rule": "nonzero",
-      transform: "scale(1 -1)",
     }),
   );
   return true;
 }
+
+/* Six sorts of a thousand units each, three to a row: a single row would be
+   six thousand units wide, which in the column this figure is set in leaves
+   every sort the size of a full stop. */
+const GRID_COLUMNS = 3;
+const GRID_ROW = 1150;
 
 function buildGrid() {
   const body = byId("grid-body");
@@ -74,7 +81,12 @@ function buildGrid() {
   body.replaceChildren();
   const count = Math.min(numGlyphs(state.face), 6);
   for (let glyph = 0; glyph < count; glyph += 1) {
-    const cell = element("g", { transform: "translate(" + glyph * 1000 + " 0)" });
+    const column = glyph % GRID_COLUMNS;
+    const row = Math.floor(glyph / GRID_COLUMNS);
+    const cell = element("g", {
+      transform:
+        "translate(" + column * 1000 + " " + row * GRID_ROW + ")",
+    });
     cell.appendChild(
       element("rect", {
         x: 0,
@@ -258,6 +270,17 @@ function start() {
       }
       if (notdef) notdef.hidden = false;
     });
+  }
+
+  // The sheet opens with the A already set, the way the specimen page opens on
+  // the same sort: a blank plate where the page's argument should be is a worse
+  // first impression than a letter with its rules drawn on it.
+  if (select.value !== "" && state.face) {
+    const codepoint = parseInt(select.dataset.codepoint || "", 10);
+    if (!Number.isNaN(codepoint)) {
+      const glyph = glyphIndex(state.face, codepoint);
+      state.wanted = glyph >= 0 ? glyph : null;
+    }
   }
 
   if (notdef) {

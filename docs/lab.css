@@ -1,48 +1,50 @@
 /* moonfont lab — visual system
-   Refined, dark, editorial. The glyphs are the art; everything else is quiet. */
+   Refined, dark, editorial. The glyphs are the art; everything else is quiet.
+   The ground, the ink and the single red are the ones the other four pages
+   declare: the cover differs in scale and motion, not in material. */
 
 :root {
-  --bg: #0a0a0c;
-  --bg-soft: #111114;
-  --bg-panel: #121216;
-  --ink: #ededf0;
-  --ink-dim: #a4a4ae;
-  --ink-faint: #83838d;
-  --line: rgba(255, 255, 255, 0.09);
-  --line-strong: rgba(255, 255, 255, 0.16);
-  --accent: #ff5a36;
-  --accent-soft: rgba(255, 90, 54, 0.16);
-  --cool: #6ad7ff;
-  --radius: 14px;
+  --bg: #121110;
+  --bg-soft: #1a1917;
+  --bg-panel: #191817;
+  --ink: #ecebe5;
+  --ink-dim: #b5b0a7;
+  --ink-faint: #8c877e;
+  --line: rgba(236, 232, 223, 0.10);
+  --line-strong: rgba(236, 232, 223, 0.18);
+  --accent: #ff6f4c;
+  --accent-soft: rgba(255, 111, 76, 0.16);
+  --cool: #e0b08a;
+  --radius: 10px;
   --maxw: 1180px;
   --font-ui: "HarmonyOS Sans SC", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --topbar-wash: rgba(10, 10, 12, 0.85);
-  --topbar-fade: rgba(10, 10, 12, 0);
-  --sheen: rgba(255, 255, 255, 0.04);
-  --sheen-strong: rgba(255, 255, 255, 0.05);
+  --topbar-wash: rgba(18, 17, 16, 0.88);
+  --topbar-fade: rgba(18, 17, 16, 0);
+  --sheen: rgba(236, 232, 223, 0.04);
+  --sheen-strong: rgba(236, 232, 223, 0.055);
   --on-accent: #1a0c08;
 }
 
 /* A second impression of the same page: paper instead of night. The type is
    the same size, the rules are the same weight; only the ink and the ground
-   swap. */
+   swap. The paper is the stock the other pages are printed on. */
 :root[data-theme="light"] {
   --bg: #f4f1ea;
-  --bg-soft: #ece8df;
+  --bg-soft: #eae6dc;
   --bg-panel: #efece4;
-  --ink: #17161a;
-  --ink-dim: #4f4d54;
-  --ink-faint: #6b6870;
-  --line: rgba(23, 22, 26, 0.12);
-  --line-strong: rgba(23, 22, 26, 0.22);
-  --accent: #c8381a;
-  --accent-soft: rgba(200, 56, 26, 0.14);
-  --cool: #16607a;
+  --ink: #191715;
+  --ink-dim: #4a4642;
+  --ink-faint: #6d6862;
+  --line: rgba(25, 23, 21, 0.12);
+  --line-strong: rgba(25, 23, 21, 0.22);
+  --accent: #a83418;
+  --accent-soft: rgba(168, 52, 24, 0.13);
+  --cool: #8a4a2a;
   --topbar-wash: rgba(244, 241, 234, 0.9);
   --topbar-fade: rgba(244, 241, 234, 0);
-  --sheen: rgba(23, 22, 26, 0.035);
-  --sheen-strong: rgba(23, 22, 26, 0.05);
+  --sheen: rgba(25, 23, 21, 0.035);
+  --sheen-strong: rgba(25, 23, 21, 0.05);
   --on-accent: #fdf9f2;
 }
 
@@ -168,10 +170,28 @@ code {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 28px;
+  padding: 17px 28px;
   background: linear-gradient(to bottom, var(--topbar-wash), var(--topbar-fade));
-  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
 }
+/* The same hairline the other pages show once they have moved. */
+.topbar::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--line-strong) 16%,
+    var(--line-strong) 84%,
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+html:not(.at-top) .topbar::after { opacity: 1; }
 .wordmark {
   font-weight: 600;
   letter-spacing: 0.18em;
@@ -196,8 +216,8 @@ code {
   content: "";
   position: absolute;
   left: 0; right: 0;
-  bottom: -7px;
-  height: 1px;
+  bottom: -8px;
+  height: 2px;
   background: var(--accent);
 }
 .topbar__tools { display: flex; align-items: center; gap: 6px; }
@@ -733,6 +753,7 @@ code {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: color-mix(in srgb, var(--bg-panel) 76%, transparent);
+  -webkit-backdrop-filter: blur(7px);
   backdrop-filter: blur(7px);
   font-size: 12px;
   line-height: 1.45;
@@ -751,6 +772,7 @@ code {
   right: 22px;
   bottom: 22px;
   background: color-mix(in srgb, var(--bg-panel) 74%, transparent);
+  -webkit-backdrop-filter: blur(7px);
   backdrop-filter: blur(7px);
 }
 .tray__button:focus-visible,

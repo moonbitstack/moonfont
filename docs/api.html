@@ -14,6 +14,9 @@
       ? chosen
       : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     document.documentElement.dataset.theme = theme;
+    // The strip only draws its hairline once the page has moved; saying so
+    // here keeps the first paint from showing a rule that then vanishes.
+    document.documentElement.classList.add("at-top");
   })();
 </script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">

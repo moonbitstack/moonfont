@@ -4,36 +4,41 @@
 :root {
   color-scheme: light dark;
 
-  --stock:        light-dark(#f2f4f3, #161c1f);
-  --stock-deep:   light-dark(#e4e9e7, #0e1315);
-  --sheet:        light-dark(#fafcfb, #101517);
-  --solid:        light-dark(#1b2327, #0a0f11);
-  --on-solid:     light-dark(#f2f4f3, #e8eeeb);
-  --ink:          light-dark(#1b2327, #e8eeeb);
-  --ink-soft:     light-dark(#3e4b51, #bcc9c6);
-  --ink-faint:    light-dark(#5a686e, #95a6a3);
-  --rule:         light-dark(#b7c3c0, #0a0e10);
-  --rule-lip:     light-dark(transparent, #3d4a47);
-  --rule-soft:    light-dark(#d4dcda, #24302f);
-  --mark:         light-dark(#2c6382, #a9cbdc);
-  --mark-strong:  light-dark(#1b4a63, #d3e8f1);
-  --mark-on-solid:light-dark(#a9cbdc, #a9cbdc);
-  --code:         light-dark(#e9efec, #0d1214);
-  --code-ink:     light-dark(#1b2327, #e2ebe7);
-  --code-dim:     light-dark(#4c5c61, #9aaba8);
-  --code-rule:    light-dark(#bcc9c5, #2b3735);
-  --focus:        light-dark(#1b4a63, #d3e8f1);
-  --focus-halo:   light-dark(#f2f4f3, #161c1f);
-  --impression:   light-dark(rgb(27 35 39 / 8%), rgb(0 0 0 / 45%));
-  --edge:         light-dark(transparent, rgb(232 238 235 / 10%));
+  /* One ramp for the whole publication: warm paper by day, warm graphite by
+     night. The specimen page declares the same ground and the same single
+     red; a reader moving between the cover and these pages should not feel
+     the temperature change underfoot. */
+  --stock:        light-dark(#f4f1ea, #121110);
+  --stock-deep:   light-dark(#eae6dc, #0b0a0a);
+  --sheet:        light-dark(#fbf9f4, #1a1917);
+  --solid:        light-dark(#1c1a17, #070707);
+  --on-solid:     light-dark(#f6f2e9, #ece8df);
+  --ink:          light-dark(#191715, #ecebe5);
+  --ink-soft:     light-dark(#4a4642, #bab5ab);
+  --ink-faint:    light-dark(#6d6862, #908a80);
+  --rule:         light-dark(#c9c2b4, #0a0908);
+  --rule-lip:     light-dark(transparent, #38352f);
+  --rule-soft:    light-dark(#ded8cb, #242220);
+  --mark:         light-dark(#a83418, #ff6f4c);
+  --mark-strong:  light-dark(#7d2410, #ffab90);
+  --mark-on-solid:light-dark(#ffb49b, #ffb49b);
+  --on-mark:      light-dark(#fdf9f2, #1a0c08);
+  --code:         light-dark(#efeadf, #181613);
+  --code-ink:     light-dark(#1e1b17, #e8e4db);
+  --code-dim:     light-dark(#5f584e, #a09a8f);
+  --code-rule:    light-dark(#d8d1c3, #2c2925);
+  --focus:        light-dark(#7d2410, #ffab90);
+  --focus-halo:   light-dark(#f4f1ea, #121110);
+  --impression:   light-dark(rgb(28 22 16 / 10%), rgb(0 0 0 / 55%));
+  --edge:         light-dark(transparent, rgb(236 232 223 / 10%));
 
-  --info:         light-dark(#2c6382, #a9cbdc);
+  --info:         light-dark(#2f5d70, #a3c3d2);
   --warning:      light-dark(#7a4e0f, #e3b46c);
-  --danger:       light-dark(#9b3327, #e6907f);
+  --danger:       light-dark(#8c2233, #f097a8);
   --success:      light-dark(#2e624f, #98cbb0);
-  --info-wash:    light-dark(rgb(44 98 130 / 10%),   rgb(169 203 220 / 12%));
+  --info-wash:    light-dark(rgb(47 93 112 / 10%),   rgb(163 195 210 / 12%));
   --warning-wash: light-dark(rgb(122 78 15 / 10%),   rgb(227 180 108 / 12%));
-  --danger-wash:  light-dark(rgb(155 51 39 / 10%),   rgb(230 144 127 / 12%));
+  --danger-wash:  light-dark(rgb(140 34 51 / 10%),   rgb(240 151 168 / 12%));
   --success-wash: light-dark(rgb(46 98 79 / 10%),    rgb(152 203 176 / 12%));
 
   /* One face for the whole site, the same one the specimen page sets its own
@@ -48,7 +53,7 @@
 
   --t-caption: 12px;
   --t-label:   15px;
-  --t-body:    19px;
+  --t-body:    18px;
   --t-lede:    24px;
   --t-h3:      32px;
   --t-h2:      48px;
@@ -68,8 +73,8 @@
   --s-44: 176px;
 
   --r-0: 0;
-  --r-1: 2px;
-  --r-2: 4px;
+  --r-1: 3px;
+  --r-2: 8px;
 
   --rail: 1120px;
 
@@ -95,7 +100,7 @@
 :root[data-theme="light"] {
   color-scheme: only light;
   --display-weight: 500;
-  --impression: rgb(27 35 39 / 8%);
+  --impression: rgb(28 22 16 / 10%);
   --edge: transparent;
   --rule-lip: transparent;
 }
@@ -103,54 +108,56 @@
 :root[data-theme="dark"] {
   color-scheme: only dark;
   --display-weight: 600;
-  --impression: rgb(0 0 0 / 45%);
-  --edge: rgb(232 238 235 / 10%);
-  --rule-lip: #3d4a47;
+  --impression: rgb(0 0 0 / 55%);
+  --edge: rgb(236 232 223 / 10%);
+  --rule-lip: #38352f;
 }
 
 /* A browser without light-dark() still gets both designs, not a blank sheet. */
 @supports not (color: light-dark(white, black)) {
   :root[data-theme="light"] {
-    --stock: #f2f4f3;
-    --stock-deep: #e4e9e7;
-    --sheet: #fafcfb;
-    --solid: #1b2327;
-    --on-solid: #f2f4f3;
-    --ink: #1b2327;
-    --ink-soft: #3e4b51;
-    --ink-faint: #5a686e;
-    --rule: #b7c3c0;
-    --rule-soft: #d4dcda;
-    --mark: #2c6382;
-    --mark-strong: #1b4a63;
-    --mark-on-solid: #a9cbdc;
-    --code: #e9efec;
-    --code-ink: #1b2327;
-    --code-dim: #4c5c61;
-    --code-rule: #bcc9c5;
-    --focus: #1b4a63;
-    --focus-halo: #f2f4f3;
+    --stock: #f4f1ea;
+    --stock-deep: #eae6dc;
+    --sheet: #fbf9f4;
+    --solid: #1c1a17;
+    --on-solid: #f6f2e9;
+    --ink: #191715;
+    --ink-soft: #4a4642;
+    --ink-faint: #6d6862;
+    --rule: #c9c2b4;
+    --rule-soft: #ded8cb;
+    --mark: #a83418;
+    --mark-strong: #7d2410;
+    --mark-on-solid: #ffb49b;
+    --on-mark: #fdf9f2;
+    --code: #efeadf;
+    --code-ink: #1e1b17;
+    --code-dim: #5f584e;
+    --code-rule: #d8d1c3;
+    --focus: #7d2410;
+    --focus-halo: #f4f1ea;
   }
   :root[data-theme="dark"] {
-    --stock: #161c1f;
-    --stock-deep: #0e1315;
-    --sheet: #101517;
-    --solid: #0a0f11;
-    --on-solid: #e8eeeb;
-    --ink: #e8eeeb;
-    --ink-soft: #bcc9c6;
-    --ink-faint: #95a6a3;
-    --rule: #0a0e10;
-    --rule-soft: #24302f;
-    --mark: #a9cbdc;
-    --mark-strong: #d3e8f1;
-    --mark-on-solid: #a9cbdc;
-    --code: #0d1214;
-    --code-ink: #e2ebe7;
-    --code-dim: #9aaba8;
-    --code-rule: #2b3735;
-    --focus: #d3e8f1;
-    --focus-halo: #161c1f;
+    --stock: #121110;
+    --stock-deep: #0b0a0a;
+    --sheet: #1a1917;
+    --solid: #070707;
+    --on-solid: #ece8df;
+    --ink: #ecebe5;
+    --ink-soft: #bab5ab;
+    --ink-faint: #908a80;
+    --rule: #0a0908;
+    --rule-soft: #242220;
+    --mark: #ff6f4c;
+    --mark-strong: #ffab90;
+    --mark-on-solid: #ffb49b;
+    --on-mark: #1a0c08;
+    --code: #181613;
+    --code-ink: #e8e4db;
+    --code-dim: #a09a8f;
+    --code-rule: #2c2925;
+    --focus: #ffab90;
+    --focus-halo: #121110;
   }
 }
 
@@ -172,7 +179,7 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   font-size: var(--t-body);
-  line-height: 1.7;
+  line-height: 1.65;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -191,13 +198,13 @@ body {
    width at the top of the page and only the thumb fades, so the layout does not
    jump when it appears. */
 @supports selector(::-webkit-scrollbar) {
-  html::-webkit-scrollbar { width: 12px; height: 12px; }
-  html::-webkit-scrollbar-track { background: var(--stock-deep); }
+  html::-webkit-scrollbar { width: 10px; height: 10px; }
+  html::-webkit-scrollbar-track { background: transparent; }
   html::-webkit-scrollbar-thumb {
     border-radius: 99px;
-    border: 3px solid var(--stock-deep);
+    border: 3px solid transparent;
     background-clip: content-box;
-    background-color: color-mix(in srgb, var(--ink) 26%, transparent);
+    background-color: color-mix(in srgb, var(--ink) 24%, transparent);
   }
   html.at-top::-webkit-scrollbar-thumb { background-color: transparent; }
   pre::-webkit-scrollbar, .table-wrap::-webkit-scrollbar,
@@ -278,15 +285,17 @@ code, .sig, .case-index-count, .field-name, .field-type, .tok-num {
 .skip:focus { transform: translateY(0); }
 
 /* --------------------------------------------------------------------------
-   The label strip on the case
+   The label strip on the case. It is the same strip the specimen page wears:
+   the ground seen through a sheet of glass, a hairline that fades in only once
+   the page has moved, and the wordmark with the one red dot in front of it.
    -------------------------------------------------------------------------- */
-
 .top {
   position: sticky;
   top: 0;
   z-index: var(--z-top);
-  background: var(--stock-deep);
-  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--stock) 86%, transparent);
+  -webkit-backdrop-filter: saturate(1.08) blur(14px);
+  backdrop-filter: saturate(1.08) blur(14px);
 }
 
 .top::after {
@@ -294,10 +303,20 @@ code, .sig, .case-index-count, .field-name, .field-type, .tok-num {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -1px;
+  bottom: 0;
   height: 1px;
-  background: var(--rule-lip);
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--ink) 15%, transparent) 16%,
+    color-mix(in srgb, var(--ink) 15%, transparent) 84%,
+    transparent
+  );
+  opacity: 0;
+  transition: opacity var(--motion-state);
 }
+
+html:not(.at-top) .top::after { opacity: 1; }
 
 .top nav {
   display: flex;
@@ -307,7 +326,10 @@ code, .sig, .case-index-count, .field-name, .field-type, .tok-num {
   max-width: var(--rail);
   min-height: var(--bar-h);
   margin-inline: auto;
-  padding: var(--s-3) var(--pad);
+  /* The strip is exactly --bar-h tall, so a band or a heading that follows it
+     starts where the cover's hero starts, and so every scroll-margin computed
+     from that number is true. */
+  padding: 0 var(--pad);
 }
 
 .brand {
@@ -323,10 +345,23 @@ code, .sig, .case-index-count, .field-name, .field-type, .tok-num {
   text-decoration: none;
 }
 
+/* The mark exactly as the cover draws it: one filled circle of the red, then
+   the name in spaced capitals. */
+.brand::before {
+  content: "";
+  align-self: center;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--mark);
+  transform: translateY(-1px);
+}
+
 .brand b {
   font-weight: 600;
-  font-size: 15px;
-  letter-spacing: 0.16em;
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 .brand span {
   font-family: var(--font-body);
@@ -336,49 +371,51 @@ code, .sig, .case-index-count, .field-name, .field-type, .tok-num {
   color: var(--ink-faint);
 }
 
+/* The current section is marked the way the cover marks it: two pixels of the
+   one red, hung the same distance under the word. */
 .link {
+  position: relative;
   padding-block: var(--s-1);
-  border-bottom: 2px solid transparent;
   font-family: var(--font-display);
-  font-size: var(--t-label);
-  color: var(--ink-soft);
+  font-size: 14px;
+  color: var(--ink-faint);
   text-decoration: none;
 }
 
-.link:hover { color: var(--mark-strong); }
-.link[aria-current="page"] {
-  color: var(--mark-strong);
-  border-bottom-color: var(--mark);
+.link:hover { color: var(--ink); }
+.link[aria-current="page"] { color: var(--ink); }
+.link[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  background: var(--mark);
 }
 
-.github {
+.github,
+.theme-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  color: var(--ink-soft);
-}
-.github:hover { color: var(--mark-strong); background: var(--stock-deep); }
-.github svg { width: 19px; height: 19px; pointer-events: none; }
-
-.theme-toggle {
-  display: inline-grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   padding: 0;
-  border: 1px solid var(--rule);
-  border-radius: var(--r-2);
-  background: var(--stock);
-  color: var(--ink);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-faint);
   cursor: pointer;
 }
-
-.theme-toggle:hover { color: var(--mark-strong); }
+.github { text-decoration: none; }
+.github:hover,
+.theme-toggle:hover { color: var(--ink); background: var(--stock-deep); }
+.github:active,
 .theme-toggle:active { transform: translateY(1px); }
-.theme-toggle svg { width: 20px; height: 20px; pointer-events: none; }
+.github svg { width: 19px; height: 19px; pointer-events: none; }
+
+.theme-toggle svg { width: 19px; height: 19px; pointer-events: none; }
 .theme-toggle .face, .theme-toggle .foot { transition: opacity var(--motion-state); }
 :root[data-theme="light"] .theme-toggle .foot { opacity: 0; }
 :root[data-theme="dark"] .theme-toggle .face { opacity: 0; }
@@ -436,7 +473,15 @@ label,
    The case: drawer labels on the left, compartments on the right
    -------------------------------------------------------------------------- */
 
-main { padding-block: var(--s-18) var(--s-32); }
+main {
+  --main-pad: var(--s-18);
+  padding-block: var(--main-pad) var(--s-32);
+}
+
+/* A band that opens a page is the page's cover: it meets the strip above it
+   the way the specimen page's hero does, rather than floating on a shelf of
+   paper. */
+main > .band:first-child { margin-top: calc(-1 * var(--main-pad)); }
 
 .case {
   display: grid;
@@ -592,7 +637,7 @@ main { padding-block: var(--s-18) var(--s-32); }
   margin-top: var(--s-4);
   padding: var(--s-3) var(--s-4);
   border: 1px solid var(--code-rule);
-  border-radius: var(--r-0);
+  border-radius: var(--r-2);
   background: var(--code);
   color: var(--code-ink);
   font-family: var(--font-mono);
@@ -968,10 +1013,13 @@ pre code { overflow-wrap: normal; }
 
 @media (max-width: 980px) {
   :root { --pad: var(--s-6); --section: var(--s-18); }
-  main { padding-block: var(--s-12) var(--s-18); }
+  main { --main-pad: var(--s-12); padding-block: var(--main-pad) var(--s-18); }
 }
 
 @media (max-width: 700px) {
+  /* The strip wraps to two rows here; every scroll-margin computed from
+     --bar-h has to know that. */
+  :root { --bar-h: 96px; }
   .case { grid-template-columns: minmax(0, 1fr); }
   .case-index { position: static; top: auto; }
   .case-index-list { display: flex; flex-wrap: wrap; gap: var(--s-2); }
@@ -981,7 +1029,7 @@ pre code { overflow-wrap: normal; }
   .pkg-name { font-size: var(--t-lede); }
   .entry-name { font-size: var(--t-body); }
   .brand span { display: none; }
-  .top nav { gap: var(--s-2); }
+  .top nav { gap: var(--s-2); padding-block: var(--s-2); }
 }
 
 @media (max-width: 640px) {
@@ -1033,7 +1081,7 @@ pre code { overflow-wrap: normal; }
   padding: var(--s-2) var(--s-3);
   background: var(--sheet);
   border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: var(--r-2);
   color: var(--ink);
   font: inherit;
   text-align: left;
@@ -1057,7 +1105,7 @@ pre code { overflow-wrap: normal; }
   list-style: none;
   background: var(--sheet);
   border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: var(--r-2);
   box-shadow: 0 14px 30px var(--impression);
 }
 .pick__option {
@@ -1069,10 +1117,10 @@ pre code { overflow-wrap: normal; }
 }
 .pick__option:first-child { border-top: 0; }
 .pick__option:hover,
-.pick__option:focus { background: var(--mark); color: var(--on-solid); outline: none; }
+.pick__option:focus { background: var(--mark); color: var(--on-mark); outline: none; }
 .pick__option[aria-selected="true"] { color: var(--mark-strong); font-weight: 600; }
 .pick__option[aria-selected="true"]:hover,
-.pick__option[aria-selected="true"]:focus { color: var(--on-solid); }
+.pick__option[aria-selected="true"]:focus { color: var(--on-mark); }
 
 /* The slider is the sheet's too. */
 input[type="range"] {
@@ -1094,14 +1142,14 @@ input[type="range"]::-webkit-slider-thumb {
   width: 12px;
   height: 12px;
   margin-top: -6px;
-  border-radius: 1px;
+  border-radius: 2px;
   background: var(--mark);
   border: 1px solid var(--sheet);
   box-shadow: 0 0 0 1px var(--mark);
 }
 input[type="range"]::-moz-range-track { height: 1px; background: var(--ink-faint); }
 input[type="range"]::-moz-range-thumb {
-  width: 10px; height: 10px; border-radius: 1px;
+  width: 10px; height: 10px; border-radius: 2px;
   background: var(--mark); border: 1px solid var(--sheet);
 }
 
