@@ -84,7 +84,9 @@
           One character, four readings of the same font data. The coverage mask is
           the rasteriser's 26.6 fixed-point output. The outline is the raw
           Bézier path. The extrusion gives that path depth and light. The
-          metrics overlay shows the em square the engine measured.
+          metrics overlay shows the em square the engine measured. A character
+          the demo face does not carry — Chinese, say — is shown in the page's
+          own face, so the four panels are still four readings of one glyph.
         </p>
         <div class="field">
           <label for="anaChar">Character</label>
@@ -168,7 +170,8 @@
         <h2 class="block__title">A keyboard, rendered live</h2>
         <p class="block__lede">
           Every keystroke is a decoded glyph drawn by the rasteriser, in the demo
-          font. The engine is the typesetter here, not a webfont.
+          font — and set in the page's face when the demo font has no such
+          character. The engine is the typesetter here, not a webfont.
         </p>
         <div class="field">
           <label for="pgText">Text</label>

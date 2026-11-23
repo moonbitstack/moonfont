@@ -159,7 +159,7 @@ function paintOutline(svgEl, path, box) {
 // The glyph inside the em square, with the metrics the engine measured. The
 // frame is the path's: font units, y down, baseline at 0 — so the ascender is
 // a negative y and every rule is drawn at minus its value.
-function paintMetrics(canvas, mask, path, metrics, units, ppem) {
+function paintMetrics(canvas, mask, path, metrics, units, ppem, text) {
   if (!canvas) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
@@ -220,8 +220,13 @@ function paintMetrics(canvas, mask, path, metrics, units, ppem) {
     ctx.fillText(label, X(right) + 8 * dpr, Y(y));
   };
   rule(-metrics.ascent, "ascender", true);
-  rule(-metrics.cap_height, "cap", true);
-  rule(-metrics.x_height, "x-height", true);
+  // Cap and x-height describe a Latin alphabet; a character set in this face
+  // for want of an outline has no such reading, so the rules stop at the
+  // ascender and the baseline.
+  if (!text) {
+    rule(-metrics.cap_height, "cap", true);
+    rule(-metrics.x_height, "x-height", true);
+  }
   rule(0, "baseline", false);
   rule(-metrics.descent, "descender", true);
 
@@ -233,6 +238,15 @@ function paintMetrics(canvas, mask, path, metrics, units, ppem) {
     ctx.scale(s, s);
     ctx.fillStyle = fade(ink, 0.9);
     ctx.fill(path);
+    ctx.restore();
+  } else if (text) {
+    // No path to fill: the page's face sets the character in the same frame.
+    ctx.save();
+    ctx.fillStyle = fade(ink, 0.9);
+    ctx.font = pageFont(units * s, 500);
+    ctx.textBaseline = "alphabetic";
+    ctx.textAlign = "left";
+    ctx.fillText(text, X(0), Y(0));
     ctx.restore();
   }
 }
@@ -613,6 +627,93 @@ function createRenderer(canvas, opts = {}) {
 // A character the demo face does not carry — Chinese, or anything outside its
 // coverage — is still shown, in the page's own face and at the hero's scale.
 // The letter is a picture of a glyph; this is the glyph the reader typed.
+// --- characters the demo face does not carry ---------------------------------
+//
+// jetbrains mono has no Chinese. Rather than draw nothing, every panel that
+// shows a character falls back to the page's own face: the coverage is a canvas
+// render, the outline a stroked glyph, the metrics measured from the same face,
+// and the extrusion is built from that coverage like any other.
+
+const PAGE_FACE = '"HarmonyOS Sans SC", ui-sans-serif, system-ui, sans-serif';
+
+function pageFont(px, weight = 500) {
+  return `${weight} ${px}px ${PAGE_FACE}`;
+}
+
+// Coverage of a character in the page's face, in the shape the rasteriser
+// returns: 8-bit samples, and the ink's offset from the pen origin.
+function textCoverage(text, ppem) {
+  const pad = 4;
+  const probe = document.createElement("canvas").getContext("2d");
+  probe.font = pageFont(ppem, 500);
+  const m = probe.measureText(text);
+  const left = Math.ceil(m.actualBoundingBoxLeft) + pad;
+  const right = Math.ceil(m.actualBoundingBoxRight) + pad;
+  const up = Math.ceil(m.actualBoundingBoxAscent) + pad;
+  const down = Math.ceil(m.actualBoundingBoxDescent) + pad;
+  const width = Math.max(1, left + right);
+  const height = Math.max(1, up + down);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  ctx.font = pageFont(ppem, 500);
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "#fff";
+  ctx.fillText(text, left, up);
+  const data = ctx.getImageData(0, 0, width, height).data;
+  const samples = new Uint8Array(width * height);
+  for (let i = 0; i < width * height; i++) samples[i] = data[i * 4 + 3];
+  return { width, height, left: -left, top: -up, samples };
+}
+
+// The metrics of the page's face at one em, in the same shape the engine
+// reports for a font: enough for the em square and its rules.
+function textFontMetrics(text) {
+  const units = 1000;
+  const ctx = document.createElement("canvas").getContext("2d");
+  ctx.font = pageFont(units, 500);
+  const ink = (ch) => ctx.measureText(ch);
+  // The vertical rules follow the character itself: a Chinese glyph sits lower
+  // in its square than a Latin one, and the rules have to describe what is on
+  // the panel, not a different letter of the same face.
+  const own = text ? ctx.measureText(text) : null;
+  return {
+    units_per_em: units,
+    ascent: Math.round(own ? own.actualBoundingBoxAscent : ink("d").actualBoundingBoxAscent),
+    // The descender is the face's, not the character's: a glyph that sits on the
+    // baseline would otherwise put two rules on top of each other.
+    descent: -Math.round(ink("p").actualBoundingBoxDescent),
+    cap_height: Math.round(ink("H").actualBoundingBoxAscent),
+    x_height: Math.round(ink("x").actualBoundingBoxAscent),
+    line_gap: 0,
+    num_glyphs: 0,
+    bounding_box: { x_min: 0, y_min: 0, x_max: units, y_max: units },
+  };
+}
+
+// A stroked glyph in the outline panel, for a character whose path the engine
+// never produced: SVG text can be stroked, which is what an outline is.
+function paintOutlineText(svgEl, text) {
+  if (!svgEl) return;
+  svgEl.innerHTML = "";
+  svgEl.setAttribute("viewBox", "0 0 1000 1000");
+  const node = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  node.setAttribute("x", "500");
+  node.setAttribute("y", "700");
+  node.setAttribute("text-anchor", "middle");
+  node.setAttribute("font-family", PAGE_FACE.replace(/"/g, "'"));
+  node.setAttribute("font-size", "760");
+  node.setAttribute("font-weight", "500");
+  node.setAttribute("fill", "none");
+  node.setAttribute("stroke", "currentColor");
+  node.setAttribute("stroke-width", "9");
+  node.setAttribute("stroke-linejoin", "round");
+  node.textContent = text;
+  svgEl.appendChild(node);
+}
+
 function paintCharacter(canvas, text, opts = {}) {
   if (!canvas) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -623,13 +724,26 @@ function paintCharacter(canvas, text, opts = {}) {
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (!text) return;
-  const size = (opts.size || Math.min(cw, ch) * 0.5) * dpr;
-  const ink = opts.color || inkColor();
-  ctx.font = `${opts.weight || 600} ${size}px "HarmonyOS Sans SC", ui-sans-serif, system-ui, sans-serif`;
+
+  const weight = opts.weight || 500;
+  // Size by the ink, not by the em: a Chinese character fills its square and a
+  // Latin one does not, so an em-based size makes the two look like different
+  // sizes on the same page.
+  ctx.font = pageFont(100, weight);
+  const probe = ctx.measureText(text);
+  const ratio = (probe.actualBoundingBoxAscent + probe.actualBoundingBoxDescent) / 100 || 0.8;
+  const target = opts.ink || (opts.size || Math.min(cw, ch) * 0.5) * ratio;
+  const size = target / ratio;
+
+  ctx.font = pageFont(size * dpr, weight);
+  const m = ctx.measureText(text);
   ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = fade(ink, opts.alpha === undefined ? 0.3 : opts.alpha);
-  ctx.fillText(text, (opts.x === undefined ? cw / 2 : opts.x) * dpr, (opts.y === undefined ? ch / 2 : opts.y) * dpr);
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = fade(opts.color || inkColor(), opts.alpha === undefined ? 0.3 : opts.alpha);
+  const x = (opts.x === undefined ? cw / 2 : opts.x) * dpr;
+  const y = (opts.y === undefined ? ch / 2 : opts.y) * dpr;
+  // Centre the ink, not the line box.
+  ctx.fillText(text, x, y + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2);
 }
 
 function paintGlyphPath(canvas, path, box, opts = {}) {
@@ -685,13 +799,21 @@ function heroCharacter(canvas, text) {
   const room = cw - copyRight;
   const beside = cw >= 760 && room > cw * 0.16;
   const dark = (document.documentElement.dataset.theme || "dark") === "dark";
+  // The same ink height the letter of the demo face would take, or as much of
+  // the column as a square character can have.
+  // The same gap the letter keeps from the copy, on both sides: a square
+  // character then takes as much of the column as the column can hold.
+  const ink = beside
+    ? Math.min(ch * 0.78, Math.max(ch * 0.3, room - 192))
+    : // A watermark still has to fit the width of the page it sits behind.
+      Math.min(ch * 0.55, cw * 0.76);
   paintCharacter(canvas, text, {
     color: inkColor(),
     alpha: beside ? (dark ? 0.3 : 0.22) : cw < 760 ? 0.1 : 0.14,
     weight: 500,
-    size: Math.min(cw, ch) * (beside ? 0.42 : 0.5),
+    ink,
     x: beside ? copyRight + room / 2 : cw / 2,
-    y: ch / 2,
+    y: beside ? ch / 2 : ch * 0.38,
   });
 }
 
@@ -757,9 +879,28 @@ function renderAnatomy() {
   const ppem = parseInt(document.getElementById("anaPpem").value, 10);
   const gi = state.face ? glyphIndex(state.face, ch.charCodeAt(0)) : -1;
   if (gi < 0) {
-    ["anaFill", "ana3d"].forEach((id) => paintMask(document.getElementById(id), null));
-    paintOutline(document.getElementById("anaOutline"), "", null);
-    paintMetrics(document.getElementById("anaMetrics"), null, null, null, state.units, ppem);
+    // The demo face has no such character — Chinese, most often. Every panel
+    // shows the page's own face instead, so the anatomy is still of a glyph.
+    const ink = textCoverage(ch, ppem);
+    paintMask(document.getElementById("anaFill"), ink, { color: inkColor(), smooth: true });
+    paintOutlineText(document.getElementById("anaOutline"), ch);
+    paintMetrics(
+      document.getElementById("anaMetrics"),
+      ink,
+      null,
+      textFontMetrics(ch),
+      state.units,
+      ppem,
+      ch,
+    );
+    const r3d = renderers.ana;
+    if (r3d) {
+      const fine = textCoverage(ch, 160);
+      // Thinner strokes than a Latin capital: the slab keeps its proportion
+      // to the drawing, not to the em.
+      r3d.depth = Math.max(10, 160 * 0.12);
+      r3d.setMask(fine);
+    }
     return;
   }
   const mask = getMask(gi, ppem);
@@ -811,7 +952,14 @@ function renderGrid(container, text, opts = {}) {
     }
     const gi = glyphIndex(state.face, ch.charCodeAt(0));
     if (gi < 0) {
-      paintMask(cv, null);
+      // Not in the face: show it in the page's face where the grid is a
+      // courtesy, and leave the hole where the grid is a test of the face —
+      // an uploaded font is being asked whether it has the character.
+      if (opts.fallback) {
+        paintMask(cv, textCoverage(ch, ppem), { color: inkColor(), smooth: true });
+      } else {
+        paintMask(cv, null);
+      }
       continue;
     }
     const mask = getMask(gi, ppem);
@@ -837,7 +985,11 @@ function renderUpload() {
 
 function renderPlayground() {
   const text = document.getElementById("pgText").value;
-  renderGrid(document.getElementById("pgGrid"), text, { ppem: 72, clickTo3d: true });
+  renderGrid(document.getElementById("pgGrid"), text, {
+    ppem: 72,
+    clickTo3d: true,
+    fallback: true,
+  });
 }
 
 function renderLab3d() {
@@ -845,7 +997,10 @@ function renderLab3d() {
   if (!r) return;
   const ch = (document.getElementById("lab3dChar").value || "R")[0];
   const gi = state.face ? glyphIndex(state.face, ch.charCodeAt(0)) : -1;
-  const solid = gi >= 0 ? solidMask(gi, 96) : { mask: null, ppem: 96 };
+  const solid =
+    gi >= 0
+      ? solidMask(gi, 96)
+      : { mask: ch ? textCoverage(ch, 160) : null, ppem: 160 };
   const asked = parseInt(document.getElementById("lab3dDepth").value, 10);
   r.depth = (asked * solid.ppem) / 96;
   r.setLight(parseInt(document.getElementById("lab3dLight").value, 10));
